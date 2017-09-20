@@ -2,6 +2,7 @@ package buddy
 
 import (
 	"testing"
+	"crypto/sha256"
 )
 
 var (
@@ -34,4 +35,21 @@ func TestContextPersistence(t *testing.T) {
 func TestSessionDelete(t *testing.T) {
 	token := store.NewSession()
 	store.Delete(token)
+}
+
+func TestSessionExists(t *testing.T) {
+	token := store.NewSession()
+	exists := store.Exists(token)
+
+	if exists != true {
+		t.Error("context does not exist when it should")
+	}
+
+	badToken := sha256.New()
+	exists = store.Exists(badToken)
+
+	if exists == true {
+		t.Error("context exists when it should not")
+	}
+
 }

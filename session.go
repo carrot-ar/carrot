@@ -16,6 +16,7 @@ type SessionStore interface {
 	Get(SessionToken) (Context, error)
 	NewSession() SessionToken
 	Delete(SessionToken) error
+	Exists(SessionToken) bool
 }
 
 type DefaultSessionStore struct {
@@ -34,6 +35,15 @@ func (s *DefaultSessionStore) Get(token SessionToken) (Context, error) {
 func (s *DefaultSessionStore) Delete(token SessionToken) error {
 	s.sessionStore.Delete(token)
 	return nil
+}
+
+func (s *DefaultSessionStore) Exists(token SessionToken) bool {
+	_, ok := s.sessionStore.Load(token)
+	if !ok {
+		return false
+	} else {
+		return true
+	}
 }
 
 func (s *DefaultSessionStore) NewSession() SessionToken {
