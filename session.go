@@ -15,6 +15,7 @@ type SessionToken hash.Hash
 type SessionStore interface {
 	Get(SessionToken) (Context, error)
 	NewSession() SessionToken
+	Delete(SessionToken) error
 }
 
 type DefaultSessionStore struct {
@@ -28,6 +29,11 @@ func (s *DefaultSessionStore) Get(token SessionToken) (Context, error) {
 	}
 
 	return ctx.(Context), nil
+}
+
+func (s *DefaultSessionStore) Delete(token SessionToken) error {
+	s.sessionStore.Delete(token)
+	return nil
 }
 
 func (s *DefaultSessionStore) NewSession() SessionToken {

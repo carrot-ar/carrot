@@ -29,5 +29,9 @@ func TestContextPersistence(t *testing.T) {
 	if modifiedCtx["testVal"] != true {
 		t.Error("context did not save after setting value")
 	}
+}
 
+func TestSessionDelete(t *testing.T) {
+	token := store.NewSession()
+	store.Delete(token)
 }
