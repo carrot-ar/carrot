@@ -1,26 +1,26 @@
 package buddy
 
 import (
-	"crypto/sha256"
+	"crypto/rand"
 	"fmt"
-	"hash"
 	"sync"
+	"encoding/base64"
 )
 
 // Potentially will need to be a sync Map
 type Context map[string]interface{}
 
-type SessionToken hash.Hash
+type SessionToken string
 
 type SessionStore interface {
 	Get(SessionToken) (Context, error)
-	NewSession() SessionToken
+	NewSession() (SessionToken, error)
 	Delete(SessionToken) error
 	Exists(SessionToken) bool
 }
 
 type DefaultSessionStore struct {
-	sessionStore sync.Map
+	sessionStore *sync.Map
 }
 
 func (s *DefaultSessionStore) Get(token SessionToken) (Context, error) {
@@ -46,15 +46,24 @@ func (s *DefaultSessionStore) Exists(token SessionToken) bool {
 	}
 }
 
-func (s *DefaultSessionStore) NewSession() SessionToken {
+func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
 	// Initialize context fields
 	ctx := Context{}
-	token := sha256.New()
+	b := make([]byte, 64)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+
+	token := SessionToken(base64.URLEncoding.EncodeToString(b))
+
 	s.sessionStore.Store(token, ctx)
 
-	return token
+	return SessionToken(token), nil
 }
 
 func NewDefaultSessionManager() SessionStore {
-	return &DefaultSessionStore{}
+	return &DefaultSessionStore{
+		sessionStore: &sync.Map{},
+	}
 }
