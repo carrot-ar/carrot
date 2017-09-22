@@ -1,9 +1,9 @@
 package buddy
 
 import (
-	"testing"
 	"crypto/rand"
 	"encoding/base64"
+	"testing"
 )
 
 var (
@@ -66,7 +66,6 @@ func TestSessionExists(t *testing.T) {
 
 	stringToken := base64.URLEncoding.EncodeToString(b)
 	badToken := SessionToken(stringToken)
-
 
 	exists = store.Exists(badToken)
 

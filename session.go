@@ -2,9 +2,9 @@ package buddy
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"sync"
-	"encoding/base64"
 )
 
 // Potentially will need to be a sync Map
