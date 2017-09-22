@@ -6,11 +6,10 @@ import (
 	"testing"
 )
 
-var (
-	store = NewDefaultSessionManager()
-)
 
 func TestDefaultSessionManagerNewSessionGet(t *testing.T) {
+	store := NewDefaultSessionManager()
+
 	token, err := store.NewSession()
 	if err != nil {
 		t.Errorf("Failed to create session")
@@ -23,6 +22,8 @@ func TestDefaultSessionManagerNewSessionGet(t *testing.T) {
 }
 
 func TestContextPersistence(t *testing.T) {
+	store := NewDefaultSessionManager()
+
 	token, err := store.NewSession()
 	if err != nil {
 		t.Errorf("Failed to create session")
@@ -40,6 +41,8 @@ func TestContextPersistence(t *testing.T) {
 }
 
 func TestSessionDelete(t *testing.T) {
+	store := NewDefaultSessionManager()
+
 	token, err := store.NewSession()
 	if err != nil {
 		t.Errorf("Failed to create session")
@@ -48,6 +51,8 @@ func TestSessionDelete(t *testing.T) {
 }
 
 func TestSessionExists(t *testing.T) {
+	store := NewDefaultSessionManager()
+
 	token, err := store.NewSession()
 	if err != nil {
 		t.Errorf("Failed to create session")
@@ -71,6 +76,31 @@ func TestSessionExists(t *testing.T) {
 
 	if exists == true {
 		t.Error("context exists when it should not")
+	}
+}
+
+func TestSessionLength(t *testing.T) {
+	store := NewDefaultSessionManager()
+	token, err := store.NewSession()
+	if err != nil {
+		t.Errorf("Failed to create session")
+	}
+
+	expectedLength := 1
+	actualLength := store.Length()
+
+	if expectedLength != actualLength {
+		t.Errorf("Length should have been %v but was %v", expectedLength, actualLength)
+	}
+
+	store.Delete(token)
+
+
+	expectedLength = 0
+	actualLength = store.Length()
+
+	if expectedLength != actualLength {
+		t.Errorf("Length should have been %v but was %v", expectedLength, actualLength)
 	}
 
 }

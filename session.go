@@ -17,10 +17,12 @@ type SessionStore interface {
 	NewSession() (SessionToken, error)
 	Delete(SessionToken) error
 	Exists(SessionToken) bool
+	Length() int
 }
 
 type DefaultSessionStore struct {
 	sessionStore *sync.Map
+	length int
 }
 
 func (s *DefaultSessionStore) Get(token SessionToken) (Context, error) {
@@ -34,6 +36,7 @@ func (s *DefaultSessionStore) Get(token SessionToken) (Context, error) {
 
 func (s *DefaultSessionStore) Delete(token SessionToken) error {
 	s.sessionStore.Delete(token)
+	s.length -= 1
 	return nil
 }
 
@@ -58,12 +61,18 @@ func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
 	token := SessionToken(base64.URLEncoding.EncodeToString(b))
 
 	s.sessionStore.Store(token, ctx)
+	s.length += 1
 
 	return SessionToken(token), nil
+}
+
+func (s *DefaultSessionStore) Length() int {
+	return s.length
 }
 
 func NewDefaultSessionManager() SessionStore {
 	return &DefaultSessionStore{
 		sessionStore: &sync.Map{},
+		length: 0,
 	}
 }
