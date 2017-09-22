@@ -6,7 +6,6 @@ import (
 	"testing"
 )
 
-
 func TestDefaultSessionManagerNewSessionGet(t *testing.T) {
 	store := NewDefaultSessionManager()
 
@@ -94,7 +93,6 @@ func TestSessionLength(t *testing.T) {
 	}
 
 	store.Delete(token)
-
 
 	expectedLength = 0
 	actualLength = store.Length()

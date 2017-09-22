@@ -35,39 +35,28 @@ func (svr *Server) run() {
 		select {
 		case client := <-svr.register:
 			svr.clients[client] = true
-			//add corresponding session
-			token := <- client.sendToken
-			println(token)
-			// if exists := svr.sessions.Exists(token); !exists {
-			// 	var err error
-			// 	token, err = svr.sessions.NewSession()
-			// 	if err != nil {
-			// 		//handle later
-			// 	}
-			// }
-			// select {
-			// 	case client.sendToken <- token:
-			// 	// default:
-			// 	// 	close (client.send)
-				
-			// }
+			token := <-client.sendToken
+			//create persistent token for new sessions
+			if token == "nil" {
+				var err error
+				token, err = svr.sessions.NewSession()
+				if err != nil {
+					//handle later
+				}
+			}
+			//make sure that a token exists for the session
+			client.sendToken <- token
 		case client := <-svr.unregister:
 			if _, ok := svr.clients[client]; ok {
 				//delete corresponding session
-				// token := <- client.sendToken
-				// svr.sessions.Delete(token)
 				delete(svr.clients, client)
 				close(client.send)
 				close(client.sendToken)
 			}
 		case message := <-svr.broadcast:
-			//token := SessionToken(message[:])			
-			token, _ := svr.sessions.NewSession()
-			println(token)
 			for client := range svr.clients {
 				select {
 				case client.send <- message:
-				case client.sendToken <- token:
 				default:
 					close(client.send)
 					close(client.sendToken)

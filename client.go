@@ -136,6 +136,16 @@ func (c *Client) writePump() {
 	}
 }
 
+//authenticate existing sessions and identify new sessions
+func getAuthToken(server *Server, r *http.Request) SessionToken {
+	user, _, _ := r.BasicAuth()
+	token := SessionToken(user)
+	if exists := server.sessions.Exists(token); !exists {
+		token = "nil"
+	}
+	return token
+}
+
 func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -144,6 +154,9 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 	}
 	client := &Client{server: server, conn: conn, send: make(chan []byte, 256), sendToken: make(chan SessionToken, 256)}
 	client.server.register <- client
+
+	authToken := getAuthToken(server, r)
+	client.sendToken <- authToken
 
 	go client.writePump()
 	go client.readPump()

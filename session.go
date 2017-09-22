@@ -22,7 +22,7 @@ type SessionStore interface {
 
 type DefaultSessionStore struct {
 	sessionStore *sync.Map
-	length int
+	length       int
 }
 
 func (s *DefaultSessionStore) Get(token SessionToken) (Context, error) {
@@ -73,6 +73,6 @@ func (s *DefaultSessionStore) Length() int {
 func NewDefaultSessionManager() SessionStore {
 	return &DefaultSessionStore{
 		sessionStore: &sync.Map{},
-		length: 0,
+		length:       0,
 	}
 }
