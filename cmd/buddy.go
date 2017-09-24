@@ -17,5 +17,4 @@ func main() {
 	server := buddy.NewServer()
 	go server.Run()
 	server.Serve()
-
 }
