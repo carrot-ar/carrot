@@ -21,7 +21,7 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 
 	//maximum message size allowed from the websocket
-	maxMessageSize = 512
+	maxMessageSize = 65536
 
 	//might need max token size too
 )
@@ -38,6 +38,7 @@ var upgrader = websocket.Upgrader{
 
 type Client struct {
 	server *Server
+	open bool
 
 	conn *websocket.Conn
 
