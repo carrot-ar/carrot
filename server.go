@@ -5,6 +5,7 @@ import (
 	"flag"
 	"log"
 	"fmt"
+	"time"
 )
 
 const serverSecret = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
@@ -14,7 +15,7 @@ const serverSecret = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
 type Server struct {
 
 	//registered clients
-	clients map[*Client]bool
+	//clients map[*Client]bool
 
 	//inbound messages from the clients
 	broadcast chan []byte
@@ -34,7 +35,7 @@ func NewServer() *Server {
 		broadcast:  make(chan []byte),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		clients:    make(map[*Client]bool),
+		//clients:    make(map[*Client]bool),
 		sessions:   NewDefaultSessionManager(),
 	}
 }
@@ -43,7 +44,7 @@ func (svr *Server) Run() {
 	for {
 		select {
 		case client := <-svr.register:
-			svr.clients[client] = true
+			client.open = true
 			token := <-client.sendToken
 			//create persistent token for new or invalid sessions
 			exists := svr.sessions.Exists(token)
@@ -56,29 +57,54 @@ func (svr *Server) Run() {
 				//return the new token for the session
 				client.sendToken <- token
 			}
+      
+			svr.sessions.SetClient(token, client)
+			client.sendToken <- token
+
 		case client := <-svr.unregister:
-			if _, ok := svr.clients[client]; ok {
+			if client.open {
+				// This is leaving the context in existence which may eventually
+				// fill up, so either we need to delete this context on close (hard)
+				// or use this boolean as a mark and sweep tactic like with gc (easy)
+				client.open = false
 				//delete corresponding session
-				delete(svr.clients, client)
+				//delete(svr.clients, client)
 				close(client.send)
 				close(client.sendToken)
 			}
 		case message := <-svr.broadcast:
-			for client := range svr.clients {
-				select {
-				case client.send <- message:
-				default:
-					close(client.send)
-					close(client.sendToken)
-					delete(svr.clients, client)
-				}
-			}
+			svr.broadcastToAll(message)
 		}
 	}
 }
 
+func (svr *Server) broadcastToAll(message []byte) {
+	start := time.Now()
+	svr.sessions.Range(func(key, value interface{}) bool {
+		ctx := value.(*Context)
+
+		if !ctx.Client.open {
+			return true
+		}
+
+		select {
+		case ctx.Client.send <- message:
+			return true
+		default:
+				close(ctx.Client.send)
+				close(ctx.Client.sendToken)
+		}
+
+		return false
+	})
+	end := time.Now()
+	fmt.Printf("Time to broadcast to %v users: %v\n", svr.sessions.Length(), end.Sub(start))
+}
+
+
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL)
+
 	if r.URL.Path != "/" {
 		http.Error(w, "Not found", 404)
 		return
@@ -87,7 +113,8 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", 405)
 		return
 	}
-	http.ServeFile(w, r, "../home.html")
+	http.ServeFile(w, r, "home.html")
+
 }
 
 func (svr *Server) Serve() {
