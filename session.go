@@ -16,7 +16,7 @@ type Context struct {
 	Client *Client
 
 	// bad name, still not sure of the use cases yet
-	itemMap map[string]interface{}
+	//itemMap map[string]interface{}
 }
 
 type SessionToken string
@@ -42,8 +42,6 @@ func (s *DefaultSessionStore) Get(token SessionToken) (*Context, error) {
 	if !ok {
 		return nil, fmt.Errorf("session does not exist")
 	}
-
-	fmt.Println(ctx.(*Context))
 
 	return ctx.(*Context), nil
 }
