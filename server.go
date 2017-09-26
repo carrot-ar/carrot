@@ -7,6 +7,8 @@ import (
 	"fmt"
 )
 
+const serverSecret = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
+
 //the server maintains the list of clients and
 //broadcasts messages to the clients
 type Server struct {
@@ -43,16 +45,17 @@ func (svr *Server) Run() {
 		case client := <-svr.register:
 			svr.clients[client] = true
 			token := <-client.sendToken
-			//create persistent token for new sessions
-			if token == "nil" {
+			//create persistent token for new or invalid sessions
+			exists := svr.sessions.Exists(token)
+			if (token == "nil") || !exists {
 				var err error
 				token, err = svr.sessions.NewSession()
 				if err != nil {
 					//handle later
 				}
+				//return the new token for the session
+				client.sendToken <- token
 			}
-			//make sure that a token exists for the session
-			client.sendToken <- token
 		case client := <-svr.unregister:
 			if _, ok := svr.clients[client]; ok {
 				//delete corresponding session
