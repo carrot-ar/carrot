@@ -24,6 +24,9 @@ const (
 	maxMessageSize = 65536
 
 	//might need max token size too
+
+	// Toggle to require a client secret token on WS upgrade request
+	clientSecretRequired = false
 )
 
 var (
@@ -38,7 +41,7 @@ var upgrader = websocket.Upgrader{
 
 type Client struct {
 	server *Server
-	open bool
+	open   bool
 
 	conn *websocket.Conn
 
@@ -138,27 +141,35 @@ func (c *Client) writePump() {
 }
 
 //authenticate that the client should be allowed to connect
-func secretsMatch(clientSecret string) bool {
-	if clientSecret == serverSecret { return true }
+
+func validClientSecret(clientSecret string) bool {
+	log.Printf("clientSecret: %v", clientSecret)
+
+	if clientSecret == serverSecret {
+		return true
+	}
+
+	log.Println("The client and server secrets do not match :(")
 	return false
 }
 
 func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
-	user, _ , _ := r.BasicAuth()
-	// log.Printf("clientSecret: %v", clientSecret)
-	// log.Printf("user: %v", user)
+	sessionToken, clientSecret, _ := r.BasicAuth()
+	log.Printf("Session Token: %v | Client Secret: %v", sessionToken, clientSecret)
 
-	// if (!secretsMatch(clientSecret)){
-	// 	log.Println("The client and server secrets do not match :(")
-	// }
+	if clientSecretRequired && !validClientSecret(clientSecret) {
+		http.Error(w, "Not Authorized!", 403)
+		return
+	}
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	
+
 	client := &Client{server: server, conn: conn, send: make(chan []byte, 256), sendToken: make(chan SessionToken, 256)}
-	client.sendToken <- SessionToken(user)
+	client.sendToken <- SessionToken(sessionToken)
 	client.server.register <- client
 
 	go client.writePump()

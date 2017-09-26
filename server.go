@@ -1,10 +1,10 @@
 package buddy
 
 import (
-	"net/http"
 	"flag"
-	"log"
 	"fmt"
+	"log"
+	"net/http"
 	"time"
 )
 
@@ -36,7 +36,7 @@ func NewServer() *Server {
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		//clients:    make(map[*Client]bool),
-		sessions:   NewDefaultSessionManager(),
+		sessions: NewDefaultSessionManager(),
 	}
 }
 
@@ -57,9 +57,8 @@ func (svr *Server) Run() {
 				//return the new token for the session
 				client.sendToken <- token
 			}
-      
+
 			svr.sessions.SetClient(token, client)
-			client.sendToken <- token
 
 		case client := <-svr.unregister:
 			if client.open {
@@ -84,6 +83,7 @@ func (svr *Server) broadcastToAll(message []byte) {
 		ctx := value.(*Context)
 
 		if !ctx.Client.open {
+			// delete closed connection here
 			return true
 		}
 
@@ -91,8 +91,8 @@ func (svr *Server) broadcastToAll(message []byte) {
 		case ctx.Client.send <- message:
 			return true
 		default:
-				close(ctx.Client.send)
-				close(ctx.Client.sendToken)
+			close(ctx.Client.send)
+			close(ctx.Client.sendToken)
 		}
 
 		return false
@@ -100,7 +100,6 @@ func (svr *Server) broadcastToAll(message []byte) {
 	end := time.Now()
 	fmt.Printf("Time to broadcast to %v users: %v\n", svr.sessions.Length(), end.Sub(start))
 }
-
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL)
