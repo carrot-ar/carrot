@@ -137,27 +137,29 @@ func (c *Client) writePump() {
 	}
 }
 
-//authenticate existing sessions and identify new sessions
-func getAuthToken(server *Server, r *http.Request) SessionToken {
-	user, _, _ := r.BasicAuth()
-	token := SessionToken(user)
-	if exists := server.sessions.Exists(token); !exists {
-		token = "nil"
-	}
-	return token
+//authenticate that the client should be allowed to connect
+func secretsMatch(clientSecret string) bool {
+	if clientSecret == serverSecret { return true }
+	return false
 }
 
 func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
+	user, _ , _ := r.BasicAuth()
+	// log.Printf("clientSecret: %v", clientSecret)
+	// log.Printf("user: %v", user)
+
+	// if (!secretsMatch(clientSecret)){
+	// 	log.Println("The client and server secrets do not match :(")
+	// }
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
+	
 	client := &Client{server: server, conn: conn, send: make(chan []byte, 256), sendToken: make(chan SessionToken, 256)}
+	client.sendToken <- SessionToken(user)
 	client.server.register <- client
-
-	authToken := getAuthToken(server, r)
-	client.sendToken <- authToken
 
 	go client.writePump()
 	go client.readPump()

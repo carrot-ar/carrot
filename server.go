@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const serverSecret = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
+
 //the server maintains the list of clients and
 //broadcasts messages to the clients
 type Server struct {
@@ -44,15 +46,18 @@ func (svr *Server) Run() {
 		case client := <-svr.register:
 			client.open = true
 			token := <-client.sendToken
-			//create persistent token for new sessions
-			if token == "nil" {
+			//create persistent token for new or invalid sessions
+			exists := svr.sessions.Exists(token)
+			if (token == "nil") || !exists {
 				var err error
 				token, err = svr.sessions.NewSession()
 				if err != nil {
 					//handle later
 				}
+				//return the new token for the session
+				client.sendToken <- token
 			}
-
+      
 			svr.sessions.SetClient(token, client)
 			client.sendToken <- token
 
