@@ -17,12 +17,12 @@ var (
 /*
 	Middlewares
 */
-func parseRequest(req *Request) {
-	loggerMw.Print("I am going to parse a request!")
-}
+// func parseRequest(req *Request) {
+// 	loggerMw.Print("I am going to parse a request!")
+// }
 
 func logger(req *Request) {
-	loggerMw.Print("New Event: <event name> | Payload: <payload> | Other Data: <other_data>")
+	loggerMw.Printf("New Event: %v | Payload: %v", req.session, req.message)
 }
 
 type MiddlewarePipeline struct {
@@ -47,7 +47,7 @@ func (mw *MiddlewarePipeline) Run() {
 
 func NewMiddlewarePipeline() *MiddlewarePipeline {
 	// List of middleware functions
-	mw := []func(*Request){parseRequest, logger}
+	mw := []func(*Request){logger}
 
 	return &MiddlewarePipeline{
 		In:          make(chan *Request, InputChannelSize),

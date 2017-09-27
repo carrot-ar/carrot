@@ -1,8 +1,8 @@
 package buddy
 
 import (
-	//"fmt"
-	//"log"
+//"fmt"
+//"log"
 )
 
 type Request struct {
@@ -12,8 +12,7 @@ type Request struct {
 
 func NewRequest(session *Session, message []byte) *Request {
 	return &Request{
-		session:	session,
-		message:	message,
+		session: session,
+		message: message,
 	}
 }
-

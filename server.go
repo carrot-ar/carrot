@@ -35,13 +35,12 @@ type Server struct {
 
 func NewServer() *Server {
 	return &Server{
-		broadcast:  	make(chan []byte),
-		register:   	make(chan *Client),
-		unregister: 	make(chan *Client),
+		broadcast:  make(chan []byte),
+		register:   make(chan *Client),
+		unregister: make(chan *Client),
 		//clients:    make(map[*Client]bool),
-		sessions: 		NewDefaultSessionManager(),
-		Middleware:	 	NewMiddlewarePipeline(),
-		
+		sessions:   NewDefaultSessionManager(),
+		Middleware: NewMiddlewarePipeline(),
 	}
 }
 
@@ -84,7 +83,7 @@ func (svr *Server) Run() {
 }
 
 func (svr *Server) broadcastAll(message []byte) {
-	start := time.Now()
+	// start := time.Now()
 	svr.sessions.Range(func(key, value interface{}) bool {
 		ctx := value.(*Session)
 
@@ -107,10 +106,10 @@ func (svr *Server) broadcastAll(message []byte) {
 
 		return false
 	})
-	end := time.Now()
-	fmt.Printf("Time to broadcast to %v users: %v\n",
-		svr.sessions.Length(),
-		end.Sub(start))
+	// end := time.Now()
+	// fmt.Printf("Time to broadcast to %v users: %v\n",
+	// 	svr.sessions.Length(),
+	// 	end.Sub(start))
 }
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
