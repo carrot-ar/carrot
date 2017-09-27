@@ -32,7 +32,7 @@ func TestContextPersistence(t *testing.T) {
 	ctx, _ := store.Get(token)
 
 	if ctx == nil {
-		t.Error("Context was not received")
+		t.Error("Session was not received")
 	}
 }
 

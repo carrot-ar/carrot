@@ -81,7 +81,7 @@ func (svr *Server) Run() {
 func (svr *Server) broadcastAll(message []byte) {
 	start := time.Now()
 	svr.sessions.Range(func(key, value interface{}) bool {
-		ctx := value.(*Context)
+		ctx := value.(*Session)
 
 		if ctx.SessionExpired() {
 			svr.sessions.Delete(ctx.Token)
