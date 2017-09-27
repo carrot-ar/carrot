@@ -45,6 +45,7 @@ type SessionStore interface {
 	NewSession() (SessionToken, error)
 	Exists(SessionToken) bool
 	Get(SessionToken) (*Session, error)
+	GetByClient(client *Client) (*Session, error)
 	SetClient(SessionToken, *Client) error
 	Range(func(key, value interface{}) bool)
 	Delete(SessionToken) error
@@ -104,6 +105,25 @@ func (s *DefaultSessionStore) Get(token SessionToken) (*Session, error) {
 	}
 
 	return ctx.(*Session), nil
+}
+
+func (s *DefaultSessionStore) GetByClient(client *Client) (*Session, error) {
+	var session *Session
+
+	s.sessionStore.Range(func(key, value interface{}) bool {
+		s := value.(*Session)
+		if s.Client == client {
+			session = s
+			return false
+		}
+		return true
+	})
+
+	if session == nil {
+		return nil, fmt.Errorf("No session found for client %v", client)
+	}
+
+	return session, nil
 }
 
 func (s *DefaultSessionStore) SetClient(token SessionToken, client *Client) error {

@@ -137,3 +137,28 @@ func TestSetClient(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestGetByClient(t *testing.T) {
+	store := NewDefaultSessionManager()
+	token, err := store.NewSession()
+	if err != nil {
+		t.Errorf("Failed to create session")
+	}
+
+	client := &Client{}
+
+	err = store.SetClient(token, client)
+	if err != nil {
+		t.Error(err)
+	}
+
+	session, err := store.GetByClient(client)
+	if err != nil {
+		t.Errorf("Failed to get client")
+	}
+
+	if session.Client != client {
+		t.Errorf("Client does not match client! %v != %v", client, session.Client)
+	}
+
+}
