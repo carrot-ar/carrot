@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 )
 
 const serverSecret = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
