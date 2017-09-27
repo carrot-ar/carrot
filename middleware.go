@@ -3,6 +3,7 @@ package buddy
 import (
 	"log"
 	"os"
+	"time"
 )
 
 const (
@@ -22,7 +23,9 @@ var (
 // }
 
 func logger(req *Request) {
-	loggerMw.Printf("New Event: %v | Payload: %v", req.session, req.message)
+	end := time.Now()
+	loggerMw.Printf("New Event: tbd | Elapsed Time: %v | Payload: %v",
+		end.Sub(req.startTime), string(req.message[:]))
 }
 
 type MiddlewarePipeline struct {
