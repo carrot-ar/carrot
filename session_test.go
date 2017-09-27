@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"testing"
+	"time"
 )
 
 func TestDefaultSessionManagerNewSessionGet(t *testing.T) {
@@ -43,6 +44,10 @@ func TestSessionDelete(t *testing.T) {
 		t.Errorf("Failed to create session")
 	}
 	store.Delete(token)
+
+	if store.Length() != 0 {
+		t.Errorf("Failed to delete session")
+	}
 }
 
 func TestSessionExists(t *testing.T) {
@@ -96,5 +101,39 @@ func TestSessionLength(t *testing.T) {
 	if expectedLength != actualLength {
 		t.Errorf("Length should have been %v but was %v", expectedLength, actualLength)
 	}
+}
 
+func TestSessionExpired(t *testing.T) {
+	store := NewDefaultSessionManager()
+	token, err := store.NewSession()
+	if err != nil {
+		t.Errorf("Failed to create session")
+	}
+
+	ctx, _ := store.Get(token)
+	expireTime := time.Now().Add(time.Second)
+	ctx.expireTime = expireTime
+	ctx.Client = &Client{}
+
+	ctx.Client.open = false
+
+	time.Sleep(time.Second)
+
+	if !ctx.SessionExpired() {
+		t.Errorf("Session did not expire after period of disconnection")
+	}
+}
+
+func TestSetClient(t *testing.T) {
+	store := NewDefaultSessionManager()
+	token, err := store.NewSession()
+	if err != nil {
+		t.Errorf("Failed to create session")
+	}
+
+	err = store.SetClient(token, &Client{})
+
+	if err != nil {
+		t.Error(err)
+	}
 }

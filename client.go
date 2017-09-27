@@ -23,8 +23,6 @@ const (
 	//maximum message size allowed from the websocket
 	maxMessageSize = 65536
 
-	//might need max token size too
-
 	// Toggle to require a client secret token on WS upgrade request
 	clientSecretRequired = false
 )
