@@ -23,7 +23,7 @@ type Context struct {
 	//itemMap map[string]interface{}
 }
 
-func expiryTime() time.Time {
+func refreshExpiryTime() time.Time {
 	return time.Now().Add(time.Second * defaultSessionClosedTimeoutDuration)
 }
 
@@ -74,9 +74,11 @@ func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
 
 	token := SessionToken(base64.URLEncoding.EncodeToString(b))
 
+
+	// set to expiryTime not time.Now
 	ctx := Context{
 		Token:      token,
-		expireTime: time.Now(),
+		expireTime: refreshExpiryTime(),
 	}
 
 	s.sessionStore.Store(token, &ctx)
@@ -112,7 +114,7 @@ func (s *DefaultSessionStore) SetClient(token SessionToken, client *Client) erro
 	}
 
 	ctx.Client = client
-	ctx.expireTime = expiryTime()
+	ctx.expireTime = refreshExpiryTime()
 
 	return nil
 }

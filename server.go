@@ -90,6 +90,8 @@ func (svr *Server) broadcastAll(message []byte) {
 			return true
 		}
 
+		ctx.expireTime = refreshExpiryTime()
+
 		select {
 		case ctx.Client.send <- message:
 			return true
