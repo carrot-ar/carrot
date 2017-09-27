@@ -5,30 +5,49 @@ import (
 	"encoding/base64"
 	"fmt"
 	"sync"
+	"time"
 )
 
 const (
-	nilSessionToken = ""
+	nilSessionToken                     = ""
+	defaultSessionClosedTimeoutDuration = 10 // seconds
 )
 
 // Potentially will need to be a sync Map
 type Context struct {
-	Client *Client
+	Token      SessionToken
+	Client     *Client
+	expireTime time.Time
 
 	// bad name, still not sure of the use cases yet
 	//itemMap map[string]interface{}
 }
 
+func refreshExpiryTime() time.Time {
+	return time.Now().Add(time.Second * defaultSessionClosedTimeoutDuration)
+}
+
+func (c *Context) sessionDurationExpired() bool {
+	if c.expireTime.Before(time.Now()) {
+		return true
+	}
+
+	return false
+}
+
+func (c *Context) SessionExpired() bool {
+	return !c.Client.open && c.sessionDurationExpired()
+}
+
 type SessionToken string
 
 type SessionStore interface {
+	NewSession() (SessionToken, error)
+	Exists(SessionToken) bool
 	Get(SessionToken) (*Context, error)
 	SetClient(SessionToken, *Client) error
-	NewSession() (SessionToken, error)
-	NewSessionClient(client *Client) (SessionToken, error)
 	Range(func(key, value interface{}) bool)
 	Delete(SessionToken) error
-	Exists(SessionToken) bool
 	Length() int
 }
 
@@ -37,6 +56,48 @@ type DefaultSessionStore struct {
 	length       int
 }
 
+func NewDefaultSessionManager() SessionStore {
+	return &DefaultSessionStore{
+		sessionStore: &sync.Map{},
+		length:       0,
+	}
+}
+
+func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
+	// Initialize context fields
+
+	b := make([]byte, 64)
+	_, err := rand.Read(b)
+	if err != nil {
+		return nilSessionToken, err
+	}
+
+	token := SessionToken(base64.URLEncoding.EncodeToString(b))
+
+
+	// set to expiryTime not time.Now
+	ctx := Context{
+		Token:      token,
+		expireTime: refreshExpiryTime(),
+	}
+
+	s.sessionStore.Store(token, &ctx)
+	s.length += 1
+
+	return token, nil
+}
+
+func (s *DefaultSessionStore) Exists(token SessionToken) bool {
+	_, ok := s.sessionStore.Load(token)
+	if !ok {
+		return false
+	} else {
+		return true
+	}
+}
+
+// Get does not guarantee that a connection is open for the given context
+// this must be checked with the expired() function once the context is retrieved
 func (s *DefaultSessionStore) Get(token SessionToken) (*Context, error) {
 	ctx, ok := s.sessionStore.Load(token)
 	if !ok {
@@ -53,6 +114,7 @@ func (s *DefaultSessionStore) SetClient(token SessionToken, client *Client) erro
 	}
 
 	ctx.Client = client
+	ctx.expireTime = refreshExpiryTime()
 
 	return nil
 }
@@ -63,60 +125,10 @@ func (s *DefaultSessionStore) Delete(token SessionToken) error {
 	return nil
 }
 
-func (s *DefaultSessionStore) Exists(token SessionToken) bool {
-	_, ok := s.sessionStore.Load(token)
-	if !ok {
-		return false
-	} else {
-		return true
-	}
-}
-
 func (s *DefaultSessionStore) Range(f func(key, value interface{}) bool) {
 	s.sessionStore.Range(f)
 }
 
-func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
-	// Initialize context fields
-	ctx := Context{}
-	b := make([]byte, 64)
-	_, err := rand.Read(b)
-	if err != nil {
-		return nilSessionToken, err
-	}
-
-	token := SessionToken(base64.URLEncoding.EncodeToString(b))
-
-	s.sessionStore.Store(token, &ctx)
-	s.length += 1
-
-	return SessionToken(token), nil
-}
-
-func (s *DefaultSessionStore) NewSessionClient(client *Client) (SessionToken, error) {
-	token, err := s.NewSession()
-	if err != nil {
-		return nilSessionToken, err
-	}
-
-	c, ok := s.sessionStore.Load(token)
-	if ok != true {
-		return nilSessionToken, err
-	}
-
-	ctx := c.(Context)
-	ctx.Client = client
-
-	return token, nil
-}
-
 func (s *DefaultSessionStore) Length() int {
 	return s.length
-}
-
-func NewDefaultSessionManager() SessionStore {
-	return &DefaultSessionStore{
-		sessionStore: &sync.Map{},
-		length:       0,
-	}
 }

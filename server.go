@@ -70,22 +70,27 @@ func (svr *Server) Run() {
 				//delete(svr.clients, client)
 				close(client.send)
 				close(client.sendToken)
+				client = nil
 			}
 		case message := <-svr.broadcast:
-			svr.broadcastToAll(message)
+			svr.broadcastAll(message)
 		}
 	}
 }
 
-func (svr *Server) broadcastToAll(message []byte) {
+func (svr *Server) broadcastAll(message []byte) {
 	start := time.Now()
 	svr.sessions.Range(func(key, value interface{}) bool {
 		ctx := value.(*Context)
 
-		if !ctx.Client.open {
-			// delete closed connection here
+		if ctx.SessionExpired() {
+			svr.sessions.Delete(ctx.Token)
+			return true
+		} else if !ctx.Client.open {
 			return true
 		}
+
+		ctx.expireTime = refreshExpiryTime()
 
 		select {
 		case ctx.Client.send <- message:
@@ -98,7 +103,9 @@ func (svr *Server) broadcastToAll(message []byte) {
 		return false
 	})
 	end := time.Now()
-	fmt.Printf("Time to broadcast to %v users: %v\n", svr.sessions.Length(), end.Sub(start))
+	fmt.Printf("Time to broadcast to %v users: %v\n",
+		svr.sessions.Length(),
+		end.Sub(start))
 }
 
 func serveHome(w http.ResponseWriter, r *http.Request) {

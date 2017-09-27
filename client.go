@@ -23,8 +23,6 @@ const (
 	//maximum message size allowed from the websocket
 	maxMessageSize = 65536
 
-	//might need max token size too
-
 	// Toggle to require a client secret token on WS upgrade request
 	clientSecretRequired = false
 )
@@ -70,6 +68,7 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+		// send message to middleware here
 		c.server.broadcast <- message
 	}
 }
