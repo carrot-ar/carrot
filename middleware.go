@@ -26,8 +26,8 @@ func logger(req *Request) {
 }
 
 type MiddlewarePipeline struct {
-	In          chan Request
-	Out         chan Request
+	In          chan *Request
+	Out         chan *Request
 	middlewares []func(*Request)
 }
 
@@ -37,7 +37,7 @@ func (mw *MiddlewarePipeline) Run() {
 			select {
 			case req := <-mw.In:
 				for _, f := range mw.middlewares {
-					f(&req)
+					f(req)
 				}
 				mw.Out <- req
 			}
@@ -47,11 +47,11 @@ func (mw *MiddlewarePipeline) Run() {
 
 func NewMiddlewarePipeline() *MiddlewarePipeline {
 	// List of middleware functions
-	mw := []func(*Session){logger}
+	mw := []func(*Request){parseRequest, logger}
 
 	return &MiddlewarePipeline{
-		In:          make(chan Request, InputChannelSize),
-		Out:         make(chan Request, OutputChannelSize),
+		In:          make(chan *Request, InputChannelSize),
+		Out:         make(chan *Request, OutputChannelSize),
 		middlewares: mw,
 	}
 }

@@ -68,7 +68,17 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+		
 		// send message to middleware here
+
+	
+		session, err := c.server.sessions.GetByClient(c)
+		if err != nil {
+			log.Print(err)
+		}
+		req := NewRequest(session, message)
+		c.server.Middleware.In <- req
+
 		c.server.broadcast <- message
 	}
 }

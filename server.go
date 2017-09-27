@@ -28,15 +28,20 @@ type Server struct {
 
 	//access list of existing sessions
 	sessions SessionStore
+
+	//keep track of middleware
+	Middleware *MiddlewarePipeline
 }
 
 func NewServer() *Server {
 	return &Server{
-		broadcast:  make(chan []byte),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
+		broadcast:  	make(chan []byte),
+		register:   	make(chan *Client),
+		unregister: 	make(chan *Client),
 		//clients:    make(map[*Client]bool),
-		sessions: NewDefaultSessionManager(),
+		sessions: 		NewDefaultSessionManager(),
+		Middleware:	 	NewMiddlewarePipeline(),
+		
 	}
 }
 

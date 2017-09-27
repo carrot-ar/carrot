@@ -7,12 +7,13 @@ import (
 
 type Request struct {
 	session *Session
-	message string
+	message []byte
 }
 
-func NewRequest(session *Session, message string) {
+func NewRequest(session *Session, message []byte) *Request {
 	return &Request{
-			
+		session:	session,
+		message:	message,
 	}
 }
 
