@@ -17,25 +17,29 @@ var (
 /*
 	Middlewares
 */
-func logger(ctx *Context) {
-	loggerMw.Print("New Event: <event name> | Payload: <payload> | Other Data: <other_data>")
+// func parseRequest(req *Request) {
+// 	loggerMw.Print("I am going to parse a request!")
+// }
+
+func logger(req *Request) {
+	loggerMw.Printf("New Event: %v | Payload: %v", req.session, req.message)
 }
 
 type MiddlewarePipeline struct {
-	In          chan Context
-	Out         chan Context
-	middlewares []func(*Context)
+	In          chan *Request
+	Out         chan *Request
+	middlewares []func(*Request)
 }
 
 func (mw *MiddlewarePipeline) Run() {
 	func() {
 		for {
 			select {
-			case ctx := <-mw.In:
+			case req := <-mw.In:
 				for _, f := range mw.middlewares {
-					f(&ctx)
+					f(req)
 				}
-				mw.Out <- ctx
+				mw.Out <- req
 			}
 		}
 	}()
@@ -43,11 +47,11 @@ func (mw *MiddlewarePipeline) Run() {
 
 func NewMiddlewarePipeline() *MiddlewarePipeline {
 	// List of middleware functions
-	mw := []func(*Context){logger}
+	mw := []func(*Request){logger}
 
 	return &MiddlewarePipeline{
-		In:          make(chan Context, InputChannelSize),
-		Out:         make(chan Context, OutputChannelSize),
+		In:          make(chan *Request, InputChannelSize),
+		Out:         make(chan *Request, OutputChannelSize),
 		middlewares: mw,
 	}
 }

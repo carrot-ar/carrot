@@ -32,7 +32,7 @@ func TestContextPersistence(t *testing.T) {
 	ctx, _ := store.Get(token)
 
 	if ctx == nil {
-		t.Error("Context was not received")
+		t.Error("Session was not received")
 	}
 }
 
@@ -136,4 +136,29 @@ func TestSetClient(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+}
+
+func TestGetByClient(t *testing.T) {
+	store := NewDefaultSessionManager()
+	token, err := store.NewSession()
+	if err != nil {
+		t.Errorf("Failed to create session")
+	}
+
+	client := &Client{}
+
+	err = store.SetClient(token, client)
+	if err != nil {
+		t.Error(err)
+	}
+
+	session, err := store.GetByClient(client)
+	if err != nil {
+		t.Errorf("Failed to get client")
+	}
+
+	if session.Client != client {
+		t.Errorf("Client does not match client! %v != %v", client, session.Client)
+	}
+
 }

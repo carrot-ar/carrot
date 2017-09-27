@@ -14,7 +14,7 @@ const (
 )
 
 // Potentially will need to be a sync Map
-type Context struct {
+type Session struct {
 	Token      SessionToken
 	Client     *Client
 	expireTime time.Time
@@ -27,7 +27,7 @@ func refreshExpiryTime() time.Time {
 	return time.Now().Add(time.Second * defaultSessionClosedTimeoutDuration)
 }
 
-func (c *Context) sessionDurationExpired() bool {
+func (c *Session) sessionDurationExpired() bool {
 	if c.expireTime.Before(time.Now()) {
 		return true
 	}
@@ -35,7 +35,7 @@ func (c *Context) sessionDurationExpired() bool {
 	return false
 }
 
-func (c *Context) SessionExpired() bool {
+func (c *Session) SessionExpired() bool {
 	return !c.Client.open && c.sessionDurationExpired()
 }
 
@@ -44,7 +44,8 @@ type SessionToken string
 type SessionStore interface {
 	NewSession() (SessionToken, error)
 	Exists(SessionToken) bool
-	Get(SessionToken) (*Context, error)
+	Get(SessionToken) (*Session, error)
+	GetByClient(client *Client) (*Session, error)
 	SetClient(SessionToken, *Client) error
 	Range(func(key, value interface{}) bool)
 	Delete(SessionToken) error
@@ -74,9 +75,8 @@ func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
 
 	token := SessionToken(base64.URLEncoding.EncodeToString(b))
 
-
 	// set to expiryTime not time.Now
-	ctx := Context{
+	ctx := Session{
 		Token:      token,
 		expireTime: refreshExpiryTime(),
 	}
@@ -98,13 +98,32 @@ func (s *DefaultSessionStore) Exists(token SessionToken) bool {
 
 // Get does not guarantee that a connection is open for the given context
 // this must be checked with the expired() function once the context is retrieved
-func (s *DefaultSessionStore) Get(token SessionToken) (*Context, error) {
+func (s *DefaultSessionStore) Get(token SessionToken) (*Session, error) {
 	ctx, ok := s.sessionStore.Load(token)
 	if !ok {
 		return nil, fmt.Errorf("session does not exist")
 	}
 
-	return ctx.(*Context), nil
+	return ctx.(*Session), nil
+}
+
+func (s *DefaultSessionStore) GetByClient(client *Client) (*Session, error) {
+	var session *Session
+
+	s.sessionStore.Range(func(key, value interface{}) bool {
+		s := value.(*Session)
+		if s.Client == client {
+			session = s
+			return false
+		}
+		return true
+	})
+
+	if session == nil {
+		return nil, fmt.Errorf("No session found for client %v", client)
+	}
+
+	return session, nil
 }
 
 func (s *DefaultSessionStore) SetClient(token SessionToken, client *Client) error {

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 )
 
 const serverSecret = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
@@ -28,6 +27,9 @@ type Server struct {
 
 	//access list of existing sessions
 	sessions SessionStore
+
+	//keep track of middleware
+	Middleware *MiddlewarePipeline
 }
 
 func NewServer() *Server {
@@ -36,7 +38,8 @@ func NewServer() *Server {
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		//clients:    make(map[*Client]bool),
-		sessions: NewDefaultSessionManager(),
+		sessions:   NewDefaultSessionManager(),
+		Middleware: NewMiddlewarePipeline(),
 	}
 }
 
@@ -79,9 +82,9 @@ func (svr *Server) Run() {
 }
 
 func (svr *Server) broadcastAll(message []byte) {
-	start := time.Now()
+	// start := time.Now()
 	svr.sessions.Range(func(key, value interface{}) bool {
-		ctx := value.(*Context)
+		ctx := value.(*Session)
 
 		if ctx.SessionExpired() {
 			svr.sessions.Delete(ctx.Token)
@@ -102,10 +105,10 @@ func (svr *Server) broadcastAll(message []byte) {
 
 		return false
 	})
-	end := time.Now()
-	fmt.Printf("Time to broadcast to %v users: %v\n",
-		svr.sessions.Length(),
-		end.Sub(start))
+	// end := time.Now()
+	// fmt.Printf("Time to broadcast to %v users: %v\n",
+	// 	svr.sessions.Length(),
+	// 	end.Sub(start))
 }
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
