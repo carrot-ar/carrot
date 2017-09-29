@@ -12,7 +12,7 @@ const (
 )
 
 var (
-	loggerMw = log.New(os.Stdout, "buddy: ", log.Lmicroseconds)
+	loggerMw = log.New(os.Stdout, "buddy: ", log.Ltime)
 )
 
 /*
@@ -24,7 +24,7 @@ var (
 
 func logger(req *Request) {
 	end := time.Now()
-	loggerMw.Printf("New Event: tbd | Elapsed Time: %v | Payload: %v",
+	loggerMw.Printf("middleware: new event: tbd | elapsed time: %v | payload: %v",
 		end.Sub(req.startTime), string(req.message[:]))
 }
 

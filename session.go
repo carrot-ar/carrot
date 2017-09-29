@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"log"
 )
 
 const (
@@ -55,19 +56,21 @@ type SessionStore interface {
 type DefaultSessionStore struct {
 	sessionStore *sync.Map
 	length       int
+	mutex        *sync.Mutex
 }
 
 func NewDefaultSessionManager() SessionStore {
 	return &DefaultSessionStore{
 		sessionStore: &sync.Map{},
 		length:       0,
+		mutex:        &sync.Mutex{},
 	}
 }
 
 func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
 	// Initialize context fields
 
-	b := make([]byte, 64)
+	b := make([]byte, 16)
 	_, err := rand.Read(b)
 	if err != nil {
 		return nilSessionToken, err
@@ -82,7 +85,11 @@ func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
 	}
 
 	s.sessionStore.Store(token, &ctx)
+	s.mutex.Lock()
 	s.length += 1
+	s.mutex.Unlock()
+
+	log.Printf("session: new session created %v, total: %v\n", token,s.length)
 
 	return token, nil
 }
@@ -100,8 +107,10 @@ func (s *DefaultSessionStore) Exists(token SessionToken) bool {
 // this must be checked with the expired() function once the context is retrieved
 func (s *DefaultSessionStore) Get(token SessionToken) (*Session, error) {
 	ctx, ok := s.sessionStore.Load(token)
+	//fmt.Printf("session: getting session %v\n", token)
+
 	if !ok {
-		return nil, fmt.Errorf("session does not exist")
+		return nil, fmt.Errorf("session: session does not exist")
 	}
 
 	return ctx.(*Session), nil
@@ -120,7 +129,7 @@ func (s *DefaultSessionStore) GetByClient(client *Client) (*Session, error) {
 	})
 
 	if session == nil {
-		return nil, fmt.Errorf("No session found for client %v", client)
+		return nil, fmt.Errorf("session: no session found for client %v\n", client)
 	}
 
 	return session, nil
@@ -140,7 +149,9 @@ func (s *DefaultSessionStore) SetClient(token SessionToken, client *Client) erro
 
 func (s *DefaultSessionStore) Delete(token SessionToken) error {
 	s.sessionStore.Delete(token)
+	s.mutex.Lock()
 	s.length -= 1
+	s.mutex.Unlock()
 	return nil
 }
 

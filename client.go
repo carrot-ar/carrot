@@ -11,20 +11,29 @@ import (
 
 const (
 
-	//time allowed to write a message to the websocket
-	writeWait = 10 * time.Second
+	writeWaitSeconds = 600
+	pongWaitSeconds = 600
 
-	//time allowed to read the next pong message from the websocket
-	pongWait = 10 * time.Second
+	// time allowed to write a message to the websocket
+	writeWait = writeWaitSeconds * time.Second
 
-	//send pings to the websocket with this period, must be less than pongWait
+	// time allowed to read the next pong message from the websocket
+	pongWait = pongWaitSeconds * time.Second
+
+	// send pings to the websocket with this period, must be less than pongWait
 	pingPeriod = (pongWait * 9) / 10
 
-	//maximum message size allowed from the websocket
+	// maximum message size allowed from the websocket
 	maxMessageSize = 65536
 
-	// Toggle to require a client secret token on WS upgrade request
+	// toggle to require a client secret token on WS upgrade request
 	clientSecretRequired = false
+
+	// size of client send channel
+	sendMsgBufferSize = 2048
+
+	// size of sendToken channel
+	sendTokenBufferSize = 2048
 )
 
 var (
@@ -33,8 +42,8 @@ var (
 )
 
 var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+	ReadBufferSize:  2048,
+	WriteBufferSize: 2048,
 }
 
 type Client struct {
@@ -69,13 +78,13 @@ func (c *Client) readPump() {
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
-		// send message to middleware here
-
 		session, err := c.server.sessions.GetByClient(c)
 		if err != nil {
 			log.Print(err)
 		}
 		req := NewRequest(session, message)
+
+		log.Printf("readPump: sending to middleware\n")
 		c.server.Middleware.In <- req
 
 		c.server.broadcast <- message
@@ -94,8 +103,9 @@ func (c *Client) writePump() {
 		case message, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
+				log.Printf("client: a connection has closed\n")
 				//the server closed the channel
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				//c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
 
@@ -163,7 +173,7 @@ func validClientSecret(clientSecret string) bool {
 
 func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 	sessionToken, clientSecret, _ := r.BasicAuth()
-	log.Printf("Session Token: %v | Client Secret: %v", sessionToken, clientSecret)
+	//log.Printf("Session Token: %v | Client Secret: %v", sessionToken, clientSecret)
 
 	if clientSecretRequired && !validClientSecret(clientSecret) {
 		http.Error(w, "Not Authorized!", 403)
@@ -176,7 +186,13 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := &Client{server: server, conn: conn, send: make(chan []byte, 256), sendToken: make(chan SessionToken, 256)}
+	client := &Client{
+		server:    server,
+		conn:      conn,
+		send:      make(chan []byte, sendMsgBufferSize),
+		sendToken: make(chan SessionToken, sendTokenBufferSize),
+	}
+
 	client.sendToken <- SessionToken(sessionToken)
 	client.server.register <- client
 
