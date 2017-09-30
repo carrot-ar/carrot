@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"time"
 
+	"fmt"
 	"github.com/gorilla/websocket"
 )
 
 const (
-
 	writeWaitSeconds = 600
-	pongWaitSeconds = 600
+	pongWaitSeconds  = 600
 
 	// time allowed to write a message to the websocket
 	writeWait = writeWaitSeconds * time.Second
@@ -186,6 +186,7 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("new client")
 	client := &Client{
 		server:    server,
 		conn:      conn,
@@ -193,9 +194,20 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 		sendToken: make(chan SessionToken, sendTokenBufferSize),
 	}
 
+	fmt.Println(len(client.sendToken))
 	client.sendToken <- SessionToken(sessionToken)
-	client.server.register <- client
+	fmt.Println(len(client.sendToken))
 
-	go client.writePump()
-	go client.readPump()
+	select {
+	case client.server.register <- client:
+		fmt.Println("Registered!")
+		fmt.Println("Starting threads")
+		go client.writePump()
+		fmt.Println("one thread started")
+		go client.readPump()
+		fmt.Println("two threads started")
+	default:
+		fmt.Println("blocked!")
+		conn.Close()
+	}
 }

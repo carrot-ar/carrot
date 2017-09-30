@@ -7,8 +7,11 @@ import (
 	"net/http"
 )
 
-const serverSecret = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
-const broadcastChannelSize = 512
+const (
+	serverSecret         = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
+	broadcastChannelSize = 512
+	port                 = 8080
+)
 
 //the server maintains the list of clients and
 //broadcasts messages to the clients
@@ -44,7 +47,10 @@ func (svr *Server) Run() {
 		select {
 		case client := <-svr.register:
 			client.open = true
+			fmt.Println(len(client.sendToken))
 			token := <-client.sendToken
+			fmt.Println(len(client.sendToken))
+			fmt.Println("BEGIN REGISTER")
 			//create persistent token for new or invalid sessions
 			exists := svr.sessions.Exists(token)
 			if (token == "nil") || !exists {
@@ -59,7 +65,6 @@ func (svr *Server) Run() {
 			}
 
 			svr.sessions.SetClient(token, client)
-
 		case client := <-svr.unregister:
 			if client.open {
 				client.open = false
@@ -81,8 +86,6 @@ func (svr *Server) broadcastAll(message []byte) {
 	refreshedClientCount := 0
 	messagesSent := 0
 	svr.sessions.Range(func(key, value interface{}) bool {
-		//out := fmt.Sprintf("On server: broadcast buffer size: %v", len(svr.broadcast))
-		//fmt.Printf("\r %v\n", out)
 		ctx := value.(*Session)
 
 		if ctx.SessionExpired() {
@@ -108,12 +111,11 @@ func (svr *Server) broadcastAll(message []byte) {
 
 		return false
 	})
-	fmt.Printf("\n")
-	log.Printf("server: broadcast expired %v, closed %v, refresh %v, sent %v",
-		expiredSessionCount,
-		closedClientCount,
+	log.Printf("server: broadcast sent %v, refresh %v, closed %v, expired %v",
+		messagesSent,
 		refreshedClientCount,
-		messagesSent)
+		closedClientCount,
+		expiredSessionCount)
 	// end := time.Now()
 	// fmt.Printf("Time to broadcast to %v users: %v\n",
 	// 	svr.sessions.Length(),
@@ -136,12 +138,15 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func (svr *Server) Serve() {
-	addr := flag.String("addr", ":8080", "http service address")
+	addr := flag.String("addr", fmt.Sprintf(":%d", port), "http service address")
 
 	http.HandleFunc("/", serveHome)
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(svr, w, r)
 	})
+
+	log.Printf("Listening at http://localhost:%d", port)
+	log.Printf("Listening at ws://localhost:%d", port)
 
 	err := http.ListenAndServe(*addr, nil)
 	if err != nil {

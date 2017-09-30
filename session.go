@@ -4,9 +4,9 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"sync"
 	"time"
-	"log"
 )
 
 const (
@@ -89,7 +89,7 @@ func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
 	s.length += 1
 	s.mutex.Unlock()
 
-	log.Printf("session: new session created %v, total: %v\n", token,s.length)
+	log.Printf("session: new session created %v, total: %v\n", token, s.length)
 
 	return token, nil
 }

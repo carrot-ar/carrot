@@ -2,17 +2,12 @@ package buddy
 
 import (
 	"log"
-	"os"
 	"time"
 )
 
 const (
 	InputChannelSize  = 256
 	OutputChannelSize = 256
-)
-
-var (
-	loggerMw = log.New(os.Stdout, "buddy: ", log.Ltime)
 )
 
 /*
@@ -24,7 +19,7 @@ var (
 
 func logger(req *Request) {
 	end := time.Now()
-	loggerMw.Printf("middleware: new event: tbd | elapsed time: %v | payload: %v",
+	log.Printf("middleware: new event: tbd | elapsed time: %v | payload: %v\n",
 		end.Sub(req.startTime), string(req.message[:]))
 }
 
