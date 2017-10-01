@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 	"github.com/gorilla/websocket"
+	"fmt"
 )
 
 const (
@@ -195,6 +196,7 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 	client.server.register <- client
 
 	func() {
+		fmt.Println("starting client!")
 		<-client.start
 		go client.writePump()
 		go client.readPump()

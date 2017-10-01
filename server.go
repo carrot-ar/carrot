@@ -9,7 +9,7 @@ import (
 
 const (
 	serverSecret         = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
-	broadcastChannelSize = 512
+	broadcastChannelSize = 4096
 	port                 = 8080
 )
 

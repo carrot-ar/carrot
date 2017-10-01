@@ -37,7 +37,7 @@ func (mw *MiddlewarePipeline) Run() {
 				for _, f := range mw.middlewares {
 					f(req)
 				}
-				mw.Out <- req
+				//mw.Out <- req
 			}
 		}
 	}()
