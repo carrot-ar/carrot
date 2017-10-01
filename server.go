@@ -47,13 +47,9 @@ func (svr *Server) Run() {
 		select {
 		case client := <-svr.register:
 			client.open = true
-			fmt.Printf("Len before grab from buffer: %v\n", len(client.sendToken))
 			token := <-client.sendToken
-			fmt.Printf("Len after grab from buffer: %v\n", len(client.sendToken))
-			fmt.Println("BEGIN REGISTER")
 			//create persistent token for new or invalid sessions
 			exists := svr.sessions.Exists(token)
-			fmt.Println(exists)
 			if (token == "") || !exists {
 				var err error
 				token, err = svr.sessions.NewSession()
@@ -66,6 +62,7 @@ func (svr *Server) Run() {
 			}
 
 			svr.sessions.SetClient(token, client)
+			close(client.start)
 		case client := <-svr.unregister:
 			if client.open {
 				client.open = false

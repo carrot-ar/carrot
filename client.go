@@ -5,8 +5,6 @@ import (
 	"log"
 	"net/http"
 	"time"
-
-	"fmt"
 	"github.com/gorilla/websocket"
 )
 
@@ -30,10 +28,10 @@ const (
 	clientSecretRequired = false
 
 	// size of client send channel
-	sendMsgBufferSize = 2048
+	sendMsgBufferSize = 1
 
 	// size of sendToken channel
-	sendTokenBufferSize = 2048
+	sendTokenBufferSize = 1
 )
 
 var (
@@ -48,6 +46,8 @@ var upgrader = websocket.Upgrader{
 
 type Client struct {
 	server *Server
+	// acts as a signal for when to start the go routines
+	start chan struct{}
 	open   bool
 
 	conn *websocket.Conn
@@ -84,9 +84,7 @@ func (c *Client) readPump() {
 		}
 		req := NewRequest(session, message)
 
-		log.Printf("readPump: sending to middleware\n")
 		c.server.Middleware.In <- req
-
 		c.server.broadcast <- message
 	}
 }
@@ -158,8 +156,7 @@ func (c *Client) writePump() {
 	}
 }
 
-//authenticate that the client should be allowed to connect
-
+// validate that the client should be allowed to connect
 func validClientSecret(clientSecret string) bool {
 	log.Printf("clientSecret: %v", clientSecret)
 
@@ -186,28 +183,20 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("new client")
 	client := &Client{
 		server:    server,
 		conn:      conn,
 		send:      make(chan []byte, sendMsgBufferSize),
 		sendToken: make(chan SessionToken, sendTokenBufferSize),
+		start: make(chan struct{}),
 	}
 
-	fmt.Println("Sent token!")
 	client.sendToken <- SessionToken(sessionToken)
+	client.server.register <- client
 
-	select {
-	case client.server.register <- client:
-		time.Sleep(time.Second)
-		fmt.Println("Registered!")
-		fmt.Println("Starting threads")
+	func() {
+		<-client.start
 		go client.writePump()
-		fmt.Println("one thread started")
 		go client.readPump()
-		fmt.Println("two threads started")
-	default:
-		fmt.Println("blocked!")
-		conn.Close()
-	}
+	}()
 }
