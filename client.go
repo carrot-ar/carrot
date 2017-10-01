@@ -194,12 +194,12 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 		sendToken: make(chan SessionToken, sendTokenBufferSize),
 	}
 
-	fmt.Println(len(client.sendToken))
+	fmt.Println("Sent token!")
 	client.sendToken <- SessionToken(sessionToken)
-	fmt.Println(len(client.sendToken))
 
 	select {
 	case client.server.register <- client:
+		time.Sleep(time.Second)
 		fmt.Println("Registered!")
 		fmt.Println("Starting threads")
 		go client.writePump()
