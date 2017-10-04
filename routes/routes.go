@@ -57,8 +57,6 @@ type pair struct {
 	controller, method string
 }
 
-
-
 func Lookup(route string) Route {
 	return routingTable[route]
 }
