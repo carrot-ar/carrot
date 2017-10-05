@@ -18,6 +18,8 @@ RUN go get github.com/gorilla/websocket
 RUN cd /root/.go/src/github.com/ && mkdir senior-buddy
 RUN cd /root/.go/src/github.com/senior-buddy/ && git clone https://github.com/senior-buddy/buddy
 
+RUN cp /root/.go/src/github.com/senior-buddy/buddy/home.html /home.html
 
 CMD ["/usr/bin/go"]
+ENTRYPOINT ["/usr/bin/go", "run", "/root/.go/src/github.com/senior-buddy/buddy/cmd/buddy.go"]
 
