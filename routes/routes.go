@@ -13,6 +13,8 @@ const (
 var routeTableRaw = map[string]string{
 	"draw": "DrawingStreamController_Draw",
 	"place_sphere": "SphereController_Place",
+	"test": "TestController_Print",
+	"test2": "TestController_PrintMore",
 }
 
 var routingTable = map[string]Route{}
@@ -28,6 +30,15 @@ type Route struct {
 	function string
 	persist bool
 }
+
+func (r *Route) Controller() string {
+	return r.controller
+}
+
+func (r *Route) Function() string {
+	return r.function
+}
+
 
 func parse(s string) Route {
 	var c, f string
