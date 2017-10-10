@@ -1,10 +1,8 @@
-package controller
+package buddy
 
 import (
 	"testing"
 	"fmt"
-	"github.com/senior-buddy/buddy"
-	"github.com/senior-buddy/buddy/routes"
 	"reflect"
 )
 
@@ -14,7 +12,7 @@ func TestControllerFactory(t *testing.T) {
 	//fmt.Println(reflect.TypeOf(c))
 }
 
-func (c *DefaultController) Print(req *buddy.Request) {
+func (c *DefaultController) Print(req *Request) {
 	fmt.Printf("Hello, world! Here is my request!!\n")
 	req.End()
 }
@@ -27,8 +25,8 @@ func TestMethodInvocation(t *testing.T) {
 
 	fmt.Println(reflect.TypeOf(tc.Controller))
 
-	route := routes.Lookup("test")
-	req := buddy.NewRequest(nil, nil)
+	route := Lookup("test")
+	req := NewRequest(nil, nil)
 
 	tc.Invoke(route, req)
 

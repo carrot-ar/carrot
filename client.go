@@ -41,8 +41,8 @@ var (
 )
 
 var upgrader = websocket.Upgrader{
-	ReadBufferSize:  2048,
-	WriteBufferSize: 2048,
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 }
 
 type Client struct {

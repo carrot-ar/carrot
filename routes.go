@@ -1,4 +1,4 @@
-package routes
+package buddy
 
 //import "github.com/senior-buddy/buddy"
 import "strings"

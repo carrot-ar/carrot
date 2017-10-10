@@ -1,8 +1,6 @@
-package controller
+package buddy
 
 import (
-	"github.com/senior-buddy/buddy/routes"
-	"github.com/senior-buddy/buddy"
 	"reflect"
 )
 
@@ -38,9 +36,9 @@ func (c *AppController) Persist(p bool) {
 /*
 		Reflect on the controller and find the correct function to call, then call it
 */
-func (c *AppController) Invoke(route routes.Route, req *buddy.Request) {
+func (c *AppController) Invoke(route Route, req *Request) {
 
-	req.AddMetric(buddy.ControllerInvocation)
+	req.AddMetric(ControllerInvocation)
 
 	// Create a new Value pointer representing the controller type
 	ptr := reflect.New(reflect.TypeOf(c.Controller))

@@ -1,19 +1,13 @@
-package controller
+package buddy
 
 import (
 	"fmt"
 )
 
-const (
-	/*
-		Add controllers below this line
-	 */
-	DEFAULT_CONTROLLER = iota
-)
 
 
 // Base controller
-type ControllerType int
+type ControllerType string
 
 type DefaultController struct {}
 
@@ -21,7 +15,7 @@ type DefaultController struct {}
 // returns a new controller of controllerType
 func New(t ControllerType) (*AppController, error) {
 	switch t {
-	case DEFAULT_CONTROLLER:
+	case "DefaultController":
 		return &AppController{
 			Controller: DefaultController{},
 			persist: false,
@@ -30,4 +24,8 @@ func New(t ControllerType) (*AppController, error) {
 		return nil, fmt.Errorf("error: invalid controller type %v", t)
 	}
 }
+
+
+
+
 
