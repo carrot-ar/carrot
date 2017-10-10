@@ -102,9 +102,6 @@ func (svr *Server) broadcastAll(message []byte) {
 		case ctx.Client.send <- message:
 			messagesSent++
 			return true
-		default:
-			close(ctx.Client.send)
-			close(ctx.Client.sendToken)
 		}
 
 		return false

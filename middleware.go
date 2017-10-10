@@ -2,7 +2,6 @@ package buddy
 
 import (
 	"log"
-	"time"
 )
 
 const (
@@ -18,9 +17,7 @@ const (
 // }
 
 func logger(req *Request) {
-	end := time.Now()
-	log.Printf("middleware: new event: tbd | elapsed time: %v | payload: %v\n",
-		end.Sub(req.startTime), string(req.message[:]))
+	log.Printf("middleware: new event: tbd | payload: %v\n", string(req.message[:]))
 }
 
 type MiddlewarePipeline struct {
@@ -34,9 +31,11 @@ func (mw *MiddlewarePipeline) Run() {
 		for {
 			select {
 			case req := <-mw.In:
+				//req.AddMetric(MiddlewareInput)
 				for _, f := range mw.middlewares {
 					f(req)
 				}
+				//req.AddMetric(MiddlewareOutput)
 				//mw.Out <- req
 			}
 		}

@@ -1,0 +1,21 @@
+apiVersion: apps/v1beta1 # for versions before 1.7.0 use apps/v1beta1
+kind: Deployment
+metadata:
+  name: buddy-test-deployment
+  labels:
+    app: buddy-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: buddy-test
+  template:
+    metadata:
+      labels:
+        app: buddy-test
+    spec:
+      containers:
+      - name: buddy-test
+        image: gcr.io/senior-project-proving-grounds/buddy_test
+        ports:
+        - containerPort: 8080
