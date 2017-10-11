@@ -1,4 +1,4 @@
-package buddy
+package carrot
 
 //import "github.com/senior-buddy/buddy"
 import "strings"

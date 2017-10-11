@@ -1,7 +1,7 @@
 package main
 
 import(
-	"github.com/senior-buddy/buddy"
+	"github.com/senior-buddy/carrot"
 )
 
 func main() {
@@ -17,7 +17,7 @@ func main() {
 	// do this to be able to handle large client counts
 	// ulimit -n SOME_REALLY_BIG_NUMBER
 	//
-	server := buddy.NewServer()
+	server := carrot.NewServer()
 	go server.Middleware.Run()
 	go server.Run()
 	server.Serve()

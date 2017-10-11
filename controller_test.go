@@ -1,4 +1,4 @@
-package buddy
+package carrot
 
 import (
 	"testing"
