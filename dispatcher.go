@@ -20,11 +20,14 @@ func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
 	if route.persist {
 		token := req.session.Token
 		if exists := dp.openStreams.Exists(token); !exists {
-			dp.openStreams.Add(token)
+			c, err := NewController(route.Controller()) //send controller string to controller factory
+			if err != nil {
+				fmt.Println(err)
+			}	
+			dp.openStreams.Add(token, c)
 		}
 		sc := dp.openStreams.Get(token)
-		//send request to controller
-		sc.Invoke(route, req)
+		sc.Invoke(route, req) //send request to controller		
 	} else { //route leads to event controller
 		c, err := NewController(route.Controller()) //send controller string to controller factory
 		if err != nil {
