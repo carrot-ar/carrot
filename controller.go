@@ -22,7 +22,9 @@ func (c *AppController) Persist(p bool) {
 /*
 		Reflect on the controller and find the correct function to call, then call it
 */
-func (c *AppController) Invoke(route Route, req *Request) {
+func (c *AppController) Invoke(route *Route, req *Request) {
+
+	fmt.Println(route)
 
 	req.AddMetric(ControllerInvocation)
 
