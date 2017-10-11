@@ -22,17 +22,16 @@ func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
 		if exists := dp.openStreams.Exists(token); !exists {
 			dp.openStreams.Add(token)
 		}
-		// sc := dp.openStreams.Get(token)
-		//reflect on method
+		sc := dp.openStreams.Get(token)
 		//send request to controller
+		sc.Invoke(route, req)
 	} else { //route leads to event controller
-		//send controller string to controller factory
-		c, err := NewController(route.Controller())
+		c, err := NewController(route.Controller()) //send controller string to controller factory
 		if err != nil {
 			fmt.Println(err)
 		}		
-		//send request to controller
-		c.Invoke(route, req)
+		c.Invoke(route, req) //send request to controller
+		
 	}
 }
 
@@ -40,7 +39,6 @@ func (dp *Dispatcher) Run() {
 	for {
 		select {
 		case req := <- dp.requests:
-			fmt.Println(req)
 			route := Lookup(req.endpoint)
 			dp.dispatchRequest(&route, req)
 		default:
