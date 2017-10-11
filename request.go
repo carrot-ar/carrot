@@ -22,6 +22,7 @@ type Request struct {
 	session   *Session
 	message   []byte
 	metrics []time.Time
+	endpoint	string
 }
 
 // Add the time that a request is created to the request metric tracker
@@ -36,7 +37,8 @@ func NewRequest(session *Session, message []byte) *Request {
 	return &Request{
 		session:   session,
 		message:   message,
-		metrics: m,
+		metrics: 	m,
+		endpoint:	"",
 	}
 }
 
