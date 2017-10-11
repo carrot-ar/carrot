@@ -1,7 +1,7 @@
 package buddy
 
 import (
-	//nothing yet
+	"fmt"
 )
 
 type OpenStreamsList struct {
@@ -25,16 +25,15 @@ func (osl *OpenStreamsList) Exists(token SessionToken) bool {
 func (osl *OpenStreamsList) Get(token SessionToken) *AppController {
 	sc, ok := osl.streams[token]
 	if !ok {
-		println("cannot return route be it doesn't exist")
+		fmt.Println("cannot return route be it doesn't exist")
 		return nil
 	}
 	return sc
 }
 
-func (osl *OpenStreamsList) Add(token SessionToken) error {
-	//osl.streams[token] = NewController()
+func (osl *OpenStreamsList) Add(token SessionToken, ac *AppController) {
+	osl.streams[token] = ac
 	osl.length += 1
-	return nil //get rid of this
 }
 
 func (osl *OpenStreamsList) Delete(token SessionToken) {
