@@ -16,8 +16,6 @@ func NewOpenStreamsList() *OpenStreamsList {
 	}
 }
 
-//should we keep this method or condense it with the one below?
-//2n lookups rn
 func (osl *OpenStreamsList) Exists(token SessionToken) bool {
 	_, ok := osl.streams[token]
 	if ok { return true }
@@ -34,9 +32,9 @@ func (osl *OpenStreamsList) Get(token SessionToken) *AppController {
 }
 
 func (osl *OpenStreamsList) Add(token SessionToken) error {
-	// osl.streams[token] = NewStreamController()
+	//osl.streams[token] = NewController()
 	osl.length += 1
-	return nil //get rid of this line after debugging
+	return nil //get rid of this
 }
 
 func (osl *OpenStreamsList) Delete(token SessionToken) {

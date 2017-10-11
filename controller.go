@@ -2,7 +2,6 @@ package buddy
 
 import (
 	"reflect"
-	"fmt"
 	"log"
 )
 
@@ -24,8 +23,6 @@ func (c *AppController) Persist(p bool) {
 */
 func (c *AppController) Invoke(route *Route, req *Request) {
 
-	fmt.Println(route)
-
 	req.AddMetric(ControllerInvocation)
 
 	// Create a new Value pointer representing the controller type
@@ -33,8 +30,6 @@ func (c *AppController) Invoke(route *Route, req *Request) {
 
 	// Look at that value then call the correct method
 	method := ptr.MethodByName(route.Function())
-
-	fmt.Println(method)
 
 	if method.IsValid() {
 		args := []reflect.Value{reflect.ValueOf(req)}
