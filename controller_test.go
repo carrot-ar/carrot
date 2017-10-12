@@ -28,12 +28,9 @@ func TestMethodInvocation(t *testing.T) {
 	// req := NewRequest(nil, nil)
 
 	// tc.Invoke(route, req)
-
 	req := &Request{
-		session:	nil,
-		message:	nil,
-		metrics:	make([]time.Time, MetricCount),
-		endpoint:	"test",
+		endpoint: "test",
+		metrics: make([]time.Time, MetricCount),
 	}
 
 	d := NewDispatcher()

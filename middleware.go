@@ -17,7 +17,7 @@ const (
 // }
 
 func logger(req *Request) {
-	log.Printf("middleware: new event: tbd | payload: %v\n", string(req.message[:]))
+	log.Println("middleware: new request")
 }
 
 type MiddlewarePipeline struct {

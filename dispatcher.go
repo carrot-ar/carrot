@@ -18,7 +18,7 @@ func NewDispatcher() *Dispatcher {
 
 func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
 	if route.persist {
-		token := req.session.Token
+		token := req.sessionToken
 		if exists := dp.openStreams.Exists(token); !exists {
 			c, err := NewController(route.Controller()) //send controller string to controller factory
 			if err != nil {
