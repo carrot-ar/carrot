@@ -1,6 +1,6 @@
 package buddy
 
-func Run(rt *RoutingTable) {
+func Run() {
 	server := NewServer()
 	go server.Middleware.Run()
 	go server.Run()

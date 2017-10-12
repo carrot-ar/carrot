@@ -29,7 +29,13 @@ func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
 		sc := dp.openStreams.Get(token)
 		sc.Invoke(route, req) //send request to controller		
 	} else { //route leads to event controller
+		fmt.Println("CONTROLLER INFO!")
+		fmt.Println(route)
+		fmt.Println(route.function)
+		fmt.Println(route.controller)
 		c, err := NewController(route.Controller()) //send controller string to controller factory
+		fmt.Println(c)
+
 		if err != nil {
 			fmt.Println(err)
 		}		
@@ -42,7 +48,10 @@ func (dp *Dispatcher) Run() {
 	for {
 		select {
 		case req := <- dp.requests:
+			fmt.Println("HEY I GOT A FUCKING REQUEST")
+			fmt.Println(req.endpoint)
 			route := Lookup(req.endpoint)
+			fmt.Println(route)
 			dp.dispatchRequest(&route, req)
 		default:
 			// fmt.Println("dispatcher Run() did something bad")
