@@ -3,8 +3,8 @@ package buddy
 import (
 	//"fmt"
 	//"log"
-	"time"
 	"fmt"
+	"time"
 )
 
 const (
@@ -19,10 +19,10 @@ const (
 )
 
 type Request struct {
-	session   *Session
-	message   []byte
-	metrics []time.Time
-	endpoint	string
+	session  *Session
+	message  []byte
+	metrics  []time.Time
+	endpoint string
 }
 
 // Add the time that a request is created to the request metric tracker
@@ -35,10 +35,10 @@ func NewRequest(session *Session, message []byte) *Request {
 	m[RequestCreation] = time.Now()
 
 	return &Request{
-		session:   session,
-		message:   message,
-		metrics: 	m,
-		endpoint:	"",
+		session:  session,
+		message:  message,
+		metrics:  m,
+		endpoint: "",
 	}
 }
 

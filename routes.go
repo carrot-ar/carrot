@@ -1,8 +1,8 @@
 package buddy
 
 const (
-	routeDelimiter = "_"
-	streamIdentifier = "StreamController"
+	routeDelimiter       = "_"
+	streamIdentifier     = "StreamController"
 	controllerIdentifier = "Controller"
 )
 
@@ -23,8 +23,8 @@ func Table() *RoutingTable {
 
 type Route struct {
 	controller ControllerType
-	function string
-	persist bool
+	function   string
+	persist    bool
 }
 
 func (r *Route) Controller() ControllerType {
@@ -35,7 +35,6 @@ func (r *Route) Function() string {
 	return r.function
 }
 
-
 type pair struct {
 	controller, method string
 }
@@ -44,7 +43,6 @@ func Lookup(route string) Route {
 	return routingTable[route]
 }
 
-func Add(path string, controller ControllerType, function string) {
-	routingTable.Add(path, Route{controller: controller, function: function})
+func Add(path string, controller ControllerType, function string, persist bool) {
+	routingTable.Add(path, Route{controller: controller, function: function, persist: persist})
 }
-

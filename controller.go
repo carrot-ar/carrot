@@ -1,12 +1,12 @@
 package buddy
 
 import (
-	"reflect"
 	"log"
+	"reflect"
 )
 
 type AppController struct {
-	persist bool
+	persist    bool
 	Controller ControllerType
 	//reqBuffer chan *buddy.Request
 	// add a responder here for responding to all, groups, individual etc"
@@ -19,7 +19,7 @@ func (c *AppController) Persist(p bool) {
 }
 
 /*
-		Reflect on the controller and find the correct function to call, then call it
+	Reflect on the controller and find the correct function to call, then call it
 */
 func (c *AppController) Invoke(route *Route, req *Request) {
 
