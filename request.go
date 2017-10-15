@@ -3,6 +3,7 @@ package buddy
 import (
 	//"fmt"
 	//"log"
+	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -19,10 +20,16 @@ const (
 )
 
 type Request struct {
-	session  *Session
-	message  []byte
-	metrics  []time.Time
-	endpoint string
+	sessionToken SessionToken
+	endpoint     string
+	Params       map[string]string
+	data         []byte
+	metrics      []time.Time
+}
+
+type requestData struct {
+	Endpoint string            `json:"endpoint"`
+	Params   map[string]string `json:"params"`
 }
 
 // Add the time that a request is created to the request metric tracker
@@ -34,12 +41,24 @@ func NewRequest(session *Session, message []byte) *Request {
 	m := make([]time.Time, MetricCount)
 	m[RequestCreation] = time.Now()
 
-	return &Request{
-		session:  session,
-		message:  message,
-		metrics:  m,
-		endpoint: "",
+	req := Request{
+		sessionToken: session.Token,
+		metrics:      m,
+		data:         message,
 	}
+
+	var d requestData
+	if err := json.Unmarshal(message, &d); err != nil {
+		fmt.Println(err)
+		// return an error, requires some refactoring for the server to handle it
+	}
+
+	req.endpoint = d.Endpoint
+	req.Params = d.Params
+
+	fmt.Println(d)
+
+	return &req
 }
 
 func (r *Request) End() {

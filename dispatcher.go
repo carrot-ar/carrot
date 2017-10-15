@@ -11,8 +11,8 @@ type Dispatcher struct {
 
 func NewDispatcher() *Dispatcher {
 	return &Dispatcher{
-		openStreams: NewOpenStreamsList(),
-		requests:    make(chan *Request, 256),
+		openStreams:	NewOpenStreamsList(),
+		requests:		make(chan *Request, 256),
 	}
 }
 
@@ -47,7 +47,6 @@ func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
 			fmt.Println(err)
 		}
 		c.Invoke(route, req) //send request to controller
-
 	}
 }
 

@@ -51,29 +51,25 @@ func TestMethodInvocation(t *testing.T) {
 	}
 
 	req1 := &Request{
-		session:  sesh,
-		message:  nil,
+		sessionToken:  sesh.Token,
 		metrics:  make([]time.Time, MetricCount),
 		endpoint: "test1",
 	}
 
 	req2 := &Request{
-		session:  sesh,
-		message:  nil,
+		sessionToken:  sesh.Token,
 		metrics:  make([]time.Time, MetricCount),
 		endpoint: "test2",
 	}
 
 	req3 := &Request{
-		session:  sesh,
-		message:  nil,
+		sessionToken:  sesh.Token,
 		metrics:  make([]time.Time, MetricCount),
 		endpoint: "test2",
 	}
 
 	req4 := &Request{
-		session:  sesh,
-		message:  nil,
+		sessionToken:  sesh.Token,
 		metrics:  make([]time.Time, MetricCount),
 		endpoint: "test2",
 	}

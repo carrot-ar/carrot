@@ -1,5 +1,7 @@
 package buddy
 
+import "fmt"
+
 const (
 	routeDelimiter       = "_"
 	streamIdentifier     = "StreamController"
@@ -15,10 +17,12 @@ func (rt RoutingTable) Add(path string, route Route) {
 }
 
 // Internally represents the routing table for the router
+// maybe a mutex here
 var routingTable = RoutingTable{}
 
-func Table() *RoutingTable {
-	return &routingTable
+func Table() RoutingTable {
+	fmt.Println(routingTable)
+	return routingTable
 }
 
 type Route struct {
@@ -40,7 +44,7 @@ type pair struct {
 }
 
 func Lookup(route string) Route {
-	return routingTable[route]
+	return Table()[route]
 }
 
 func Add(path string, controller ControllerType, function string, persist bool) {
