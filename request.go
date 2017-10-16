@@ -37,7 +37,7 @@ func (r *Request) AddMetric(stage int) {
 	r.metrics[stage] = time.Now()
 }
 
-func NewRequest(session *Session, message []byte) *Request {
+func NewRequest(session *Session, message []byte) *Request { //returns error, 
 	m := make([]time.Time, MetricCount)
 	m[RequestCreation] = time.Now()
 
@@ -47,7 +47,7 @@ func NewRequest(session *Session, message []byte) *Request {
 		data:         message,
 	}
 
-	var d requestData
+	var d requestData 	//figure out how to not crash entire program on bad requests	
 	if err := json.Unmarshal(message, &d); err != nil {
 		fmt.Println(err)
 		// return an error, requires some refactoring for the server to handle it

@@ -19,7 +19,7 @@ func NewDispatcher() *Dispatcher {
 func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
 	if route.persist {
 		fmt.Printf("\nopenStreams is empty...%v\n", dp.openStreams.IsEmpty())
-		token := req.session.Token
+		token := req.sessionToken
 		if exists := dp.openStreams.Exists(token); !exists {
 			fmt.Printf("\ntoken is:	%v\n", token)
 			c1, err := NewController(route.Controller(), true) //send to controller factory with stream identifier

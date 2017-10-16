@@ -1,7 +1,5 @@
 package buddy
 
-import "fmt"
-
 // returns a new controller of controllerType
 func NewController(c interface{}, isStream bool) (*AppController, error) {
 	if isStream {
