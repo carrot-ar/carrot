@@ -49,18 +49,11 @@ func NewRequest(session *Session, message []byte) *Request {
 	}
 
 	var d requestData
-	var err error
-	if err = json.Unmarshal(message, &d); err != nil {
-		fmt.Println(err)
-		// return an error, requires some refactoring for the server to handle it
-	}
+	err := json.Unmarshal(message, &d)
 
 	req.err = err
 	req.endpoint = d.Endpoint
 	req.Params = d.Params
-
-	fmt.Println(d)
-	fmt.Println(err)
 
 	return &req
 }
