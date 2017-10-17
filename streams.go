@@ -6,19 +6,21 @@ import (
 
 type OpenStreamsList struct {
 	streams map[SessionToken]*AppController
-	length int
+	length  int
 }
 
 func NewOpenStreamsList() *OpenStreamsList {
-	return &OpenStreamsList {
-		streams:	make(map[SessionToken]*AppController),
-		length:		0,
+	return &OpenStreamsList{
+		streams: make(map[SessionToken]*AppController),
+		length:  0,
 	}
 }
 
 func (osl *OpenStreamsList) Exists(token SessionToken) bool {
 	_, ok := osl.streams[token]
-	if ok { return true }
+	if ok {
+		return true
+	}
 	return false
 }
 
@@ -42,6 +44,8 @@ func (osl *OpenStreamsList) Delete(token SessionToken) {
 }
 
 func (osl *OpenStreamsList) IsEmpty() bool {
-	if osl.length == 0 { return true }
+	if osl.length == 0 {
+		return true
+	}
 	return false
 }

@@ -2,11 +2,11 @@ package buddy
 
 import (
 	"bytes"
+	"fmt"
+	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 	"time"
-	"github.com/gorilla/websocket"
-	"fmt"
 )
 
 const (
@@ -49,7 +49,7 @@ type Client struct {
 	server *Server
 	// acts as a signal for when to start the go routines
 	start chan struct{}
-	open   bool
+	open  bool
 
 	conn *websocket.Conn
 
@@ -189,7 +189,7 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 		conn:      conn,
 		send:      make(chan []byte, sendMsgBufferSize),
 		sendToken: make(chan SessionToken, sendTokenBufferSize),
-		start: make(chan struct{}),
+		start:     make(chan struct{}),
 	}
 
 	client.sendToken <- SessionToken(sessionToken)

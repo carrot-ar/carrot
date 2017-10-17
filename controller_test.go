@@ -1,8 +1,8 @@
 package buddy
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 	"time"
 )
 
@@ -30,7 +30,7 @@ func TestMethodInvocation(t *testing.T) {
 	// tc.Invoke(route, req)
 	req := &Request{
 		endpoint: "test",
-		metrics: make([]time.Time, MetricCount),
+		metrics:  make([]time.Time, MetricCount),
 	}
 
 	d := NewDispatcher()

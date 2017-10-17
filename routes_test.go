@@ -4,7 +4,6 @@ import (
 	"testing"
 )
 
-
 type SphereController struct{}
 
 func TestControllerRouteLookup(t *testing.T) {
@@ -13,8 +12,8 @@ func TestControllerRouteLookup(t *testing.T) {
 
 	expected := Route{
 		controller: SphereController{},
-		function: "Place",
-		persist: false,
+		function:   "Place",
+		persist:    false,
 	}
 
 	if actual != expected {
