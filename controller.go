@@ -1,7 +1,6 @@
 package buddy
 
 import (
-	"fmt"
 	"log"
 	"reflect"
 )
@@ -25,7 +24,7 @@ func (c *AppController) Persist(p bool) {
 func (c *AppController) Invoke(route *Route, req *Request) {
 
 	req.AddMetric(ControllerInvocation)
-	fmt.Println(route)
+
 	// Create a new Value pointer representing the controller type
 	ptr := reflect.New(reflect.TypeOf(c.Controller))
 

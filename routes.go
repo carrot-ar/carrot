@@ -44,8 +44,5 @@ func Lookup(route string) Route {
 }
 
 func Add(path string, controller ControllerType, function string) {
-	fmt.Println("adding")
-	fmt.Println(path)
-	fmt.Println(controller)
 	routingTable.Add(path, Route{controller: controller, function: function})
 }

@@ -22,7 +22,7 @@ func logger(req *Request) error {
 
 func discardBadRequest(req *Request) error {
 	if req.err != nil {
-		log.Printf("deleting request because: %s", req.err.Error())
+		log.Printf("bad request: %s, ignoring...\n", req.err.Error())
 		return req.err
 	}
 	return nil
@@ -41,18 +41,19 @@ func (mw *MiddlewarePipeline) Run() {
 		for {
 			select {
 			case req := <-mw.In:
-				//req.AddMetric(MiddlewareInput)
+				req.AddMetric(MiddlewareInput)
 				var err error
 				for _, f := range mw.middlewares {
 					err = f(req)
 					if err != nil {
+						req.End()
 						break
 					}
 				}
 				if err == nil {
 					mw.dispatcher.requests <- req
 				}
-				//req.AddMetric(MiddlewareOutputToDispatcher)
+				req.AddMetric(MiddlewareOutputToDispatcher)
 			}
 		}
 	}()
