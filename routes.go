@@ -3,8 +3,8 @@ package buddy
 import "fmt"
 
 const (
-	routeDelimiter = "_"
-	streamIdentifier = "StreamController"
+	routeDelimiter       = "_"
+	streamIdentifier     = "StreamController"
 	controllerIdentifier = "Controller"
 )
 
@@ -27,8 +27,8 @@ func Table() RoutingTable {
 
 type Route struct {
 	controller ControllerType
-	function string
-	persist bool
+	function   string
+	persist    bool
 }
 
 func (r *Route) Controller() ControllerType {
@@ -49,4 +49,3 @@ func Add(path string, controller ControllerType, function string) {
 	fmt.Println(controller)
 	routingTable.Add(path, Route{controller: controller, function: function})
 }
-

@@ -6,13 +6,13 @@ import (
 
 type Dispatcher struct {
 	openStreams *OpenStreamsList
-	requests 	chan *Request
+	requests    chan *Request
 }
 
 func NewDispatcher() *Dispatcher {
 	return &Dispatcher{
-		openStreams:	NewOpenStreamsList(),
-		requests:		make(chan *Request, 256),
+		openStreams: NewOpenStreamsList(),
+		requests:    make(chan *Request, 256),
 	}
 }
 
@@ -23,11 +23,11 @@ func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
 			c, err := NewController(route.Controller()) //send controller string to controller factory
 			if err != nil {
 				fmt.Println(err)
-			}	
+			}
 			dp.openStreams.Add(token, c)
 		}
 		sc := dp.openStreams.Get(token)
-		sc.Invoke(route, req) //send request to controller		
+		sc.Invoke(route, req) //send request to controller
 	} else { //route leads to event controller
 		fmt.Println("CONTROLLER INFO!")
 		fmt.Println(route)
@@ -38,16 +38,16 @@ func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
 
 		if err != nil {
 			fmt.Println(err)
-		}		
+		}
 		c.Invoke(route, req) //send request to controller
-		
+
 	}
 }
 
 func (dp *Dispatcher) Run() {
 	for {
 		select {
-		case req := <- dp.requests:
+		case req := <-dp.requests:
 			fmt.Println("HEY I GOT A FUCKING REQUEST")
 			fmt.Println(req.endpoint)
 			route := Lookup(req.endpoint)
