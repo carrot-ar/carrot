@@ -26,8 +26,16 @@ func (c *AppController) Invoke(route *Route, req *Request) {
 
 	req.AddMetric(ControllerInvocation)
 	fmt.Println(route)
+
 	// Create a new Value pointer representing the controller type
 	ptr := reflect.New(reflect.TypeOf(c.Controller))
+	fmt.Println(reflect.TypeOf(c.Controller))
+	fmt.Println(ptr)
+	fmt.Println("VALUE==========")
+	val := reflect.ValueOf(&c.Controller).Elem()
+	fmt.Println(val.Elem().Interface())
+	fmt.Println(val.Elem().NumMethod())
+	fmt.Println(val.Elem().MethodByName(route.Function()).Interface())
 
 	// Look at that value then call the correct method
 	method := ptr.MethodByName(route.Function())

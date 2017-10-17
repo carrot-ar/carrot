@@ -48,7 +48,6 @@ func (dp *Dispatcher) Run() {
 	for {
 		select {
 		case req := <- dp.requests:
-			fmt.Println("HEY I GOT A FUCKING REQUEST")
 			fmt.Println(req.endpoint)
 			route := Lookup(req.endpoint)
 			fmt.Println(route)
