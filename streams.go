@@ -28,12 +28,10 @@ func (osl *OpenStreamsList) Get(token SessionToken) *AppController {
 		fmt.Println("cannot return route because it doesn't exist")
 		//return nil
 	}
-	fmt.Printf("%v:%v\n", token, &sc)
 	return sc
 }
 
 func (osl *OpenStreamsList) Add(token SessionToken, ac *AppController) {
-	fmt.Printf("%v:%v\n", token, &ac)
 	osl.streams[token] = ac
 }
 

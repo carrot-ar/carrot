@@ -1,9 +1,9 @@
 package buddy
 
 import (
-	"reflect"
 	"fmt"
 	"log"
+	"reflect"
 )
 
 type AppController struct {
@@ -26,23 +26,17 @@ func (c *AppController) Invoke(route *Route, req *Request) {
 
 	req.AddMetric(ControllerInvocation)
 
-	fmt.Println("INVOCATION PROCESS STARTING")
-	fmt.Println(reflect.TypeOf(c.Controller).Name())
+	ptr := c.Controller.(reflect.Value).Type()
 
-	ptr := reflect.New(reflect.TypeOf(c.Controller))
+	method, ok := ptr.MethodByName(route.Function())
 
-	fmt.Println("ptr is", ptr.Type(), " to a ", ptr.Elem().Type())
+	if ok != true {
+		fmt.Println("the method is not ok!")
+	}
 
-	ptr.Elem().Set(reflect.ValueOf(c.Controller))
-
-	fmt.Println(ptr)
-
-	// Look at that value then call the correct method
-	method := ptr.MethodByName(route.Function())
-
-	if method.IsValid() {
-		args := []reflect.Value{reflect.ValueOf(req)}
-		method.Call(args)
+	if method.Func.IsValid() {
+		args := []reflect.Value{c.Controller.(reflect.Value), reflect.ValueOf(req)}
+		method.Func.Call(args)
 	} else {
 		log.Printf("error: invalid method called")
 	}

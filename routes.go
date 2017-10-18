@@ -1,7 +1,5 @@
 package buddy
 
-import "fmt"
-
 const (
 	routeDelimiter       = "_"
 	streamIdentifier     = "StreamController"
@@ -21,7 +19,6 @@ func (rt RoutingTable) Add(path string, route Route) {
 var routingTable = RoutingTable{}
 
 func Table() RoutingTable {
-	fmt.Println(routingTable)
 	return routingTable
 }
 

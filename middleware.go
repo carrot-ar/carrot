@@ -24,7 +24,7 @@ type MiddlewarePipeline struct {
 	In          chan *Request
 	Out         chan *Request
 	middlewares []func(*Request)
-	dispatcher *Dispatcher
+	dispatcher  *Dispatcher
 }
 
 func (mw *MiddlewarePipeline) Run() {
@@ -54,6 +54,6 @@ func NewMiddlewarePipeline() *MiddlewarePipeline {
 		In:          make(chan *Request, InputChannelSize),
 		Out:         make(chan *Request, OutputChannelSize),
 		middlewares: mw,
-		dispatcher: NewDispatcher(),
+		dispatcher:  NewDispatcher(),
 	}
 }

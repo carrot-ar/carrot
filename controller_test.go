@@ -28,7 +28,7 @@ func (c *TestController) Print(req *Request) {
 func (c *TestStreamController) Print(req *Request) {
 	fmt.Printf("Hello, world! Here is my stream request!!\n")
 	c.count += 1
-	fmt.Println(c.count)
+	fmt.Printf("Stream Controllers internal count value: %v\n", c.count)
 	// req.End()
 }
 
@@ -61,27 +61,27 @@ func TestMethodInvocation(t *testing.T) {
 	}
 
 	req1 := &Request{
-		sessionToken:  sesh.Token,
-		metrics:  make([]time.Time, MetricCount),
-		endpoint: "test1",
+		sessionToken: sesh.Token,
+		metrics:      make([]time.Time, MetricCount),
+		endpoint:     "test1",
 	}
 
 	req2 := &Request{
-		sessionToken:  sesh.Token,
-		metrics:  make([]time.Time, MetricCount),
-		endpoint: "test2",
+		sessionToken: sesh.Token,
+		metrics:      make([]time.Time, MetricCount),
+		endpoint:     "test2",
 	}
 
 	req3 := &Request{
-		sessionToken:  sesh.Token,
-		metrics:  make([]time.Time, MetricCount),
-		endpoint: "test2",
+		sessionToken: sesh.Token,
+		metrics:      make([]time.Time, MetricCount),
+		endpoint:     "test2",
 	}
 
 	req4 := &Request{
-		sessionToken:  sesh.Token,
-		metrics:  make([]time.Time, MetricCount),
-		endpoint: "test2",
+		sessionToken: sesh.Token,
+		metrics:      make([]time.Time, MetricCount),
+		endpoint:     "test2",
 	}
 
 	d := NewDispatcher()
