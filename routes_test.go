@@ -7,7 +7,7 @@ import (
 type SphereController struct{}
 
 func TestControllerRouteLookup(t *testing.T) {
-	Add("place_sphere", SphereController{}, "Place")
+	Add("place_sphere", SphereController{}, "Place", false)
 	actual := Lookup("place_sphere")
 
 	expected := Route{

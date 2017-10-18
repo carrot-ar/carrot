@@ -1,6 +1,7 @@
 package buddy
 
 import (
+	"fmt"
 	"log"
 	"reflect"
 )
@@ -25,15 +26,17 @@ func (c *AppController) Invoke(route *Route, req *Request) {
 
 	req.AddMetric(ControllerInvocation)
 
-	// Create a new Value pointer representing the controller type
-	ptr := reflect.New(reflect.TypeOf(c.Controller))
+	ptr := c.Controller.(reflect.Value).Type()
 
-	// Look at that value then call the correct method
-	method := ptr.MethodByName(route.Function())
+	method, ok := ptr.MethodByName(route.Function())
 
-	if method.IsValid() {
-		args := []reflect.Value{reflect.ValueOf(req)}
-		method.Call(args)
+	if ok != true {
+		fmt.Println("the method is not ok!")
+	}
+
+	if method.Func.IsValid() {
+		args := []reflect.Value{c.Controller.(reflect.Value), reflect.ValueOf(req)}
+		method.Func.Call(args)
 	} else {
 		log.Printf("error: invalid method called")
 	}

@@ -32,7 +32,7 @@ type requestData struct {
 	Params       map[string]string `json:"params"`
 }
 
-func NewRequest(session *Session, message []byte) *Request {
+func NewRequest(session *Session, message []byte) *Request { //returns error,
 	m := make([]time.Time, MetricCount)
 
 	req := Request{
@@ -41,7 +41,7 @@ func NewRequest(session *Session, message []byte) *Request {
 		data:         message,
 	}
 
-	var d requestData
+  var d requestData
 	err := json.Unmarshal(message, &d)
 
 	err = validSession(session.Token, SessionToken(d.SessionToken))
