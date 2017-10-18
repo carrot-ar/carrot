@@ -1,7 +1,8 @@
 package buddy
 
 func Run() {
-	server := NewServer()
+	sessions := NewDefaultSessionManager()
+	server := NewServer(sessions)
 	go server.Middleware.Run()
 	go server.Run()
 	server.Serve()
