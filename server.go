@@ -32,12 +32,12 @@ type Server struct {
 	Middleware *MiddlewarePipeline
 }
 
-func NewServer() *Server {
+func NewServer(sessionStore SessionStore) *Server {
 	return &Server{
 		broadcast:  make(chan []byte, broadcastChannelSize),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		sessions:   NewDefaultSessionManager(),
+		sessions:   sessionStore,
 		Middleware: NewMiddlewarePipeline(),
 	}
 }
