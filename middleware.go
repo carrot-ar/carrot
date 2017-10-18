@@ -5,8 +5,7 @@ import (
 )
 
 const (
-	InputChannelSize  = 256
-	OutputChannelSize = 256
+	InputChannelSize = 256
 )
 
 /*
@@ -16,14 +15,22 @@ const (
 // 	loggerMw.Print("I am going to parse a request!")
 // }
 
-func logger(req *Request) {
+func logger(req *Request) error {
 	log.Println("middleware: new request")
+	return nil
+}
+
+func discardBadRequest(req *Request) error {
+	if req.err != nil {
+		log.Printf("bad request: %s, ignoring...\n", req.err.Error())
+		return req.err
+	}
+	return nil
 }
 
 type MiddlewarePipeline struct {
 	In          chan *Request
-	Out         chan *Request
-	middlewares []func(*Request)
+	middlewares []func(*Request) error
 	dispatcher  *Dispatcher
 }
 
@@ -34,13 +41,19 @@ func (mw *MiddlewarePipeline) Run() {
 		for {
 			select {
 			case req := <-mw.In:
-				//req.AddMetric(MiddlewareInput)
+				req.AddMetric(MiddlewareInput)
+				var err error
 				for _, f := range mw.middlewares {
-					f(req)
+					err = f(req)
+					if err != nil {
+						req.End()
+						break
+					}
 				}
-				mw.dispatcher.requests <- req
-				//req.AddMetric(MiddlewareOutput)
-				//mw.Out <- req
+				if err == nil {
+					mw.dispatcher.requests <- req
+				}
+				req.AddMetric(MiddlewareOutputToDispatcher)
 			}
 		}
 	}()
@@ -48,11 +61,10 @@ func (mw *MiddlewarePipeline) Run() {
 
 func NewMiddlewarePipeline() *MiddlewarePipeline {
 	// List of middleware functions
-	mw := []func(*Request){logger}
+	mw := []func(*Request) error{logger, discardBadRequest}
 
 	return &MiddlewarePipeline{
 		In:          make(chan *Request, InputChannelSize),
-		Out:         make(chan *Request, OutputChannelSize),
 		middlewares: mw,
 		dispatcher:  NewDispatcher(),
 	}

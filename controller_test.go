@@ -49,7 +49,6 @@ func TestMethodInvocation(t *testing.T) {
 	// req := NewRequest(nil, nil)
 
 	// tc.Invoke(route, req)
-
 	ss := NewDefaultSessionManager()
 	token, err1 := ss.NewSession()
 	if err1 != nil {
@@ -90,5 +89,4 @@ func TestMethodInvocation(t *testing.T) {
 	d.requests <- req2
 	d.requests <- req3
 	d.requests <- req4
-
 }

@@ -1,20 +1,18 @@
 package buddy
 
 import (
-	//"fmt"
-	//"log"
 	"encoding/json"
 	"fmt"
 	"time"
 )
 
 const (
-	MetricCount = 2
+	MetricCount = 5
 
-	RequestCreation = 0
-	//MiddlewareInput
-	//MiddlewareOutput
-	ControllerInvocation = 1
+	RequestCreation = iota
+	MiddlewareInput
+	MiddlewareOutputToDispatcher
+	ControllerInvocation
 	ResponderInvocation
 	ResponderElapsed
 )
@@ -25,21 +23,17 @@ type Request struct {
 	Params       map[string]string
 	data         []byte
 	metrics      []time.Time
+	err          error
 }
 
 type requestData struct {
-	Endpoint string            `json:"endpoint"`
-	Params   map[string]string `json:"params"`
-}
-
-// Add the time that a request is created to the request metric tracker
-func (r *Request) AddMetric(stage int) {
-	r.metrics[stage] = time.Now()
+	SessionToken string            `json:"session_token"`
+	Endpoint     string            `json:"endpoint"`
+	Params       map[string]string `json:"params"`
 }
 
 func NewRequest(session *Session, message []byte) *Request { //returns error,
 	m := make([]time.Time, MetricCount)
-	m[RequestCreation] = time.Now()
 
 	req := Request{
 		sessionToken: session.Token,
@@ -47,18 +41,23 @@ func NewRequest(session *Session, message []byte) *Request { //returns error,
 		data:         message,
 	}
 
-	var d requestData //figure out how to not crash entire program on bad requests
-	if err := json.Unmarshal(message, &d); err != nil {
-		fmt.Println(err)
-		// return an error, requires some refactoring for the server to handle it
-	}
+  var d requestData
+	err := json.Unmarshal(message, &d)
 
+	err = validSession(session.Token, SessionToken(d.SessionToken))
+
+	req.err = err
 	req.endpoint = d.Endpoint
 	req.Params = d.Params
 
-	fmt.Println(d)
+	req.AddMetric(RequestCreation)
 
 	return &req
+}
+
+// Add the time that a request is created to the request metric tracker
+func (r *Request) AddMetric(stage int) {
+	r.metrics[stage] = time.Now()
 }
 
 func (r *Request) End() {
@@ -73,4 +72,12 @@ func logBenchmarks(metrics []time.Time) {
 		}
 		prev = metric
 	}
+}
+
+func validSession(serverToken SessionToken, clientToken SessionToken) error {
+	if serverToken != clientToken {
+		return fmt.Errorf("token mismatch %v != %v", serverToken, clientToken)
+	}
+
+	return nil
 }
