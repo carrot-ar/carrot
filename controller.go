@@ -1,9 +1,9 @@
 package buddy
 
 import (
-	"log"
 	"reflect"
 	"fmt"
+	"log"
 )
 
 type AppController struct {
@@ -25,9 +25,17 @@ func (c *AppController) Persist(p bool) {
 func (c *AppController) Invoke(route *Route, req *Request) {
 
 	req.AddMetric(ControllerInvocation)
-	fmt.Println(route)
-	// Create a new Value pointer representing the controller type
+
+	fmt.Println("INVOCATION PROCESS STARTING")
+	fmt.Println(reflect.TypeOf(c.Controller).Name())
+
 	ptr := reflect.New(reflect.TypeOf(c.Controller))
+
+	fmt.Println("ptr is", ptr.Type(), " to a ", ptr.Elem().Type())
+
+	ptr.Elem().Set(reflect.ValueOf(c.Controller))
+
+	fmt.Println(ptr)
 
 	// Look at that value then call the correct method
 	method := ptr.MethodByName(route.Function())
