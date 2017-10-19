@@ -4,8 +4,6 @@ import (
 	"reflect"
 )
 
-const controllerInitializer = "Initialize"
-
 // returns a new controller of controllerType
 func NewController(c interface{}, isStream bool) (*AppController, error) {
 
