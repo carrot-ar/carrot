@@ -16,8 +16,6 @@ const (
 //the server maintains the list of clients and
 //broadcasts messages to the clients
 type Server struct {
-	//inbound messages from the clients
-	broadcast chan []byte
 
 	//register requests from the clients
 	register chan *Client
@@ -34,7 +32,6 @@ type Server struct {
 
 func NewServer(sessionStore SessionStore) *Server {
 	return &Server{
-		broadcast:  make(chan []byte, broadcastChannelSize),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		sessions:   sessionStore,
@@ -71,50 +68,8 @@ func (svr *Server) Run() {
 				close(client.sendToken)
 				client = nil
 			}
-		case message := <-svr.broadcast:
-			svr.broadcastAll(message)
 		}
 	}
-}
-
-func (svr *Server) broadcastAll(message []byte) {
-	// start := time.Now()
-	expiredSessionCount := 0
-	closedClientCount := 0
-	refreshedClientCount := 0
-	messagesSent := 0
-	svr.sessions.Range(func(key, value interface{}) bool {
-		ctx := value.(*Session)
-
-		if ctx.SessionExpired() {
-			expiredSessionCount++
-			svr.sessions.Delete(ctx.Token)
-			return true
-		} else if !ctx.Client.open {
-			closedClientCount++
-			return true
-		}
-
-		ctx.expireTime = refreshExpiryTime()
-		refreshedClientCount++
-
-		select {
-		case ctx.Client.send <- message:
-			messagesSent++
-			return true
-		}
-
-		return false
-	})
-	log.Printf("server: broadcast sent %v, refresh %v, closed %v, expired %v",
-		messagesSent,
-		refreshedClientCount,
-		closedClientCount,
-		expiredSessionCount)
-	// end := time.Now()
-	// fmt.Printf("Time to broadcast to %v users: %v\n",
-	// 	svr.sessions.Length(),
-	// 	end.Sub(start))
 }
 
 func serveHome(w http.ResponseWriter, r *http.Request) {

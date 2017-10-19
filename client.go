@@ -86,7 +86,7 @@ func (c *Client) readPump() {
 		req := NewRequest(session, message)
 
 		c.server.Middleware.In <- req
-		c.server.broadcast <- message
+		//c.server.broadcast <- message
 	}
 }
 

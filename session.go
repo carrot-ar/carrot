@@ -92,6 +92,9 @@ func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
 	ctx := Session{
 		Token:      token,
 		expireTime: refreshExpiryTime(),
+		Client: &Client{
+			open: false,
+		},
 	}
 
 	s.sessionStore.Store(token, &ctx)
