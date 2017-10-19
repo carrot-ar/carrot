@@ -23,8 +23,7 @@ func (c *AppController) Persist(p bool) {
 	Reflect on the controller and find the correct function to call, then call it
 */
 func (c *AppController) Invoke(route *Route, req *Request) {
-
-	req.AddMetric(ControllerInvocation)
+	req.AddMetric(MethodReflectionStart)
 
 	ptr := c.Controller.(reflect.Value).Type()
 
@@ -36,7 +35,11 @@ func (c *AppController) Invoke(route *Route, req *Request) {
 
 	if method.Func.IsValid() {
 		args := []reflect.Value{c.Controller.(reflect.Value), reflect.ValueOf(req)}
+		req.AddMetric(MethodReflectionEnd)
+		req.AddMetric(ControllerMethodStart)
 		method.Func.Call(args)
+		req.AddMetric(ControllerMethodEnd)
+		req.End()
 	} else {
 		log.Printf("error: invalid method called")
 	}
