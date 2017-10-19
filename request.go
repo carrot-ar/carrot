@@ -7,12 +7,19 @@ import (
 )
 
 const (
-	MetricCount = 5
+	MetricCount = 12
 
-	RequestCreation = iota
-	MiddlewareInput
-	MiddlewareOutputToDispatcher
-	ControllerInvocation
+	RequestCreation              = iota // 1
+	MiddlewareInput                     // 2
+	MiddlewareOutputToDispatcher        // 3
+	DispatchLookupStart                 // 4
+	DispatchLookupEnd                   // 5
+	DispatchRequestStart                // 6
+	DispatchRequestEnd                  // 7
+	MethodReflectionStart               // 8
+	MethodReflectionEnd                 // 9
+	ControllerMethodStart               // 10
+	ControllerMethodEnd                 // 11
 	ResponderInvocation
 	ResponderElapsed
 )
@@ -41,7 +48,7 @@ func NewRequest(session *Session, message []byte) *Request { //returns error,
 		data:         message,
 	}
 
-  var d requestData
+	var d requestData
 	err := json.Unmarshal(message, &d)
 
 	err = validSession(session.Token, SessionToken(d.SessionToken))
@@ -68,7 +75,12 @@ func logBenchmarks(metrics []time.Time) {
 	var prev time.Time
 	for i, metric := range metrics {
 		if i != 0 {
-			fmt.Printf("%v => %v\n", i, metric.Sub(prev))
+			if i == 1 {
+				fmt.Printf("%v => %v\n", i, time.Now().Sub(metric))
+			} else {
+				fmt.Printf("%v => %v\n", i, metric.Sub(prev))
+
+			}
 		}
 		prev = metric
 	}
