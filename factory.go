@@ -10,15 +10,12 @@ const controllerInitializer = "Initialize"
 func NewController(c interface{}, isStream bool) (*AppController, error) {
 
 	newController := reflect.New(reflect.TypeOf(c))
+	responder := NewResponder()
+	go responder.Run()
 
-	if isStream {
-		return &AppController{
-			Controller: newController,
-			persist:    true,
-		}, nil
-	}
 	return &AppController{
 		Controller: newController,
-		persist:    false,
+		persist:    isStream,
+		responder:  responder,
 	}, nil
 }

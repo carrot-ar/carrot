@@ -11,6 +11,7 @@ type AppController struct {
 	Controller ControllerType
 	//reqBuffer chan *buddy.Request
 	// add a responder here for responding to all, groups, individual etc"
+	responder *Responder
 }
 
 type ControllerType interface{}
@@ -35,7 +36,7 @@ func (c *AppController) Invoke(route *Route, req *Request) {
 	}
 
 	if method.Func.IsValid() {
-		args := []reflect.Value{c.Controller.(reflect.Value), reflect.ValueOf(req)}
+		args := []reflect.Value{c.Controller.(reflect.Value), reflect.ValueOf(req), reflect.ValueOf(c.responder)}
 		method.Func.Call(args)
 	} else {
 		log.Printf("error: invalid method called")
