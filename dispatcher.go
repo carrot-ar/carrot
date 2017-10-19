@@ -17,6 +17,7 @@ func NewDispatcher() *Dispatcher {
 }
 
 func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
+	req.AddMetric(DispatchRequestStart)
 	if route.persist {
 		token := req.sessionToken
 		if exists := dp.openStreams.Exists(token); !exists {
@@ -43,8 +44,13 @@ func (dp *Dispatcher) Run() {
 	for {
 		select {
 		case req := <-dp.requests:
+			req.AddMetric(DispatchLookupStart)
 			route := Lookup(req.endpoint)
+			req.AddMetric(DispatchLookupEnd)
+
+			req.AddMetric(DispatchRequestStart)
 			dp.dispatchRequest(&route, req)
+			req.AddMetric(DispatchRequestEnd)
 		default:
 			// fmt.Println("dispatcher Run() did something bad")
 		}

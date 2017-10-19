@@ -11,15 +11,6 @@ type TestStreamController struct {
 	count int
 }
 
-func (c *TestController) Initialize() {
-	fmt.Println("initializing test controller!")
-}
-
-func (c *TestStreamController) Initialize() {
-	fmt.Println("initializing test stream controller!")
-	c.count = 0
-}
-
 func (c *TestController) Print(req *Request, res *Responder) {
 	fmt.Printf("Hello, world! Here is my event request!!\n")
 	// req.End()

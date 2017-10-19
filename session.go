@@ -14,6 +14,12 @@ const (
 	defaultSessionClosedTimeoutDuration = 10 // seconds
 )
 
+var (
+	once sync.Once
+
+	instance SessionStore
+)
+
 // Potentially will need to be a sync Map
 type Session struct {
 	Token      SessionToken
@@ -60,11 +66,15 @@ type DefaultSessionStore struct {
 }
 
 func NewDefaultSessionManager() SessionStore {
-	return &DefaultSessionStore{
-		sessionStore: &sync.Map{},
-		length:       0,
-		mutex:        &sync.Mutex{},
-	}
+	once.Do(func() {
+		instance = &DefaultSessionStore{
+			sessionStore: &sync.Map{},
+			length:       0,
+			mutex:        &sync.Mutex{},
+		}
+	})
+
+	return instance
 }
 
 func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
