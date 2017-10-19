@@ -39,14 +39,20 @@ func TestContextPersistence(t *testing.T) {
 func TestSessionDelete(t *testing.T) {
 	store := NewDefaultSessionManager()
 
+
 	token, err := store.NewSession()
 	if err != nil {
 		t.Errorf("Failed to create session")
 	}
+
+	beforeLength := store.Length()
+
 	store.Delete(token)
 
-	if store.Length() != 0 {
-		t.Errorf("Failed to delete session")
+	afterLength := store.Length()
+
+	if afterLength != beforeLength - 1 {
+		t.Errorf("Failed to delete session \n Before: %v \n After: %v", beforeLength, afterLength - 1)
 	}
 }
 
@@ -76,30 +82,6 @@ func TestSessionExists(t *testing.T) {
 
 	if exists == true {
 		t.Error("context exists when it should not")
-	}
-}
-
-func TestSessionLength(t *testing.T) {
-	store := NewDefaultSessionManager()
-	token, err := store.NewSession()
-	if err != nil {
-		t.Errorf("Failed to create session")
-	}
-
-	expectedLength := 1
-	actualLength := store.Length()
-
-	if expectedLength != actualLength {
-		t.Errorf("Length should have been %v but was %v", expectedLength, actualLength)
-	}
-
-	store.Delete(token)
-
-	expectedLength = 0
-	actualLength = store.Length()
-
-	if expectedLength != actualLength {
-		t.Errorf("Length should have been %v but was %v", expectedLength, actualLength)
 	}
 }
 
