@@ -8,15 +8,19 @@ type SphereController struct{}
 
 func TestControllerRouteLookup(t *testing.T) {
 	Add("place_sphere", SphereController{}, "Place", false)
-	actual := Lookup("place_sphere")
+	actual, err := Lookup("place_sphere")
 
-	expected := Route{
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := &Route{
 		controller: SphereController{},
 		function:   "Place",
 		persist:    false,
 	}
 
-	if actual != expected {
+	if *actual != *expected {
 		t.Errorf("Routes do not match: %v != %v", actual, expected)
 	}
 }

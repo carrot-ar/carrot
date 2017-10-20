@@ -15,9 +15,9 @@ const (
 )
 
 var (
-	once sync.Once
+	oneSessionStore sync.Once
 
-	instance SessionStore
+	sessionStoreInstance SessionStore
 )
 
 // Potentially will need to be a sync Map
@@ -66,15 +66,15 @@ type DefaultSessionStore struct {
 }
 
 func NewDefaultSessionManager() SessionStore {
-	once.Do(func() {
-		instance = &DefaultSessionStore{
+	oneSessionStore.Do(func() {
+		sessionStoreInstance = &DefaultSessionStore{
 			sessionStore: &sync.Map{},
 			length:       0,
 			mutex:        &sync.Mutex{},
 		}
 	})
 
-	return instance
+	return sessionStoreInstance
 }
 
 func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
@@ -173,5 +173,8 @@ func (s *DefaultSessionStore) Range(f func(key, value interface{}) bool) {
 }
 
 func (s *DefaultSessionStore) Length() int {
-	return s.length
+	s.mutex.Lock()
+	length := s.length
+	s.mutex.Unlock()
+	return length
 }
