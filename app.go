@@ -1,4 +1,4 @@
-package buddy
+package carrot
 
 func Run() {
 	sessions := NewDefaultSessionManager()
