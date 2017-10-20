@@ -1,5 +1,32 @@
 # Carrot
 
+## Building an application with Carrot
+Simply create a new go project and import carrot! Below is an example application that receives a request and sends back the word "Pong" to all connected clients. 
+
+```
+package main
+
+import (
+  "github.com/carrot-ar/carrot"
+)
+
+type PingController struct{}
+
+func (c *PingController) Ping(req *carrot.Request, res *carrot.Responder) {
+	res.broadcast <- []byte("Pong!")
+}
+
+func main() {
+
+  // Register endpoints here in the order of endpoint, controller, method, and whether the route will accept streaming
+  carrot.Add("ping", PingController{}, "Ping", false)
+
+  // Run the server
+  carrot.Run()
+}
+```
+
+
 
 ## New Session with client secrets disabled
 
