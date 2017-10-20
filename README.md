@@ -3,8 +3,6 @@
 # Carrot
 
 ## Building an application with Carrot
-Simply create a new go project and import carrot! Below is an example application that receives a request and sends back the word "Pong" to all connected clients. 
-
 ```
 package main
 
