@@ -18,7 +18,8 @@ func (c *PingController) Ping(req *carrot.Request, res *carrot.Responder) {
 
 func main() {
 
-  // Register endpoints here in the order of endpoint, controller, method, and whether the route will accept streaming
+  // Register endpoints here in the order of endpoint, controller, method,
+  // and whether the route will accept streaming
   carrot.Add("ping", PingController{}, "Ping", false)
 
   // Run the server
