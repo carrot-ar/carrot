@@ -2,4 +2,5 @@ language: go
 go:
   - 1.9
 script:
+  - ./go_fmt_check.sh
   - go test
