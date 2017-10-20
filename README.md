@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/carrot-ar/carrot.svg?branch=master)](https://travis-ci.org/carrot-ar/carrot) [![codecov](https://codecov.io/gh/carrot-ar/carrot/branch/master/graph/badge.svg)](https://codecov.io/gh/carrot-ar/carrot)
+
 # Carrot
 
 ## Building an application with Carrot
