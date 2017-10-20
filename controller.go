@@ -2,7 +2,6 @@ package carrot
 
 import (
 	"fmt"
-	"log"
 	"reflect"
 )
 
@@ -23,7 +22,7 @@ func (c *AppController) Persist(p bool) {
 /*
 	Reflect on the controller and find the correct function to call, then call it
 */
-func (c *AppController) Invoke(route *Route, req *Request) {
+func (c *AppController) Invoke(route *Route, req *Request) error {
 	req.AddMetric(MethodReflectionStart)
 
 	ptr := c.Controller.(reflect.Value).Type()
@@ -31,12 +30,12 @@ func (c *AppController) Invoke(route *Route, req *Request) {
 	method, ok := ptr.MethodByName(route.Function())
 
 	if ok != true {
-		fmt.Println("the method is not ok!")
+		return fmt.Errorf("method lookup failed")
 	}
 
 	if method.Func.IsValid() {
 		args := []reflect.Value{c.Controller.(reflect.Value), reflect.ValueOf(req), reflect.ValueOf(c.responder)}
-		
+
 		req.AddMetric(MethodReflectionEnd)
 		req.AddMetric(ControllerMethodStart)
 
@@ -44,6 +43,8 @@ func (c *AppController) Invoke(route *Route, req *Request) {
 		req.AddMetric(ControllerMethodEnd)
 		req.End()
 	} else {
-		log.Printf("error: invalid method called")
+		return fmt.Errorf("invalid method called")
 	}
+
+	return nil
 }
