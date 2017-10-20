@@ -36,7 +36,7 @@ func (c *AppController) Invoke(route *Route, req *Request) {
 
 	if method.Func.IsValid() {
 		args := []reflect.Value{c.Controller.(reflect.Value), reflect.ValueOf(req), reflect.ValueOf(c.responder)}
-		
+
 		req.AddMetric(MethodReflectionEnd)
 		req.AddMetric(ControllerMethodStart)
 

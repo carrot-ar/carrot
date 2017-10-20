@@ -39,7 +39,6 @@ func TestContextPersistence(t *testing.T) {
 func TestSessionDelete(t *testing.T) {
 	store := NewDefaultSessionManager()
 
-
 	token, err := store.NewSession()
 	if err != nil {
 		t.Errorf("Failed to create session")
@@ -51,8 +50,8 @@ func TestSessionDelete(t *testing.T) {
 
 	afterLength := store.Length()
 
-	if afterLength != beforeLength - 1 {
-		t.Errorf("Failed to delete session \n Before: %v \n After: %v", beforeLength, afterLength - 1)
+	if afterLength != beforeLength-1 {
+		t.Errorf("Failed to delete session \n Before: %v \n After: %v", beforeLength, afterLength-1)
 	}
 }
 
