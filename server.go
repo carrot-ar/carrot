@@ -43,7 +43,7 @@ func (svr *Server) Run() {
 	for {
 		select {
 		case client := <-svr.register:
-			client.open = true
+			client.softOpen()
 			token := <-client.sendToken
 			//create persistent token for new or invalid sessions
 			exists := svr.sessions.Exists(token)
@@ -61,8 +61,8 @@ func (svr *Server) Run() {
 			svr.sessions.SetClient(token, client)
 			close(client.start)
 		case client := <-svr.unregister:
-			if client.open {
-				client.open = false
+			if client.Open() {
+				client.softClose()
 				// delete client?
 				close(client.send)
 				close(client.sendToken)

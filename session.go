@@ -25,6 +25,7 @@ type Session struct {
 	Token      SessionToken
 	Client     *Client
 	expireTime time.Time
+	mutex      *sync.Mutex
 
 	// bad name, still not sure of the use cases yet
 	//itemMap map[string]interface{}
@@ -43,7 +44,7 @@ func (c *Session) sessionDurationExpired() bool {
 }
 
 func (c *Session) SessionExpired() bool {
-	return !c.Client.open && c.sessionDurationExpired()
+	return !c.Client.Open() && c.sessionDurationExpired()
 }
 
 type SessionToken string
@@ -93,7 +94,8 @@ func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
 		Token:      token,
 		expireTime: refreshExpiryTime(),
 		Client: &Client{
-			open: false,
+			open:  false,
+			mutex: &sync.Mutex{},
 		},
 	}
 
