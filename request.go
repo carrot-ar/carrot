@@ -60,7 +60,9 @@ func NewRequest(session *Session, message []byte) *Request { //returns error,
 	var d requestData
 	err := json.Unmarshal(message, &d)
 
-	err = validSession(session.Token, SessionToken(d.SessionToken))
+	if err == nil {
+		err = validSession(session.Token, SessionToken(d.SessionToken))
+	}
 
 	req.err = err
 	req.endpoint = d.Endpoint
