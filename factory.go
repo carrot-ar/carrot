@@ -8,12 +8,13 @@ import (
 func NewController(c interface{}, isStream bool) (*AppController, error) {
 
 	newController := reflect.New(reflect.TypeOf(c))
-	responder := NewResponder()
-	go responder.Run()
+	broadcaster := NewBroadcaster()
+	broadcast := NewBroadcast(broadcaster)
+	go broadcast.broadcaster.Run()
 
 	return &AppController{
 		Controller: newController,
 		persist:    isStream,
-		responder:  responder,
+		broadcast:  broadcast,
 	}, nil
 }
