@@ -1,27 +1,34 @@
 package carrot
 
-type Responder struct {
+import (
+
+)
+
+type Broadcaster struct {
 	sessions SessionStore
 
 	//inbound messages from the clients
-	Broadcast chan []byte
+	broadcast chan []byte
 }
 
-func NewResponder() *Responder {
-	return &Responder{
+func NewBroadcaster() *Broadcaster {
+	return &Broadcaster{
 		sessions:  NewDefaultSessionManager(),
-		Broadcast: make(chan []byte, broadcastChannelSize),
+		broadcast: make(chan []byte, broadcastChannelSize),
 	}
 }
 
-func (res *Responder) broadcastAll(message []byte) {
-	//log.Printf("Current length of this responder: %v\n", len(res.Broadcast))
+func (br *Broadcaster) broadcastAll(message []byte) {
+	expiredSessionCount := 0
+	//closedClientCount := 0
+	//refreshedClientCount := 0
 	messagesSent := 0
-	res.sessions.Range(func(key, value interface{}) bool {
+	br.sessions.Range(func(key, value interface{}) bool {
 		ctx := value.(*Session)
 
 		if ctx.SessionExpired() {
-			res.sessions.Delete(ctx.Token)
+			expiredSessionCount++
+			br.sessions.Delete(ctx.Token)
 			return true
 		} else if !ctx.Client.Open() {
 			return true
@@ -44,12 +51,11 @@ func (res *Responder) broadcastAll(message []byte) {
 	//	expiredSessionCount)
 }
 
-func (res *Responder) Run() {
+func (br *Broadcaster) Run() {
 	for {
 		select {
-		case message := <-res.Broadcast:
-			go res.broadcastAll(message)
-			//fmt.Println(string(message))
+		case message := <-br.broadcast:
+			br.broadcastAll(message)
 		}
 	}
 }

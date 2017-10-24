@@ -10,7 +10,7 @@ type AppController struct {
 	Controller ControllerType
 	//reqBuffer chan *buddy.Request
 	// add a responder here for responding to all, groups, individual etc"
-	responder *Responder
+	broadcast *Broadcast
 }
 
 type ControllerType interface{}
@@ -34,7 +34,7 @@ func (c *AppController) Invoke(route *Route, req *Request) error {
 	}
 
 	if method.Func.IsValid() {
-		args := []reflect.Value{c.Controller.(reflect.Value), reflect.ValueOf(req), reflect.ValueOf(c.responder)}
+		args := []reflect.Value{c.Controller.(reflect.Value), reflect.ValueOf(req), reflect.ValueOf(c.broadcast)}
 
 		req.AddMetric(MethodReflectionEnd)
 		req.AddMetric(ControllerMethodStart)

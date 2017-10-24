@@ -11,18 +11,18 @@ type TestStreamController struct {
 	count int
 }
 
-func (c *TestController) Print(req *Request, res *Responder) {
+func (c *TestController) Print(req *Request, broadcast *Broadcast) {
 	fmt.Printf("Hello, world! Here is my event request!!\n")
 	// req.End()
 }
 
-func (c *TestStreamController) Print(req *Request, res *Responder) {
+func (c *TestStreamController) Print(req *Request, broadcast *Broadcast) {
 	fmt.Printf("Hello, world! Here is my stream request!!\n")
 	c.count += 1
 	fmt.Printf("Stream Controllers internal count value: %v\n", c.count)
 	// req.End()
 
-	res.Broadcast <- []byte("This is the stream controller broadcasting a message!")
+	broadcast.Send([]byte("This is the stream controller broadcasting a message!"))
 }
 
 func TestControllerFactory(t *testing.T) {
