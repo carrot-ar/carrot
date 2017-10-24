@@ -47,7 +47,8 @@ var upgrader = websocket.Upgrader{
 }
 
 type Client struct {
-	server *Server
+	session *Session
+	server  *Server
 	// acts as a signal for when to start the go routines
 	start chan struct{}
 	open  bool
@@ -100,12 +101,7 @@ func (c *Client) readPump() {
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
-		// could be O(n) and problematic
-		session, err := c.server.sessions.GetByClient(c)
-		if err != nil {
-			log.Print(err)
-		}
-		req := NewRequest(session, message)
+		req := NewRequest(c.session, message)
 
 		c.server.Middleware.In <- req
 		//c.server.broadcast <- message
@@ -207,6 +203,7 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := &Client{
+		session:   nil,
 		server:    server,
 		conn:      conn,
 		send:      make(chan []byte, sendMsgBufferSize),

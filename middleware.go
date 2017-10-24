@@ -11,6 +11,7 @@ const (
 
 var count int = 0
 var rate float64 = 0
+
 /*
 	Middlewares
 */

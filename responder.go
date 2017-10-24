@@ -20,7 +20,6 @@ func (res *Responder) broadcastAll(message []byte) {
 	res.sessions.Range(func(key, value interface{}) bool {
 		ctx := value.(*Session)
 
-
 		if ctx.SessionExpired() {
 			res.sessions.Delete(ctx.Token)
 			return true

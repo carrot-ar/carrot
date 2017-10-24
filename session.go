@@ -26,7 +26,6 @@ type Session struct {
 	Client     *Client
 	expireTime time.Time
 	mutex      *sync.Mutex
-
 }
 
 func refreshExpiryTime() time.Time {
@@ -48,7 +47,7 @@ func (c *Session) SessionExpired() bool {
 type SessionToken string
 
 type SessionStore interface {
-	NewSession() (SessionToken, error)
+	NewSession() (SessionToken, *Session, error)
 	Exists(SessionToken) bool
 	Get(SessionToken) (*Session, error)
 	GetByClient(client *Client) (*Session, error)
@@ -76,13 +75,13 @@ func NewDefaultSessionManager() SessionStore {
 	return sessionStoreInstance
 }
 
-func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
+func (s *DefaultSessionStore) NewSession() (SessionToken, *Session, error) {
 	// Initialize context fields
 
 	b := make([]byte, 16)
 	_, err := rand.Read(b)
 	if err != nil {
-		return nilSessionToken, err
+		return nilSessionToken, nil, err
 	}
 
 	token := SessionToken(base64.URLEncoding.EncodeToString(b))
@@ -91,10 +90,6 @@ func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
 	ctx := Session{
 		Token:      token,
 		expireTime: refreshExpiryTime(),
-		Client: &Client{
-			open:  false,
-			mutex: &sync.Mutex{},
-		},
 	}
 
 	s.sessionStore.Store(token, &ctx)
@@ -104,7 +99,7 @@ func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
 
 	log.Printf("session: new session created %v, total: %v\n", token, s.length)
 
-	return token, nil
+	return token, &ctx, nil
 }
 
 func (s *DefaultSessionStore) Exists(token SessionToken) bool {

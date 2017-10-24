@@ -11,7 +11,10 @@ const (
 	serverSecret         = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
 	broadcastChannelSize = 65536
 	port                 = 8080
+	maxClients           = 512
 )
+
+type Clients []*Client
 
 //the server maintains the list of clients and
 //broadcasts messages to the clients
@@ -28,6 +31,8 @@ type Server struct {
 
 	//keep track of middleware
 	Middleware *MiddlewarePipeline
+
+	clients Clients
 }
 
 func NewServer(sessionStore SessionStore) *Server {
@@ -49,16 +54,25 @@ func (svr *Server) Run() {
 			exists := svr.sessions.Exists(token)
 			if (token == "") || !exists {
 				var err error
-				token, err = svr.sessions.NewSession()
+				token, sessionPtr, err := svr.sessions.NewSession()
 				if err != nil {
 					//handle later
 					log.Print(err)
 				}
+
+				client.session = sessionPtr
+
+				// find a free location in the client list
+				for i, c := range svr.clients {
+					if c == nil {
+						svr.clients[i] = client
+					}
+				}
+
 				//return the new token for the session
 				client.sendToken <- token
 			}
 
-			svr.sessions.SetClient(token, client)
 			close(client.start)
 		case client := <-svr.unregister:
 			if client.Open() {
