@@ -1,16 +1,16 @@
 package carrot
 
 import (
-	//nothing yet
+//nothing yet
 )
 
 type Broadcast struct {
-	broadcaster	*Broadcaster
+	broadcaster *Broadcaster
 }
 
 func NewBroadcast(broadcaster *Broadcaster) *Broadcast {
-	return &Broadcast {
-		broadcaster:	broadcaster,
+	return &Broadcast{
+		broadcaster: broadcaster,
 	}
 }
 

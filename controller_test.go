@@ -98,7 +98,7 @@ func TestInvalidMethodInvocation(t *testing.T) {
 		endpoint:     "bad_method",
 	}
 
-	rt,_ := Lookup("bad_method")
+	rt, _ := Lookup("bad_method")
 
 	c, err := NewController(rt.Controller(), false)
 	if err != nil {
