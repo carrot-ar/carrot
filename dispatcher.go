@@ -45,11 +45,14 @@ func (dp *Dispatcher) Run() {
 		select {
 		case req := <-dp.requests:
 			req.AddMetric(DispatchLookupStart)
-			route := Lookup(req.endpoint)
+			route, err := Lookup(req.endpoint)
+			if err != nil {
+				fmt.Println(err)
+			}
 			req.AddMetric(DispatchLookupEnd)
 
 			req.AddMetric(DispatchRequestStart)
-			dp.dispatchRequest(&route, req)
+			dp.dispatchRequest(route, req)
 			req.AddMetric(DispatchRequestEnd)
 		default:
 			// fmt.Println("dispatcher Run() did something bad")

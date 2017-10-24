@@ -3,6 +3,7 @@ package carrot
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"sync"
 	"testing"
 	"time"
 )
@@ -94,9 +95,10 @@ func TestSessionExpired(t *testing.T) {
 	ctx, _ := store.Get(token)
 	expireTime := time.Now().Add(time.Second)
 	ctx.expireTime = expireTime
-	ctx.Client = &Client{}
-
-	ctx.Client.open = false
+	ctx.Client = &Client{
+		mutex: &sync.Mutex{},
+		open:  false,
+	}
 
 	time.Sleep(time.Second)
 

@@ -31,7 +31,7 @@ func (res *Responder) broadcastAll(message []byte) {
 			expiredSessionCount++
 			res.sessions.Delete(ctx.Token)
 			return true
-		} else if !ctx.Client.open {
+		} else if !ctx.Client.Open() {
 			closedClientCount++
 			return true
 		}

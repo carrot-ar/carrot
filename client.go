@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -58,6 +59,26 @@ type Client struct {
 
 	//buffered channel of outbound tokens
 	sendToken chan SessionToken
+
+	mutex *sync.Mutex
+}
+
+func (c *Client) Open() bool {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return c.open
+}
+
+func (c *Client) softOpen() {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.open = true
+}
+
+func (c *Client) softClose() {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.open = false
 }
 
 //readPump pumps messages from the websocket to the server
@@ -190,6 +211,7 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 		send:      make(chan []byte, sendMsgBufferSize),
 		sendToken: make(chan SessionToken, sendTokenBufferSize),
 		start:     make(chan struct{}),
+		mutex:     &sync.Mutex{},
 	}
 
 	client.sendToken <- SessionToken(sessionToken)
