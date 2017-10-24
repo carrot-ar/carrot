@@ -83,3 +83,31 @@ func TestMethodInvocation(t *testing.T) {
 	d.requests <- req3
 	d.requests <- req4
 }
+
+func TestInvalidMethodInvocation(t *testing.T) {
+	Add("bad_method", TestController{}, "BadMethod", false)
+	ss := NewDefaultSessionManager()
+	token, err := ss.NewSession()
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	req := &Request{
+		sessionToken: token,
+		metrics:      make([]time.Time, MetricCount),
+		endpoint:     "bad_method",
+	}
+
+	rt, _ := Lookup("bad_method")
+
+	c, err := NewController(rt.Controller(), false)
+	if err != nil {
+		t.Errorf("failed to make controller")
+	}
+
+	err = c.Invoke(rt, req)
+	if err == nil {
+		t.Errorf("Method invocation did not capture invalid method and probably crashed.")
+	}
+
+}

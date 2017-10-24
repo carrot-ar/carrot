@@ -28,15 +28,19 @@ func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
 			dp.openStreams.Add(token, c1)
 		}
 		sc := dp.openStreams.Get(token)
-		sc.Invoke(route, req) //send request to controller
-		// sc.Invoke(route, req) //send request to controller
+
+		err := sc.Invoke(route, req) //send request to controller
+		if err != nil {
+			req.err = err
+		}
 
 	} else { //route leads to event controller
 		c, err := NewController(route.Controller(), false) //send to controller factory with event identifier
 		if err != nil {
 			fmt.Println(err)
 		}
-		c.Invoke(route, req) //send request to controller
+		err = c.Invoke(route, req) //send request to controller
+		req.err = err
 	}
 }
 
