@@ -27,8 +27,6 @@ type Session struct {
 	expireTime time.Time
 	mutex      *sync.Mutex
 
-	// bad name, still not sure of the use cases yet
-	//itemMap map[string]interface{}
 }
 
 func refreshExpiryTime() time.Time {

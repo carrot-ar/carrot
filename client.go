@@ -100,6 +100,7 @@ func (c *Client) readPump() {
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
+		// could be O(n) and problematic
 		session, err := c.server.sessions.GetByClient(c)
 		if err != nil {
 			log.Print(err)

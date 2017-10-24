@@ -42,7 +42,7 @@ func (c *AppController) Invoke(route *Route, req *Request) {
 
 		method.Func.Call(args)
 		req.AddMetric(ControllerMethodEnd)
-		req.End()
+		//req.End()
 	} else {
 		log.Printf("error: invalid method called")
 	}

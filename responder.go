@@ -1,10 +1,5 @@
 package carrot
 
-import (
-	"fmt"
-	"log"
-)
-
 type Responder struct {
 	sessions SessionStore
 
@@ -20,44 +15,42 @@ func NewResponder() *Responder {
 }
 
 func (res *Responder) broadcastAll(message []byte) {
-	expiredSessionCount := 0
-	closedClientCount := 0
-	refreshedClientCount := 0
+	//log.Printf("Current length of this responder: %v\n", len(res.Broadcast))
 	messagesSent := 0
 	res.sessions.Range(func(key, value interface{}) bool {
 		ctx := value.(*Session)
 
+
 		if ctx.SessionExpired() {
-			expiredSessionCount++
 			res.sessions.Delete(ctx.Token)
 			return true
 		} else if !ctx.Client.Open() {
-			closedClientCount++
 			return true
 		}
 
 		ctx.expireTime = refreshExpiryTime()
-		refreshedClientCount++
 
 		select {
 		case ctx.Client.send <- message:
 			messagesSent++
 			return true
 		}
+
+		return true
 	})
-	log.Printf("server: broadcast sent %v, refresh %v, closed %v, expired %v",
-		messagesSent,
-		refreshedClientCount,
-		closedClientCount,
-		expiredSessionCount)
+	//log.Printf("server: broadcast sent %v, refresh %v, closed %v, expired %v",
+	//	messagesSent,
+	//	refreshedClientCount,
+	//	closedClientCount,
+	//	expiredSessionCount)
 }
 
 func (res *Responder) Run() {
 	for {
 		select {
 		case message := <-res.Broadcast:
-			res.broadcastAll(message)
-			fmt.Println(string(message))
+			go res.broadcastAll(message)
+			//fmt.Println(string(message))
 		}
 	}
 }

@@ -2,12 +2,15 @@ package carrot
 
 import (
 	"log"
+	"time"
 )
 
 const (
 	InputChannelSize = 256
 )
 
+var count int = 0
+var rate float64 = 0
 /*
 	Middlewares
 */
@@ -16,7 +19,7 @@ const (
 // }
 
 func logger(req *Request) error {
-	log.Println("middleware: new request")
+	//log.Println("middleware: new request")
 	return nil
 }
 
@@ -49,6 +52,7 @@ func (mw *MiddlewarePipeline) Run() {
 						req.End()
 						break
 					}
+					count++
 				}
 				if err == nil {
 					mw.dispatcher.requests <- req
@@ -63,6 +67,16 @@ func NewMiddlewarePipeline() *MiddlewarePipeline {
 	// List of middleware functions
 	mw := []func(*Request) error{logger, discardBadRequest}
 
+	seconds := 0
+	go func() {
+		for {
+			time.Sleep(time.Second)
+			seconds++
+			rate = float64(count) / float64(seconds)
+			log.Printf("%v requests per second\n", rate)
+			log.Printf("%v request count\n", count)
+		}
+	}()
 	return &MiddlewarePipeline{
 		In:          make(chan *Request, InputChannelSize),
 		middlewares: mw,
