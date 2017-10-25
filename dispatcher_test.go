@@ -1,12 +1,12 @@
 package carrot
 
 import (
+	"fmt"
 	"testing"
 	"time"
-	"fmt"
 )
 
-type TestDispatcherController struct {}
+type TestDispatcherController struct{}
 
 func (tdc *TestDispatcherController) Print(req *Request, broadcast *Broadcast) {
 	fmt.Println("The dispatchingRequest method worked because this controller is speaking!")
@@ -59,14 +59,14 @@ func TestDispatchRequest(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	if (!d.cachedControllers.Exists(sesh1.Token)) {
+	if !d.cachedControllers.Exists(sesh1.Token) {
 		fmt.Println("The DPC is not yet in the cached controllers list")
 	}
 	fmt.Println(d.cachedControllers.Length()) //should return int of 0
 
 	d.dispatchRequest(route1, req1)
 
-	if (d.cachedControllers.Exists(sesh1.Token)) {
+	if d.cachedControllers.Exists(sesh1.Token) {
 		fmt.Println("The DPC was successfully stored in the cached controllers list")
 	}
 	fmt.Println(d.cachedControllers.Length()) //should return int of 1
@@ -75,7 +75,7 @@ func TestDispatchRequest(t *testing.T) {
 
 	fmt.Println(d.cachedControllers.Length()) //should return int of 1 (using existing entry in list)
 
-	d.dispatchRequest(route2, req2)	
-	
+	d.dispatchRequest(route2, req2)
+
 	fmt.Println(d.cachedControllers.Length()) //should return int of 2
 }

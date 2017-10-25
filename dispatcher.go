@@ -10,19 +10,19 @@ const (
 
 type Dispatcher struct {
 	cachedControllers *CachedControllersList
-	requests    chan *Request
+	requests          chan *Request
 }
 
 func NewDispatcher() *Dispatcher {
 	return &Dispatcher{
 		cachedControllers: NewCachedControllersList(),
-		requests:    make(chan *Request, 256),
+		requests:          make(chan *Request, 256),
 	}
 }
 
 func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
 	req.AddMetric(DispatchRequestStart)
-	if doCacheControllers {	//used to be "if route.persist"
+	if doCacheControllers { //used to be "if route.persist"
 		token := req.sessionToken
 		if exists := dp.cachedControllers.Exists(token); !exists {
 			c, err := NewController(route.Controller(), doCacheControllers) //send to controller factory with stream identifier
