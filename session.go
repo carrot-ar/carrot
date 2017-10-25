@@ -23,7 +23,6 @@ var (
 // Potentially will need to be a sync Map
 type Session struct {
 	Token      SessionToken
-	Client     *Client
 	expireTime time.Time
 	mutex      *sync.Mutex
 }
@@ -40,18 +39,12 @@ func (c *Session) sessionDurationExpired() bool {
 	return false
 }
 
-func (c *Session) SessionExpired() bool {
-	return !c.Client.Open() && c.sessionDurationExpired()
-}
-
 type SessionToken string
 
 type SessionStore interface {
 	NewSession() (SessionToken, *Session, error)
 	Exists(SessionToken) bool
 	Get(SessionToken) (*Session, error)
-	GetByClient(client *Client) (*Session, error)
-	SetClient(SessionToken, *Client) error
 	Range(func(key, value interface{}) bool)
 	Delete(SessionToken) error
 	Length() int
@@ -122,37 +115,6 @@ func (s *DefaultSessionStore) Get(token SessionToken) (*Session, error) {
 	}
 
 	return ctx.(*Session), nil
-}
-
-func (s *DefaultSessionStore) GetByClient(client *Client) (*Session, error) {
-	var session *Session
-
-	s.sessionStore.Range(func(key, value interface{}) bool {
-		s := value.(*Session)
-		if s.Client == client {
-			session = s
-			return false
-		}
-		return true
-	})
-
-	if session == nil {
-		return nil, fmt.Errorf("session: no session found for client %v\n", client)
-	}
-
-	return session, nil
-}
-
-func (s *DefaultSessionStore) SetClient(token SessionToken, client *Client) error {
-	ctx, err := s.Get(token)
-	if err != nil {
-		return err
-	}
-
-	ctx.Client = client
-	ctx.expireTime = refreshExpiryTime()
-
-	return nil
 }
 
 func (s *DefaultSessionStore) Delete(token SessionToken) error {

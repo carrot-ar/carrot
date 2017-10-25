@@ -11,10 +11,10 @@ const (
 	serverSecret         = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
 	broadcastChannelSize = 65536
 	port                 = 8080
-	maxClients           = 512
+	maxClients           = 4096
 )
 
-type Clients []*Client
+type Clients [maxClients]*Client
 
 //the server maintains the list of clients and
 //broadcasts messages to the clients
@@ -32,7 +32,7 @@ type Server struct {
 	//keep track of middleware
 	Middleware *MiddlewarePipeline
 
-	clients Clients
+	clients *Clients
 }
 
 func NewServer(sessionStore SessionStore) *Server {
@@ -41,6 +41,7 @@ func NewServer(sessionStore SessionStore) *Server {
 		unregister: make(chan *Client),
 		sessions:   sessionStore,
 		Middleware: NewMiddlewarePipeline(),
+		clients: 	new(Clients),
 	}
 }
 
@@ -66,6 +67,7 @@ func (svr *Server) Run() {
 				for i, c := range svr.clients {
 					if c == nil {
 						svr.clients[i] = client
+						break
 					}
 				}
 

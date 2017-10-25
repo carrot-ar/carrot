@@ -1,54 +1,36 @@
 package carrot
 
-import (
-
-)
-
 type Broadcaster struct {
 	sessions SessionStore
-
+	clients *Clients
 	//inbound messages from the clients
 	broadcast chan []byte
 }
 
-func NewBroadcaster() *Broadcaster {
+func NewBroadcaster(clients *Clients) *Broadcaster {
 	return &Broadcaster{
 		sessions:  NewDefaultSessionManager(),
 		broadcast: make(chan []byte, broadcastChannelSize),
+		clients: clients,
 	}
 }
 
 func (br *Broadcaster) broadcastAll(message []byte) {
-	expiredSessionCount := 0
-	//closedClientCount := 0
-	//refreshedClientCount := 0
-	messagesSent := 0
-	br.sessions.Range(func(key, value interface{}) bool {
-		ctx := value.(*Session)
+	//log.Printf("Length of clients: %v\n", len(br.clients))
+	for _, client := range br.clients {
+		if client != nil {
+			if client.Expired() {
+				br.sessions.Delete(client.session.Token)
+				continue
+			} else if !client.Open() {
+				continue
+			}
 
-		if ctx.SessionExpired() {
-			expiredSessionCount++
-			br.sessions.Delete(ctx.Token)
-			return true
-		} else if !ctx.Client.Open() {
-			return true
+			client.session.expireTime = refreshExpiryTime()
+
+			client.send <- message
 		}
-
-		ctx.expireTime = refreshExpiryTime()
-
-		select {
-		case ctx.Client.send <- message:
-			messagesSent++
-			return true
-		}
-
-		return true
-	})
-	//log.Printf("server: broadcast sent %v, refresh %v, closed %v, expired %v",
-	//	messagesSent,
-	//	refreshedClientCount,
-	//	closedClientCount,
-	//	expiredSessionCount)
+	}
 }
 
 func (br *Broadcaster) Run() {

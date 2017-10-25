@@ -12,7 +12,7 @@ type Dispatcher struct {
 func NewDispatcher() *Dispatcher {
 	return &Dispatcher{
 		openStreams: NewOpenStreamsList(),
-		requests:    make(chan *Request, 256),
+		requests:    make(chan *Request, 4096),
 	}
 }
 

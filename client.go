@@ -82,6 +82,10 @@ func (c *Client) softClose() {
 	c.open = false
 }
 
+func (c *Client) Expired() bool {
+	return !c.Open() && c.session.sessionDurationExpired()
+}
+
 //readPump pumps messages from the websocket to the server
 func (c *Client) readPump() {
 	defer func() {
