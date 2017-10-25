@@ -32,6 +32,7 @@ type requestData struct {
 type originData struct {
 	Longitude float64 `json:"longitude"`
 	Latitude  float64 `json:"latitude"`
+	Altitude  float64 `json:"altitude"`
 }
 
 type payloadData struct {

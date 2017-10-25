@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+	"log"
 )
 
 const (
@@ -40,6 +41,7 @@ type Request struct {
 type location struct {
 	Longitude float64
 	Latitude  float64
+	Altitude float64
 }
 
 type offset struct {
@@ -56,6 +58,8 @@ func NewRequest(session *Session, message []byte) *Request { //returns error,
 		metrics:      m,
 		data:         message,
 	}
+
+	log.Println(string(message))
 
 	var d requestData
 	err := json.Unmarshal(message, &d)
