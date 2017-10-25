@@ -3,8 +3,8 @@ package carrot
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 	"log"
+	"time"
 )
 
 const (
@@ -41,7 +41,7 @@ type Request struct {
 type location struct {
 	Longitude float64
 	Latitude  float64
-	Altitude float64
+	Altitude  float64
 }
 
 type offset struct {
