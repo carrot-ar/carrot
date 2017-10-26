@@ -4,30 +4,34 @@ import (
 	"fmt"
 )
 
+const (
+	doCacheControllers bool = true
+)
+
 type Dispatcher struct {
-	openStreams *OpenStreamsList
-	requests    chan *Request
+	cachedControllers *CachedControllersList
+	requests          chan *Request
 }
 
 func NewDispatcher() *Dispatcher {
 	return &Dispatcher{
-		openStreams: NewOpenStreamsList(),
-		requests:    make(chan *Request, 4096),
+		cachedControllers: NewCachedControllersList(),
+		requests:          make(chan *Request, 256),
 	}
 }
 
 func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
 	req.AddMetric(DispatchRequestStart)
-	if route.persist {
+	if doCacheControllers { //used to be "if route.persist"
 		token := req.sessionToken
-		if exists := dp.openStreams.Exists(token); !exists {
-			c1, err := NewController(route.Controller(), true) //send to controller factory with stream identifier
+		if exists := dp.cachedControllers.Exists(token); !exists {
+			c, err := NewController(route.Controller(), doCacheControllers) //send to controller factory with stream identifier
 			if err != nil {
 				fmt.Println(err)
 			}
-			dp.openStreams.Add(token, c1)
+			dp.cachedControllers.Add(token, c)
 		}
-		sc := dp.openStreams.Get(token)
+		sc := dp.cachedControllers.Get(token)
 
 		err := sc.Invoke(route, req) //send request to controller
 		if err != nil {
@@ -35,7 +39,7 @@ func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
 		}
 
 	} else { //route leads to event controller
-		c, err := NewController(route.Controller(), false) //send to controller factory with event identifier
+		c, err := NewController(route.Controller(), doCacheControllers) //send to controller factory with event identifier
 		if err != nil {
 			fmt.Println(err)
 		}
