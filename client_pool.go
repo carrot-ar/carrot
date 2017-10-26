@@ -2,24 +2,19 @@ package carrot
 
 import "fmt"
 
+const maxClients = 4096
 const maxClientPoolQueueBackup = 128
-
-type Pool interface{
-	Insert(*Client) error
-	Count() int
-	Send(*OutboundMessage)
-	ListenAndSend()
-}
+const maxOutboundMessages = 8192
 
 type ClientPool struct {
-	sessions SessionStore
-	clients []*Client
-	free	chan int
-	insertQueue chan *Client
+	sessions             SessionStore
+	clients              []*Client
+	free                 chan int
+	insertQueue          chan *Client
 	outboundMessageQueue chan *OutboundMessage
 }
 
-func NewClientPool() Pool {
+func NewClientPool() *ClientPool {
 	// setup the free list by filling up a channel of
 	// integers from 0 to maxClients
 	free := make(chan int, maxClients)
@@ -28,13 +23,13 @@ func NewClientPool() Pool {
 	}
 
 	return &ClientPool{
-		sessions: NewDefaultSessionManager(),
-		clients: make([]*Client, maxClients, maxClients),
-		free: free,
-		insertQueue: make(chan *Client, maxClientPoolQueueBackup),
+		sessions:             NewDefaultSessionManager(),
+		clients:              make([]*Client, maxClients, maxClients),
+		free:                 free,
+		insertQueue:          make(chan *Client, maxClientPoolQueueBackup),
+		outboundMessageQueue: make(chan *OutboundMessage, maxOutboundMessages),
 	}
 }
-
 
 // Add to the free list in a non blocking fashion
 // by adding the client to a queue that will insert new clients
@@ -81,7 +76,9 @@ func (cp *ClientPool) getFreeIndex() (int, error) {
 	if len(cp.free) == 0 {
 		return -1, fmt.Errorf("client pool is full")
 	}
-	return <-cp.free, nil
+
+	freeSpot := <-cp.free
+	return freeSpot, nil
 }
 
 func (cp *ClientPool) Count() int {
@@ -97,7 +94,10 @@ func (cp *ClientPool) Send(message *OutboundMessage) {
 func (cp *ClientPool) ListenAndSend() {
 	for {
 		select {
-		case message := <- cp.outboundMessageQueue:
+		case newClient := <-cp.insertQueue:
+			fmt.Println("A NEW CLIENT JOINED!")
+			cp.insert(newClient)
+		case message := <-cp.outboundMessageQueue:
 			// TODO: Figure out the logic for running a criteria
 			// function and only broadcasting to a subset of clients
 			for i, client := range cp.clients {
@@ -119,8 +119,7 @@ func (cp *ClientPool) ListenAndSend() {
 
 				}
 			}
-		case newClient := <- cp.insertQueue:
-			cp.insert(newClient)
+		default:
 		}
 	}
 }

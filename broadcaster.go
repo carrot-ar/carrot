@@ -6,16 +6,16 @@ type OutboundMessage struct {
 
 // manage broadcast groups with the broadcaster
 type Broadcaster struct {
-	sessions SessionStore
-	clientPool  Pool
+	sessions   SessionStore
+	clientPool *ClientPool
 	//inbound messages from the clients
 	broadcast chan []byte
 }
 
-func NewBroadcaster(pool Pool) *Broadcaster {
+func NewBroadcaster(pool *ClientPool) *Broadcaster {
 	return &Broadcaster{
-		sessions:  NewDefaultSessionManager(),
-		broadcast: make(chan []byte, broadcastChannelSize),
+		sessions:   NewDefaultSessionManager(),
+		broadcast:  make(chan []byte, broadcastChannelSize),
 		clientPool: pool,
 	}
 }

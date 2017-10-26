@@ -11,10 +11,7 @@ const (
 	serverSecret         = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
 	broadcastChannelSize = 65536
 	port                 = 8080
-	maxClients           = 4096
 )
-
-type Clients [maxClients]*Client
 
 //the server maintains the list of clients and
 //broadcasts messages to the clients
@@ -32,16 +29,16 @@ type Server struct {
 	//keep track of middleware
 	Middleware *MiddlewarePipeline
 
-	clients *Clients
+	clientPool *ClientPool
 }
 
-func NewServer(sessionStore SessionStore) *Server {
+func NewServer(clientPool *ClientPool, sessionStore SessionStore) *Server {
 	return &Server{
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		sessions:   sessionStore,
 		Middleware: NewMiddlewarePipeline(),
-		clients: 	new(Clients),
+		clientPool: clientPool,
 	}
 }
 
@@ -63,13 +60,7 @@ func (svr *Server) Run() {
 
 				client.session = sessionPtr
 
-				// find a free location in the client list
-				for i, c := range svr.clients {
-					if c == nil {
-						svr.clients[i] = client
-						break
-					}
-				}
+				svr.clientPool.Insert(client)
 
 				//return the new token for the session
 				client.sendToken <- token

@@ -4,15 +4,15 @@ var broadcast *Broadcast
 
 func Run() {
 	sessions := NewDefaultSessionManager()
-	server := NewServer(sessions)
-	dispatcher := NewDispatcher()
 	clientPool := NewClientPool()
+	server := NewServer(clientPool, sessions)
+	dispatcher := NewDispatcher()
 	broadcaster := NewBroadcaster(clientPool)
 	broadcast = NewBroadcast(broadcaster)
-	go clientPool.ListenAndSend()
 	go broadcast.broadcaster.Run()
 	go dispatcher.Run()
 	go server.Middleware.Run()
 	go server.Run()
+	go broadcast.broadcaster.clientPool.ListenAndSend()
 	server.Serve()
 }

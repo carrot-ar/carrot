@@ -3,7 +3,6 @@ package carrot
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 )
 
@@ -59,7 +58,7 @@ func NewRequest(session *Session, message []byte) *Request { //returns error,
 		data:         message,
 	}
 
-	log.Println(string(message))
+	//log.Println(string(message))
 
 	var d requestData
 	err := json.Unmarshal(message, &d)

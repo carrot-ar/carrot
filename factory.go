@@ -9,7 +9,6 @@ func NewController(c interface{}, isStream bool) (*AppController, error) {
 
 	newController := reflect.New(reflect.TypeOf(c))
 
-
 	return &AppController{
 		Controller: newController,
 		persist:    isStream,
