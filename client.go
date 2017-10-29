@@ -192,7 +192,7 @@ func validClientSecret(clientSecret string) bool {
 
 func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 	sessionToken, clientSecret, _ := r.BasicAuth()
-	//log.Printf("Session Token: %v | Client Secret: %v", sessionToken, clientSecret)
+	//log.Printf("Session Token: %v | Client Secret: %v", SessionToken, clientSecret)
 
 	if clientSecretRequired && !validClientSecret(clientSecret) {
 		http.Error(w, "Not Authorized!", 403)

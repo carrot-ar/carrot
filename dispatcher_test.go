@@ -27,7 +27,7 @@ func TestDispatchRequest(t *testing.T) {
 	}
 
 	req1 := &Request{
-		sessionToken: sesh1.Token,
+		SessionToken: sesh1.Token,
 		metrics:      make([]time.Time, MetricCount),
 		endpoint:     "test1",
 	}
@@ -42,7 +42,7 @@ func TestDispatchRequest(t *testing.T) {
 	}
 
 	req2 := &Request{
-		sessionToken: sesh2.Token,
+		SessionToken: sesh2.Token,
 		metrics:      make([]time.Time, MetricCount),
 		endpoint:     "test2",
 	}

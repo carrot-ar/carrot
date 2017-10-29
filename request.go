@@ -28,7 +28,7 @@ const (
 // request structs
 
 type Request struct {
-	sessionToken SessionToken
+	SessionToken SessionToken
 	endpoint     string
 	Params       map[string]string
 	Origin       location
@@ -54,7 +54,7 @@ func NewRequest(session *Session, message []byte) *Request { //returns error,
 	m := make([]time.Time, MetricCount)
 
 	req := Request{
-		sessionToken: session.Token,
+		SessionToken: session.Token,
 		metrics:      m,
 		data:         message,
 	}
