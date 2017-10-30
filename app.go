@@ -1,8 +1,9 @@
 package carrot
 
-var config = getConfig() // parse conf.yaml and instantiate Config
+var config Config
 
 func Run() {
+	config = getConfig() // parse conf.yaml and instantiate Config
 	sessions := NewDefaultSessionManager()
 	server := NewServer(sessions)
 	dispatcher := NewDispatcher()
