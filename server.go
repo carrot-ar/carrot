@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	serverConfig = config.Server
+	serverConfig         = config.Server
 	serverSecret         = serverConfig.ServerSecret
 	broadcastChannelSize = serverConfig.BroadcastChannelSize
 	port                 = serverConfig.Port

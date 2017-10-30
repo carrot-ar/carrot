@@ -3,6 +3,7 @@ package carrot
 import (
 	"fmt"
 )
+
 var (
 	doCacheControllers = config.Router.DoCacheControllers
 )
