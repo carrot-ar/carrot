@@ -33,7 +33,6 @@ func getRouter() Router {
 			mutex:        &sync.Mutex{},
 		}
 	})
-	
 	return routerInstance
 }
 

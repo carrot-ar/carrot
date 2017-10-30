@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	clientConfig = config.Client
+	clientConfig     = config.Client
 	writeWaitSeconds = clientConfig.WriteWaitSecs
 	pongWaitSeconds  = clientConfig.PongWaitSecs
 
