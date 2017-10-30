@@ -7,10 +7,11 @@ import (
 	"net/http"
 )
 
-const (
-	serverSecret         = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
-	broadcastChannelSize = 4096
-	port                 = 8080
+var (
+	serverConfig = config.Server
+	serverSecret         = serverConfig.ServerSecret
+	broadcastChannelSize = serverConfig.BroadcastChannelSize
+	port                 = serverConfig.Port
 )
 
 //the server maintains the list of clients and

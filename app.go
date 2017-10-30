@@ -1,5 +1,7 @@
 package carrot
 
+var config = getConfig() // parse conf.yaml and instantiate Config
+
 func Run() {
 	sessions := NewDefaultSessionManager()
 	server := NewServer(sessions)
