@@ -27,7 +27,9 @@ type Config struct {
 		RouteDelimiter       string `yaml:"route_delimiter"`
 		StreamIdentifier     string `yaml:"stream_identifier"`
 		ControllerIdentifier string `yaml:"controller_identifier"`
-		DoCacheControllers   bool   `yaml:"do_cache_controllers"`
+	}
+	Dispatcher struct {
+		DoCacheControllers bool `yaml:"do_cache_controllers"`
 	}
 	Client struct {
 		SendMessageBufferSize int           `yaml:"send_msg_buffer_size"`

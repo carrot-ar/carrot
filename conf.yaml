@@ -1,5 +1,5 @@
 server:
-  server_secret: "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
+  server_secret: "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b" // TODO: Change this because using a default secret is insecure
   broadcast_channel_size: 4096
   port: 8080
 
@@ -11,6 +11,8 @@ router:
   route_delimiter: "_"
   stream_identifier: "StreamController"
   controller_identifier: "Controller"
+
+dispatcher:
   do_cache_controllers: true
 
 client:
