@@ -2,10 +2,13 @@ package carrot
 
 import (
 	"fmt"
+	"reflect"
+	"strings"
 )
 
 const (
-	doCacheControllers bool = true
+	doCacheControllers      bool = true
+	maxNumCachedControllers      = 256
 )
 
 type Dispatcher struct {
@@ -24,14 +27,15 @@ func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
 	req.AddMetric(DispatchRequestStart)
 	if doCacheControllers { //used to be "if route.persist"
 		token := req.SessionToken
-		if exists := dp.cachedControllers.Exists(token); !exists {
+		key := getCacheKey(token, route.controller)
+		if exists := dp.cachedControllers.Exists(key); !exists {
 			c, err := NewController(route.Controller(), doCacheControllers) //send to controller factory with stream identifier
 			if err != nil {
 				fmt.Println(err)
 			}
-			dp.cachedControllers.Add(token, c)
+			dp.cachedControllers.Add(key, c)
 		}
-		sc := dp.cachedControllers.Get(token)
+		sc := dp.cachedControllers.Get(key)
 
 		err := sc.Invoke(route, req) //send request to controller
 		if err != nil {
@@ -63,7 +67,21 @@ func (dp *Dispatcher) Run() {
 			dp.dispatchRequest(route, req)
 			req.AddMetric(DispatchRequestEnd)
 		default:
-			// fmt.Println("dispatcher Run() did something bad")
+			//delete controllers that haven't been used recently
+			if dp.cachedControllers.Length() > maxNumCachedControllers {
+				dp.cachedControllers.DeleteOldest()
+				fmt.Printf("a controller has been deleted, num of controllers left: %v \n", dp.cachedControllers.lru.Len())
+			}
 		}
 	}
+}
+
+func getCacheKey(token SessionToken, controller ControllerType) string {
+	c1 := reflect.TypeOf(controller)
+	c2 := strings.SplitAfter(c1.String(), ".")
+	tmp := []string{string(token), c2[1]}
+	key := strings.Join(tmp, ".")
+	fmt.Println(key)
+	return key
+	// will look like "token.controllerType"
 }
