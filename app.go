@@ -5,21 +5,18 @@ import (
 )
 
 var Environment string
-	
-	
-
 
 // TODO: refactor so that if a module fails to load, we cause an error
-func Run() {
-  // if the environment isn't set, then we can set to debug.
-  
-  if Environment != "testing" {
+func Run() error {
+	// if the environment isn't set, then we can set to debug.
+
+	if Environment != "testing" {
 		log.SetLevel(log.DebugLevel)
 	} else {
 		log.SetLevel(log.PanicLevel)
 	}
-  
-  sessions := NewDefaultSessionManager()
+
+	sessions := NewDefaultSessionManager()
 	log.Debug("session store initialized")
 	server := NewServer(sessions)
 	log.Debug("server initialized")
