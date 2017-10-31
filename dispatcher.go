@@ -3,8 +3,9 @@ package carrot
 import (
 	"fmt"
 )
-var (
-	doCacheControllers = config.Router.DoCacheControllers
+
+const (
+	doCacheControllers bool = true
 )
 
 type Dispatcher struct {

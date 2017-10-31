@@ -4,9 +4,8 @@ import (
 	"log"
 )
 
-var (
-	middlewareConfig = config.Middleware
-	InputChannelSize = middlewareConfig.InputChannelSize
+const (
+	InputChannelSize = 256
 )
 
 /*
