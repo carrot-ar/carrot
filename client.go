@@ -10,22 +10,9 @@ import (
 	"time"
 )
 
-var (
-	clientConfig = config.Client
-	writeWaitSeconds = clientConfig.WriteWaitSecs
-	pongWaitSeconds  = clientConfig.PongWaitSecs
-
-	// maximum message size allowed from the websocket
-	maxMessageSize = clientConfig.MaxMessageSize
-
-	// toggle to require a client secret token on WS upgrade request
-	clientSecretRequired = clientConfig.ClientSecretRequired
-
-	// size of client send channel
-	sendMsgBufferSize = clientConfig.SendMessageBufferSize
-
-	// size of sendToken channel
-	sendTokenBufferSize = clientConfig.SendTokenBufferSize
+const (
+	writeWaitSeconds = 600
+	pongWaitSeconds  = 600
 
 	// time allowed to write a message to the websocket
 	writeWait = writeWaitSeconds * time.Second
@@ -35,6 +22,18 @@ var (
 
 	// send pings to the websocket with this period, must be less than pongWait
 	pingPeriod = (pongWait * 9) / 10
+
+	// maximum message size allowed from the websocket
+	maxMessageSize = 65536
+
+	// toggle to require a client secret token on WS upgrade request
+	clientSecretRequired = false
+
+	// size of client send channel
+	sendMsgBufferSize = 1
+
+	// size of sendToken channel
+	sendTokenBufferSize = 1
 )
 
 var (

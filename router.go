@@ -5,6 +5,12 @@ import (
 	"sync"
 )
 
+const (
+	routeDelimiter       = "_"
+	streamIdentifier     = "StreamController"
+	controllerIdentifier = "Controller"
+)
+
 type RoutingTable map[string]Route
 
 var (
@@ -33,7 +39,7 @@ func getRouter() Router {
 			mutex:        &sync.Mutex{},
 		}
 	})
-	
+
 	return routerInstance
 }
 
