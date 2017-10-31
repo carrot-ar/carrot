@@ -123,4 +123,3 @@ func (ih *itemHeap) Pop() interface{} {
 	*ih = old[0 : len(old)-1]
 	return item
 }
-

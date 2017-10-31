@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	doCacheControllers bool = true
-	maxNumCachedControllers = 256
+	doCacheControllers      bool = true
+	maxNumCachedControllers      = 256
 )
 
 type Dispatcher struct {
@@ -68,7 +68,7 @@ func (dp *Dispatcher) Run() {
 			req.AddMetric(DispatchRequestEnd)
 		default:
 			//delete controllers that haven't been used recently
-			if (dp.cachedControllers.Length() > maxNumCachedControllers) {
+			if dp.cachedControllers.Length() > maxNumCachedControllers {
 				dp.cachedControllers.DeleteOldest()
 				fmt.Printf("a controller has been deleted, num of controllers left: %v \n", dp.cachedControllers.lru.Len())
 			}

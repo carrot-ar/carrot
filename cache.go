@@ -7,13 +7,13 @@ import (
 
 type CachedControllersList struct {
 	cachedControllers map[string]*AppController
-	lru *PriorityQueue
+	lru               *PriorityQueue
 }
 
 func NewCachedControllersList() *CachedControllersList {
 	return &CachedControllersList{
 		cachedControllers: make(map[string]*AppController),
-		lru:	NewPriorityQueue(),
+		lru:               NewPriorityQueue(),
 	}
 }
 
@@ -49,7 +49,7 @@ func (ccl *CachedControllersList) Add(key string, ac *AppController) {
 func (ccl *CachedControllersList) DeleteOldest() {
 	//find oldest controller in LRU to identify token and delete LRU record
 	key, err := ccl.lru.Pop()
-	if (err != nil) {
+	if err != nil {
 		fmt.Println("there was a problem removing the oldest element from the LRU")
 	}
 
