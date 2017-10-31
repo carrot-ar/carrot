@@ -26,14 +26,9 @@ func NewDispatcher() *Dispatcher {
 func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
 	req.AddMetric(DispatchRequestStart)
 	if doCacheControllers { //used to be "if route.persist"
-<<<<<<< Updated upstream
-		token := req.SessionToken
-		if exists := dp.cachedControllers.Exists(token); !exists {
-=======
 		token := req.sessionToken
 		key := getCacheKey(token, route.controller)
 		if exists := dp.cachedControllers.Exists(key); !exists {
->>>>>>> Stashed changes
 			c, err := NewController(route.Controller(), doCacheControllers) //send to controller factory with stream identifier
 			if err != nil {
 				fmt.Println(err)
