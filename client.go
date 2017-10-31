@@ -2,9 +2,8 @@ package carrot
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/gorilla/websocket"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"sync"
 	"time"
@@ -123,7 +122,8 @@ func (c *Client) writePump() {
 		case message, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
-				log.Printf("client: a connection has closed\n")
+				// TODO: add session token to here once client list is updated
+				log.WithFields(log.Fields{}).Info("a connection has closed\n")
 				//the server closed the channel
 				//c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
@@ -180,14 +180,12 @@ func (c *Client) writePump() {
 
 // validate that the client should be allowed to connect
 func validClientSecret(clientSecret string) bool {
-	log.Printf("clientSecret: %v", clientSecret)
-
-	if clientSecret == serverSecret {
-		return true
+	if clientSecret != serverSecret {
+		log.WithField("attempted_secret", clientSecret).Error("client and server secrets do not match :(")
+		return false
 	}
 
-	log.Println("The client and server secrets do not match :(")
-	return false
+	return true
 }
 
 func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
@@ -218,7 +216,8 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 	client.server.register <- client
 
 	func() {
-		fmt.Println("starting client!")
+		// TODO: log session token used here
+		log.Info("a new client has joined")
 		<-client.start
 		go client.writePump()
 		go client.readPump()

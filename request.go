@@ -3,7 +3,6 @@ package carrot
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 )
 
@@ -59,8 +58,6 @@ func NewRequest(session *Session, message []byte) *Request { //returns error,
 		data:         message,
 	}
 
-	log.Println(string(message))
-
 	var d requestData
 	err := json.Unmarshal(message, &d)
 
@@ -85,7 +82,7 @@ func (r *Request) AddMetric(stage int) {
 }
 
 func (r *Request) End() {
-	logBenchmarks(r.metrics)
+	//logBenchmarks(r.metrics)
 }
 
 func logBenchmarks(metrics []time.Time) {
@@ -105,7 +102,7 @@ func logBenchmarks(metrics []time.Time) {
 
 func validSession(serverToken SessionToken, clientToken SessionToken) error {
 	if serverToken != clientToken {
-		return fmt.Errorf("token mismatch %v != %v", serverToken, clientToken)
+		return fmt.Errorf("client-server token mismatch")
 	}
 
 	return nil

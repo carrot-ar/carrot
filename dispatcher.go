@@ -2,6 +2,7 @@ package carrot
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"reflect"
 	"strings"
 )
@@ -70,7 +71,7 @@ func (dp *Dispatcher) Run() {
 			//delete controllers that haven't been used recently
 			if dp.cachedControllers.Length() > maxNumCachedControllers {
 				dp.cachedControllers.DeleteOldest()
-				fmt.Printf("a controller has been deleted, num of controllers left: %v \n", dp.cachedControllers.lru.Len())
+				log.WithField("cache_size", dp.cachedControllers.lru.Len()).Debug("deleting least recently used controller")
 			}
 		}
 	}
@@ -81,7 +82,6 @@ func getCacheKey(token SessionToken, controller ControllerType) string {
 	c2 := strings.SplitAfter(c1.String(), ".")
 	tmp := []string{string(token), c2[1]}
 	key := strings.Join(tmp, ".")
-	fmt.Println(key)
 	return key
 	// will look like "token.controllerType"
 }
