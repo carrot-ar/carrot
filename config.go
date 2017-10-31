@@ -2,9 +2,9 @@ package carrot
 
 import (
 	"gopkg.in/yaml.v2"
+	"sync"
 	"io/ioutil"
 	"log"
-	"sync"
 	"time"
 )
 
