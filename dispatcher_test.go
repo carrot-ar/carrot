@@ -59,14 +59,15 @@ func TestDispatchRequest(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	if !d.cachedControllers.Exists(sesh1.Token) {
+	key1 := getCacheKey(sesh1.Token, route1.controller)
+	if !d.cachedControllers.Exists(key1) {
 		fmt.Println("The DPC is not yet in the cached controllers list")
 	}
 	fmt.Println(d.cachedControllers.Length()) //should return int of 0
 
 	d.dispatchRequest(route1, req1)
 
-	if d.cachedControllers.Exists(sesh1.Token) {
+	if d.cachedControllers.Exists(key1) {
 		fmt.Println("The DPC was successfully stored in the cached controllers list")
 	}
 	fmt.Println(d.cachedControllers.Length()) //should return int of 1
