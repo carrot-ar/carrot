@@ -9,74 +9,71 @@ import (
 type TestDispatcherController struct{}
 
 func (tdc *TestDispatcherController) Print(req *Request, broadcast *Broadcast) {
-	fmt.Println("The dispatchingRequest method worked because this controller is speaking!")
+	fmt.Println("The dispatchingRequest method worked because this controller is speaking :D!")
+}
+
+func getTokenRouteAndRequestForTest(endpoint string) (SessionToken, *Route, *Request, error) {
+		ss := NewDefaultSessionManager()
+		token, err := ss.NewSession()
+		if err != nil {
+			return "", nil, nil, err
+		}
+		sesh, err := ss.Get(token)
+		if err != nil {
+			return "", nil, nil, err
+		}
+		req := &Request{
+			SessionToken: sesh.Token,
+			metrics:      make([]time.Time, MetricCount),
+			endpoint:     endpoint,
+		}
+		route, err := Lookup(req.endpoint)
+		if err != nil {
+			return "", nil, nil, err
+		}
+		return token, route, req, nil
 }
 
 func TestDispatchRequest(t *testing.T) {
-	Add("test1", TestDispatcherController{}, "Print", false)
+	d := NewDispatcher()	
 
-	ss := NewDefaultSessionManager()
-
-	token1, err1 := ss.NewSession()
-	if err1 != nil {
-		fmt.Println(err1)
-	}
-	sesh1, err2 := ss.Get(token1)
-	if err2 != nil {
-		fmt.Println(err2)
-	}
-
-	req1 := &Request{
-		SessionToken: sesh1.Token,
-		metrics:      make([]time.Time, MetricCount),
-		endpoint:     "test1",
-	}
-
-	token2, err3 := ss.NewSession()
-	if err3 != nil {
-		fmt.Println(err1)
-	}
-	sesh2, err4 := ss.Get(token2)
-	if err4 != nil {
-		fmt.Println(err2)
-	}
-
-	req2 := &Request{
-		SessionToken: sesh2.Token,
-		metrics:      make([]time.Time, MetricCount),
-		endpoint:     "test2",
-	}
-
-	d := NewDispatcher()
-
-	route1, err := Lookup(req1.endpoint)
+	token1, route1, req1, err := getTokenRouteAndRequestForTest(endpoint1)
 	if err != nil {
-		fmt.Println(err)
+		t.Error(err)
 	}
 
-	route2, err := Lookup(req2.endpoint)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	key1 := getCacheKey(sesh1.Token, route1.controller)
-	if !d.cachedControllers.Exists(key1) {
-		fmt.Println("The DPC is not yet in the cached controllers list")
-	}
-	fmt.Println(d.cachedControllers.Length()) //should return int of 0
-
-	d.dispatchRequest(route1, req1)
-
+	key1 := getCacheKey(token1, route1.controller)
 	if d.cachedControllers.Exists(key1) {
-		fmt.Println("The DPC was successfully stored in the cached controllers list")
+		t.Fatalf("The DPC is already in the cached controllers list")
 	}
-	fmt.Println(d.cachedControllers.Length()) //should return int of 1
+
+	if d.cachedControllers.Length() != 0 {
+		t.Fatalf("No (zero) cached controllers should be stored yet")
+	}
 
 	d.dispatchRequest(route1, req1)
 
-	fmt.Println(d.cachedControllers.Length()) //should return int of 1 (using existing entry in list)
+	if !d.cachedControllers.Exists(key1) {
+		t.Fatalf("The DPC was unsuccessfully stored in the cached controllers list")
+	}
+	if d.cachedControllers.Length() != 1 {
+		t.Fatalf("Only 1 (one) cached controller should be stored")
+	}
+
+	d.dispatchRequest(route1, req1)
+
+	if d.cachedControllers.Length() != 1 { //should return int of 1 (using existing entry in list)
+		t.Fatalf("An existing cached controller should have been used")
+	}
+
+	_, route2, req2, err := getTokenRouteAndRequestForTest(endpoint1)
+	if err != nil {
+		t.Error(err)
+	}
 
 	d.dispatchRequest(route2, req2)
 
-	fmt.Println(d.cachedControllers.Length()) //should return int of 2
+	if d.cachedControllers.Length() != 2 { //should return int of 2
+		t.Fatalf("Only 2 (two) cached controllers should be stored")
+	}
 }
