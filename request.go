@@ -3,7 +3,7 @@ package carrot
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -59,8 +59,6 @@ func NewRequest(session *Session, message []byte) *Request { //returns error,
 		data:         message,
 	}
 
-	log.Println(string(message))
-
 	var d requestData
 	err := json.Unmarshal(message, &d)
 
@@ -105,7 +103,10 @@ func logBenchmarks(metrics []time.Time) {
 
 func validSession(serverToken SessionToken, clientToken SessionToken) error {
 	if serverToken != clientToken {
-		return fmt.Errorf("token mismatch %v != %v", serverToken, clientToken)
+		log.WithFields(log.Fields{
+			"server_token": serverToken,
+			"client_token": clientToken,
+		}).Error("token mismatch")
 	}
 
 	return nil

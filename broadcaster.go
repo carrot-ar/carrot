@@ -45,10 +45,10 @@ func (br *Broadcaster) broadcastAll(message []byte) {
 		}
 	})
 	log.WithFields(log.Fields{
-		"sent" : messagesSent,
+		"sent":      messagesSent,
 		"refreshed": refreshedClientCount,
-		"closed": closedClientCount,
-		"expired": expiredSessionCount,
+		"closed":    closedClientCount,
+		"expired":   expiredSessionCount,
 	}).Debug("broadcast sent")
 }
 

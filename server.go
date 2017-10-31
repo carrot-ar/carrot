@@ -3,8 +3,8 @@ package carrot
 import (
 	"flag"
 	"fmt"
-	"net/http"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 )
 
 const (
@@ -52,7 +52,7 @@ func (svr *Server) Run() {
 				token, err = svr.sessions.NewSession()
 				if err != nil {
 					//handle later
-					log.Print(err)
+					log.Error(err)
 				}
 				//return the new token for the session
 				client.sendToken <- token
@@ -97,7 +97,7 @@ func (svr *Server) Serve() {
 
 	log.WithFields(log.Fields{
 		"port": port,
-		"url": "ws://localhost/",
+		"url":  "ws://localhost/",
 	}).Infof("Listening...")
 
 	err := http.ListenAndServe(*addr, nil)

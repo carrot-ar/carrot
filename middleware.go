@@ -18,7 +18,7 @@ const (
 func logger(req *Request) error {
 	log.WithFields(log.Fields{
 		"session_token": req.SessionToken,
-		"module": "middleware"}).Debug("new request")
+		"module":        "middleware"}).Debug("new request")
 	return nil
 }
 
@@ -26,7 +26,7 @@ func discardBadRequest(req *Request) error {
 	if req.err != nil {
 		log.WithFields(log.Fields{
 			"session_token": req.SessionToken,
-			"module": "middleware"}).Errorf("invalid request: %v", req.err.Error())
+			"module":        "middleware"}).Errorf("invalid request: %v", req.err.Error())
 		return req.err
 	}
 	return nil
