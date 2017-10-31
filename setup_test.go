@@ -6,8 +6,8 @@ const (
 )
 
 func init() {
-	Environment = "testing"	
+	Environment = "testing"
 
 	//for dispatcher_test.go
-	Add(endpoint1, TestDispatcherController{}, "Print", false)	
+	Add(endpoint1, TestDispatcherController{}, "Print", false)
 }

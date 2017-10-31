@@ -13,29 +13,29 @@ func (tdc *TestDispatcherController) Print(req *Request, broadcast *Broadcast) {
 }
 
 func getTokenRouteAndRequestForTest(endpoint string) (SessionToken, *Route, *Request, error) {
-		ss := NewDefaultSessionManager()
-		token, err := ss.NewSession()
-		if err != nil {
-			return "", nil, nil, err
-		}
-		sesh, err := ss.Get(token)
-		if err != nil {
-			return "", nil, nil, err
-		}
-		req := &Request{
-			SessionToken: sesh.Token,
-			metrics:      make([]time.Time, MetricCount),
-			endpoint:     endpoint,
-		}
-		route, err := Lookup(req.endpoint)
-		if err != nil {
-			return "", nil, nil, err
-		}
-		return token, route, req, nil
+	ss := NewDefaultSessionManager()
+	token, err := ss.NewSession()
+	if err != nil {
+		return "", nil, nil, err
+	}
+	sesh, err := ss.Get(token)
+	if err != nil {
+		return "", nil, nil, err
+	}
+	req := &Request{
+		SessionToken: sesh.Token,
+		metrics:      make([]time.Time, MetricCount),
+		endpoint:     endpoint,
+	}
+	route, err := Lookup(req.endpoint)
+	if err != nil {
+		return "", nil, nil, err
+	}
+	return token, route, req, nil
 }
 
 func TestDispatchRequest(t *testing.T) {
-	d := NewDispatcher()	
+	d := NewDispatcher()
 
 	token1, route1, req1, err := getTokenRouteAndRequestForTest(endpoint1)
 	if err != nil {
