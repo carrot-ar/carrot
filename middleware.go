@@ -1,7 +1,7 @@
 package carrot
 
 import (
-	"log"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -16,13 +16,17 @@ const (
 // }
 
 func logger(req *Request) error {
-	log.Println("middleware: new request")
+	log.WithFields(log.Fields{
+		"session_token": req.SessionToken,
+		"module": "middleware"}).Debug("new request")
 	return nil
 }
 
 func discardBadRequest(req *Request) error {
 	if req.err != nil {
-		log.Printf("bad request: %s, ignoring...\n", req.err.Error())
+		log.WithFields(log.Fields{
+			"session_token": req.SessionToken,
+			"module": "middleware"}).Errorf("invalid request: %v", req.err.Error())
 		return req.err
 	}
 	return nil
@@ -36,7 +40,6 @@ type MiddlewarePipeline struct {
 
 func (mw *MiddlewarePipeline) Run() {
 	go mw.dispatcher.Run()
-
 	func() {
 		for {
 			select {
@@ -61,7 +64,7 @@ func (mw *MiddlewarePipeline) Run() {
 
 func NewMiddlewarePipeline() *MiddlewarePipeline {
 	// List of middleware functions
-	mw := []func(*Request) error{logger, discardBadRequest}
+	mw := []func(*Request) error{discardBadRequest, logger}
 
 	return &MiddlewarePipeline{
 		In:          make(chan *Request, InputChannelSize),

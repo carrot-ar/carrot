@@ -1,7 +1,7 @@
 package carrot
 
 import (
-	"fmt"
+	log "github.com/sirupsen/logrus"
 )
 
 type CachedControllersList struct {
@@ -25,8 +25,9 @@ func (ccl *CachedControllersList) Exists(token SessionToken) bool {
 func (ccl *CachedControllersList) Get(token SessionToken) *AppController {
 	cc, ok := ccl.cachedControllers[token]
 	if !ok || cc == nil {
-		fmt.Println("cannot return route because it doesn't exist")
-		//return nil
+		log.WithFields(log.Fields{
+			"session_token" : token,
+		}).Error("cached controller does not exist")
 	}
 	return cc
 }

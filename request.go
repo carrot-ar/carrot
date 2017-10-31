@@ -85,7 +85,7 @@ func (r *Request) AddMetric(stage int) {
 }
 
 func (r *Request) End() {
-	logBenchmarks(r.metrics)
+	//logBenchmarks(r.metrics)
 }
 
 func logBenchmarks(metrics []time.Time) {

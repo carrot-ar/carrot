@@ -3,8 +3,8 @@ package carrot
 import (
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -95,8 +95,10 @@ func (svr *Server) Serve() {
 		serveWs(svr, w, r)
 	})
 
-	log.Printf("Listening at http://localhost:%d", port)
-	log.Printf("Listening at ws://localhost:%d", port)
+	log.WithFields(log.Fields{
+		"port": port,
+		"url": "ws://localhost/",
+	}).Infof("Listening...")
 
 	err := http.ListenAndServe(*addr, nil)
 	if err != nil {
