@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	doCacheControllers = config.Dispatcher.DoCacheControllers
+	doCacheControllers = config.Router.DoCacheControllers
 )
 
 type Dispatcher struct {
