@@ -1,8 +1,7 @@
 package carrot
 
 import (
-	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 )
 
 type Broadcaster struct {
@@ -45,11 +44,12 @@ func (br *Broadcaster) broadcastAll(message []byte) {
 			return true
 		}
 	})
-	log.Printf("server: broadcast sent %v, refresh %v, closed %v, expired %v",
-		messagesSent,
-		refreshedClientCount,
-		closedClientCount,
-		expiredSessionCount)
+	log.WithFields(log.Fields{
+		"sent":      messagesSent,
+		"refreshed": refreshedClientCount,
+		"closed":    closedClientCount,
+		"expired":   expiredSessionCount,
+	}).Debug("broadcast sent")
 }
 
 func (br *Broadcaster) Run() {
@@ -57,7 +57,6 @@ func (br *Broadcaster) Run() {
 		select {
 		case message := <-br.broadcast:
 			br.broadcastAll(message)
-			fmt.Println(string(message))
 		}
 	}
 }

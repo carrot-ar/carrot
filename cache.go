@@ -1,7 +1,7 @@
 package carrot
 
 import (
-	"fmt"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -28,8 +28,9 @@ func (ccl *CachedControllersList) Exists(key string) bool {
 func (ccl *CachedControllersList) Get(key string) *AppController {
 	cc, ok := ccl.cachedControllers[key]
 	if !ok || cc == nil {
-		fmt.Println("cannot return route because it doesn't exist")
-		//return nil
+		log.WithFields(log.Fields{
+			"session_token": key,
+		}).Error("cached controller does not exist")
 	}
 
 	//update priority to reflect recent controller usage
@@ -43,14 +44,17 @@ func (ccl *CachedControllersList) Add(key string, ac *AppController) {
 	ccl.cachedControllers[key] = ac
 	//add to LRU to keep track of deletion order
 	ccl.lru.Insert(key, getPriority())
-	fmt.Printf("a controller has been added, num of controllers: %v \n", ccl.lru.Len())
+	log.WithFields(log.Fields{
+		"key":        key,
+		"cache_size": ccl.lru.Len(),
+	}).Debug("new controller cached")
 }
 
 func (ccl *CachedControllersList) DeleteOldest() {
 	//find oldest controller in LRU to identify token and delete LRU record
 	key, err := ccl.lru.Pop()
 	if err != nil {
-		fmt.Println("there was a problem removing the oldest element from the LRU")
+		log.Error("could not remove oldest element of LRU")
 	}
 
 	//use token to delete from controller map

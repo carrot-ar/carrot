@@ -3,8 +3,8 @@ package carrot
 import (
 	"crypto/rand"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"sync"
 	"time"
 )
@@ -109,7 +109,10 @@ func (s *DefaultSessionStore) NewSession() (SessionToken, error) {
 	s.length += 1
 	s.mutex.Unlock()
 
-	log.Printf("session: new session created %v, total: %v\n", token, s.length)
+	log.WithFields(log.Fields{
+		"session_token": token,
+		"session_count": s.length,
+	})
 
 	return token, nil
 }
