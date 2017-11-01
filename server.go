@@ -9,7 +9,6 @@ import (
 
 const (
 	serverSecret         = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
-	broadcastChannelSize = 65536
 	port                 = 8080
 )
 
@@ -60,7 +59,7 @@ func (svr *Server) Run() {
 
 				client.session = sessionPtr
 
-				svr.clientPool.Insert(client)
+				svr.clientPool.insertQueue <- client
 
 				//return the new token for the session
 				client.sendToken <- token

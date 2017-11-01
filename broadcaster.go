@@ -1,5 +1,9 @@
 package carrot
 
+import log "github.com/sirupsen/logrus"
+
+const broadcastChannelSize = 65536
+
 type OutboundMessage struct {
 	message []byte
 }
@@ -12,8 +16,8 @@ type Broadcaster struct {
 	broadcast chan []byte
 }
 
-func NewBroadcaster(pool *ClientPool) *Broadcaster {
-	return &Broadcaster{
+func NewBroadcaster(pool *ClientPool) Broadcaster {
+	return Broadcaster{
 		sessions:   NewDefaultSessionManager(),
 		broadcast:  make(chan []byte, broadcastChannelSize),
 		clientPool: pool,
@@ -33,6 +37,7 @@ func (br *Broadcaster) Run() {
 	for {
 		select {
 		case message := <-br.broadcast:
+			log.WithField("module", "broadcaster").Debug("broadcast all")
 			br.broadcastAll(message)
 		}
 	}

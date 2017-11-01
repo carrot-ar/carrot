@@ -67,6 +67,10 @@ func (dp *Dispatcher) Run() {
 			req.AddMetric(DispatchRequestStart)
 			dp.dispatchRequest(route, req)
 			req.AddMetric(DispatchRequestEnd)
+			log.WithFields(log.Fields{
+				"route" : fmt.Sprintf("%v#%v", reflect.TypeOf(route.controller).Name(), route.function),
+				"session_token" : req.SessionToken,
+			}).Debug("dispatching request")
 		default:
 			//delete controllers that haven't been used recently
 			if dp.cachedControllers.Length() > maxNumCachedControllers {

@@ -98,14 +98,14 @@ func (c *Client) readPump() {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-				log.Printf("error: %v", err)
+				log.Errorf("error: %v", err)
 			}
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
 		req := NewRequest(c.session, message)
-
+		log.WithField("session_token", c.session.Token).Debug("request being sent to middleware")
 		c.server.Middleware.In <- req
 		//c.server.broadcast <- message
 	}

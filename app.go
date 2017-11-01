@@ -4,15 +4,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var broadcast *Broadcast
 var Environment string
+var broadcaster Broadcaster
 
 // TODO: refactor so that if a module fails to load, we cause an error
 func Run() error {
 
 	// if the environment isn't set, then we can set to debug.
 	if Environment != "testing" {
-		log.SetLevel(log.DebugLevel)
+		log.SetLevel(log.InfoLevel)
 	} else {
 		log.SetLevel(log.PanicLevel)
 	}
@@ -23,20 +23,16 @@ func Run() error {
 	log.Debug("client pool initialized")
 	server := NewServer(clientPool, sessions)
 	log.Debug("server initialized")
-	dispatcher := NewDispatcher()
-	log.Debug("dispatcher initialized")
-	broadcaster := NewBroadcaster(clientPool)
-	log.Debug("broadcaster initialized")
-	broadcast = NewBroadcast(broadcaster)
-	log.Debug("set broadcast var")
-	go dispatcher.Run()
-	log.Debug("dispatcher started")
+
+	// TODO: clean all this up
+	broadcaster = NewBroadcaster(clientPool)
+	log.Debug("global broadcaster created")
+	go broadcaster.clientPool.ListenAndSend()
+	log.Debug("global broadcaster running")
 	go server.Middleware.Run()
 	log.Debug("middleware started")
 	go server.Run()
 	log.Debug("server started")
-	go broadcast.broadcaster.clientPool.ListenAndSend()
-	log.Debug("client pool broadcaster started")
 	log.Debug("beginning to serve")
 
 	if Environment != "testing" {

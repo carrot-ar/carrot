@@ -42,7 +42,7 @@ func (cp *ClientPool) Insert(client *Client) error {
 		return fmt.Errorf("unable to queue client")
 	}
 
-	cp.insertQueue <- client
+	cp.insert(client)
 
 	return nil
 }
@@ -57,7 +57,7 @@ func (cp *ClientPool) insert(client *Client) error {
 		return err
 	}
 
-	err = cp.setClient(index, <-cp.insertQueue)
+	err = cp.setClient(index, client)
 	if err != nil {
 		return err
 	}
@@ -90,6 +90,7 @@ func (cp *ClientPool) Count() int {
 
 // send a message to the clients
 func (cp *ClientPool) Send(message *OutboundMessage) {
+	log.Debug("in the send method")
 	cp.outboundMessageQueue <- message
 }
 
@@ -100,9 +101,12 @@ func (cp *ClientPool) ListenAndSend() {
 		case newClient := <-cp.insertQueue:
 			fmt.Println("A NEW CLIENT JOINED!")
 			cp.insert(newClient)
+			log.Debugf("client pool size %v", len(cp.clients))
 		case message := <-cp.outboundMessageQueue:
 			// TODO: Figure out the logic for running a criteria
 			// function and only broadcasting to a subset of clients
+			log.WithField("message", message).Debug("MESSAGE")
+
 			for i, client := range cp.clients {
 				if client != nil {
 
@@ -122,8 +126,9 @@ func (cp *ClientPool) ListenAndSend() {
 
 				}
 			}
+
 		default:
-			log.Debug("DEFAULT ENTRY HIT")
+			//log.Debug("DEFAULT ENTRY HIT")
 		}
 	}
 }
