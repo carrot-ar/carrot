@@ -3,11 +3,12 @@ package carrot
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"math"
 )
 
-const maxClients = 4096
+const maxClients = 128
 const maxClientPoolQueueBackup = 128
-const maxOutboundMessages = 8192
+const maxOutboundMessages = 4096
 
 type ClientPool struct {
 	sessions             SessionStore
@@ -97,16 +98,41 @@ func (cp *ClientPool) Send(message *OutboundMessage) {
 // loop and send
 func (cp *ClientPool) ListenAndSend() {
 	for {
+
+		if len(cp.insertQueue) > int(math.Floor(maxClientPoolQueueBackup * 0.90)) {
+			log.WithFields(log.Fields{
+				"size" : len(cp.insertQueue),
+				"module" : "client_pool",
+				"channel" : "insert_queue"}).Warn("input channel is at or above 90% capacity!")
+		}
+
+		if len(cp.insertQueue) == maxClientPoolQueueBackup {
+			log.WithFields(log.Fields{
+				"size" : len(cp.insertQueue),
+				"module" : "client_pool",
+				"channel" : "insert_queue"}).Error("input channel is full!")
+		}
+
+		if len(cp.outboundMessageQueue) > int(math.Floor(maxOutboundMessages * 0.90)) {
+			log.WithFields(log.Fields{
+				"size" : len(cp.outboundMessageQueue),
+				"module" : "client_pool",
+				"channel": "outbound"}).Warn("input channel is at or above 90% capacity!")
+		}
+
+		if len(cp.outboundMessageQueue) == maxOutboundMessages {
+			log.WithFields(log.Fields{
+				"size" : len(cp.outboundMessageQueue),
+				"module" : "client_pool",
+				"channel" : "outbound"}).Error("input channel is full!")
+		}
+
 		select {
 		case newClient := <-cp.insertQueue:
-			fmt.Println("A NEW CLIENT JOINED!")
 			cp.insert(newClient)
-			log.Debugf("client pool size %v", len(cp.clients))
 		case message := <-cp.outboundMessageQueue:
 			// TODO: Figure out the logic for running a criteria
 			// function and only broadcasting to a subset of clients
-			log.WithField("message", message).Debug("MESSAGE")
-
 			for i, client := range cp.clients {
 				if client != nil {
 

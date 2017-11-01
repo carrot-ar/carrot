@@ -5,11 +5,13 @@ import (
 	log "github.com/sirupsen/logrus"
 	"reflect"
 	"strings"
+	"math"
 )
 
 const (
 	doCacheControllers      bool = true
-	maxNumCachedControllers      = 256
+	maxNumCachedControllers      = 4096
+	maxNumDispatcherIncomingRequests = 4096
 )
 
 type Dispatcher struct {
@@ -20,7 +22,7 @@ type Dispatcher struct {
 func NewDispatcher() *Dispatcher {
 	return &Dispatcher{
 		cachedControllers: NewCachedControllersList(),
-		requests:          make(chan *Request, 256),
+		requests:          make(chan *Request, maxNumDispatcherIncomingRequests),
 	}
 }
 
@@ -57,6 +59,18 @@ func (dp *Dispatcher) Run() {
 	for {
 		select {
 		case req := <-dp.requests:
+			if len(dp.requests) > int(math.Floor(maxNumDispatcherIncomingRequests * 0.90)) {
+				log.WithFields(log.Fields{
+					"size" : len(dp.requests),
+					"module" : "dispatcher"}).Warn("input channel is at or above 90% capacity!")
+			}
+
+			if len(dp.requests) == maxNumDispatcherIncomingRequests {
+				log.WithFields(log.Fields{
+					"size" : len(dp.requests),
+					"module" : "dispatcher"}).Error("input channel is full!")
+			}
+
 			req.AddMetric(DispatchLookupStart)
 			route, err := Lookup(req.endpoint)
 			if err != nil {
@@ -67,6 +81,7 @@ func (dp *Dispatcher) Run() {
 			req.AddMetric(DispatchRequestStart)
 			dp.dispatchRequest(route, req)
 			req.AddMetric(DispatchRequestEnd)
+
 			log.WithFields(log.Fields{
 				"route" : fmt.Sprintf("%v#%v", reflect.TypeOf(route.controller).Name(), route.function),
 				"session_token" : req.SessionToken,

@@ -1,7 +1,6 @@
 package carrot
 
 import (
-//nothing yet
 	log "github.com/sirupsen/logrus"
 )
 

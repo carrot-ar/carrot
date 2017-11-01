@@ -1,8 +1,11 @@
 package carrot
 
-import log "github.com/sirupsen/logrus"
+import (
+	log "github.com/sirupsen/logrus"
+	"math"
+)
 
-const broadcastChannelSize = 65536
+const broadcastChannelSize = 4096
 
 type OutboundMessage struct {
 	message []byte
@@ -35,6 +38,18 @@ func (br *Broadcaster) broadcastAll(message []byte) {
 
 func (br *Broadcaster) Run() {
 	for {
+		if len(br.broadcast) > int(math.Floor(broadcastChannelSize * 0.90)) {
+			log.WithFields(log.Fields{
+				"size" : len(br.broadcast),
+				"module" : "broadcaster"}).Warn("input channel is at or above 90% capacity!")
+		}
+
+		if len(br.broadcast) == maxNumDispatcherIncomingRequests {
+			log.WithFields(log.Fields{
+				"size" : len(br.broadcast),
+				"module" : "broadcaster"}).Error("input channel is full!")
+		}
+
 		select {
 		case message := <-br.broadcast:
 			log.WithField("module", "broadcaster").Debug("broadcast all")
