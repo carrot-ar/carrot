@@ -7,7 +7,7 @@ import (
 type Broadcaster struct {
 	sessions SessionStore
 
-	//inbound messages from the clients
+	//inbound messages from the controllers
 	broadcast chan []byte
 }
 

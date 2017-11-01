@@ -3,6 +3,7 @@ package carrot
 import (
 	log "github.com/sirupsen/logrus"
 	"time"
+	"errors"
 )
 
 type CachedControllersList struct {
@@ -25,18 +26,18 @@ func (ccl *CachedControllersList) Exists(key string) bool {
 	return false
 }
 
-func (ccl *CachedControllersList) Get(key string) *AppController {
+func (ccl *CachedControllersList) Get(key string) (*AppController, error) {
+	var err error
 	cc, ok := ccl.cachedControllers[key]
 	if !ok || cc == nil {
 		log.WithFields(log.Fields{
 			"session_token": key,
-		}).Error("cached controller does not exist")
+		})
+		err = errors.New("cached controller does not exist")
 	}
-
 	//update priority to reflect recent controller usage
 	ccl.lru.UpdatePriority(key, getPriority())
-
-	return cc
+	return cc, err
 }
 
 func (ccl *CachedControllersList) Add(key string, ac *AppController) {
@@ -50,15 +51,15 @@ func (ccl *CachedControllersList) Add(key string, ac *AppController) {
 	}).Debug("new controller cached")
 }
 
-func (ccl *CachedControllersList) DeleteOldest() {
+func (ccl *CachedControllersList) DeleteOldest() error {
 	//find oldest controller in LRU to identify token and delete LRU record
 	key, err := ccl.lru.Pop()
 	if err != nil {
-		log.Error("could not remove oldest element of LRU")
+		return err
 	}
-
 	//use token to delete from controller map
 	delete(ccl.cachedControllers, key.(string)) //doesn't return anything
+	return nil
 }
 
 func (ccl *CachedControllersList) IsEmpty() bool {
