@@ -2,9 +2,9 @@ package carrot
 
 import (
 	"crypto/rand"
-	"encoding/base64"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
+	"io"
 	"sync"
 	"time"
 )
@@ -77,7 +77,12 @@ func (s *DefaultSessionStore) NewSession() (SessionToken, *Session, error) {
 		return nilSessionToken, nil, err
 	}
 
-	token := SessionToken(base64.URLEncoding.EncodeToString(b))
+	uuid, err := generateUUID()
+	if err != nil {
+		return "", nil, err
+	}
+
+	token := SessionToken(uuid)
 
 	// set to expiryTime not time.Now
 	ctx := Session{
@@ -90,7 +95,10 @@ func (s *DefaultSessionStore) NewSession() (SessionToken, *Session, error) {
 	s.length += 1
 	s.mutex.Unlock()
 
-	log.Printf("session: new session created %v, total: %v\n", token, s.length)
+	log.WithFields(log.Fields{
+		"session_token": token,
+		"session_count": s.length,
+	})
 
 	return token, &ctx, nil
 }
@@ -134,4 +142,20 @@ func (s *DefaultSessionStore) Length() int {
 	length := s.length
 	s.mutex.Unlock()
 	return length
+}
+
+// generate UUID fulfilling RFC 4122
+func generateUUID() (string, error) {
+	uuid := make([]byte, 16)
+	n, err := io.ReadFull(rand.Reader, uuid)
+	if n != len(uuid) || err != nil {
+		return "", err
+	}
+
+	// variant bits
+	uuid[8] = uuid[8]&^0xc0 | 0x80
+
+	// version 4
+	uuid[6] = uuid[6]&^0xf0 | 0x40
+	return fmt.Sprintf("%x-%x-%x-%x-%x", uuid[0:4], uuid[4:6], uuid[6:8], uuid[8:10], uuid[10:]), nil
 }

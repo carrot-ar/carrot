@@ -3,6 +3,7 @@ package carrot
 import (
 	"fmt"
 	"reflect"
+	//"strings"
 	"strings"
 	"testing"
 	"time"
@@ -33,7 +34,7 @@ func TestNewRequest(t *testing.T) {
 	actual := NewRequest(ctx, []byte(str))
 
 	expected := &Request{
-		sessionToken: ctx.Token,
+		SessionToken: ctx.Token,
 		endpoint:     "test",
 		Params:       map[string]string{"foo": "bar"},
 		Origin: location{
@@ -64,9 +65,8 @@ func TestRequestTokenMismatch(t *testing.T) {
 	str := `{ "session_token": "badtoken", "endpoint": "print_foo_param", "origin": { "longitude": 45.501689, "latitude": -73.567256 }, "payload": { "offset": { "x": 3, "y": 1, "z": 4 }, "params": { "foo": "bar" } } }`
 
 	req := NewRequest(ctx, []byte(str))
-
 	if !strings.Contains(req.err.Error(), "mismatch") {
 		t.Errorf("request token validation check failed stop request \n "+
-			"Error: %v \n Request Token: %v \n Session Token: %v \n", req.err, req.sessionToken, ctx.Token)
+			"Error: %v \n Request Token: %v \n Session Token: %v \n", req.err, "badtoken", req.SessionToken)
 	}
 }

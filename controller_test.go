@@ -53,25 +53,25 @@ func TestMethodInvocation(t *testing.T) {
 	}
 
 	req1 := &Request{
-		sessionToken: sesh.Token,
+		SessionToken: sesh.Token,
 		metrics:      make([]time.Time, MetricCount),
 		endpoint:     "test1",
 	}
 
 	req2 := &Request{
-		sessionToken: sesh.Token,
+		SessionToken: sesh.Token,
 		metrics:      make([]time.Time, MetricCount),
 		endpoint:     "test2",
 	}
 
 	req3 := &Request{
-		sessionToken: sesh.Token,
+		SessionToken: sesh.Token,
 		metrics:      make([]time.Time, MetricCount),
 		endpoint:     "test2",
 	}
 
 	req4 := &Request{
-		sessionToken: sesh.Token,
+		SessionToken: sesh.Token,
 		metrics:      make([]time.Time, MetricCount),
 		endpoint:     "test2",
 	}
@@ -93,7 +93,7 @@ func TestInvalidMethodInvocation(t *testing.T) {
 	}
 
 	req := &Request{
-		sessionToken: token,
+		SessionToken: token,
 		metrics:      make([]time.Time, MetricCount),
 		endpoint:     "bad_method",
 	}

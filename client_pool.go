@@ -1,6 +1,9 @@
 package carrot
 
-import "fmt"
+import (
+	"fmt"
+	log "github.com/sirupsen/logrus"
+)
 
 const maxClients = 4096
 const maxClientPoolQueueBackup = 128
@@ -120,6 +123,7 @@ func (cp *ClientPool) ListenAndSend() {
 				}
 			}
 		default:
+			log.Debug("DEFAULT ENTRY HIT")
 		}
 	}
 }

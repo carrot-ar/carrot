@@ -27,7 +27,7 @@ const (
 // request structs
 
 type Request struct {
-	sessionToken SessionToken
+	SessionToken SessionToken
 	endpoint     string
 	Params       map[string]string
 	Origin       location
@@ -53,12 +53,10 @@ func NewRequest(session *Session, message []byte) *Request { //returns error,
 	m := make([]time.Time, MetricCount)
 
 	req := Request{
-		sessionToken: session.Token,
+		SessionToken: session.Token,
 		metrics:      m,
 		data:         message,
 	}
-
-	//log.Println(string(message))
 
 	var d requestData
 	err := json.Unmarshal(message, &d)
@@ -84,7 +82,7 @@ func (r *Request) AddMetric(stage int) {
 }
 
 func (r *Request) End() {
-	logBenchmarks(r.metrics)
+	//logBenchmarks(r.metrics)
 }
 
 func logBenchmarks(metrics []time.Time) {
@@ -104,7 +102,7 @@ func logBenchmarks(metrics []time.Time) {
 
 func validSession(serverToken SessionToken, clientToken SessionToken) error {
 	if serverToken != clientToken {
-		return fmt.Errorf("token mismatch %v != %v", serverToken, clientToken)
+		return fmt.Errorf("client-server token mismatch")
 	}
 
 	return nil
