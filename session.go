@@ -53,7 +53,7 @@ type SessionStore interface {
 type DefaultSessionStore struct {
 	sessionStore *sync.Map
 	length       int
-	mutex        *sync.Mutex
+	lengthMutex  *sync.RWMutex
 }
 
 func NewDefaultSessionManager() SessionStore {
@@ -61,7 +61,7 @@ func NewDefaultSessionManager() SessionStore {
 		sessionStoreInstance = &DefaultSessionStore{
 			sessionStore: &sync.Map{},
 			length:       0,
-			mutex:        &sync.Mutex{},
+			lengthMutex:  &sync.RWMutex{},
 		}
 	})
 
@@ -91,9 +91,9 @@ func (s *DefaultSessionStore) NewSession() (SessionToken, *Session, error) {
 	}
 
 	s.sessionStore.Store(token, &ctx)
-	s.mutex.Lock()
+	s.lengthMutex.Lock()
 	s.length += 1
-	s.mutex.Unlock()
+	s.lengthMutex.Unlock()
 
 	log.WithFields(log.Fields{
 		"session_token": token,
@@ -127,9 +127,9 @@ func (s *DefaultSessionStore) Get(token SessionToken) (*Session, error) {
 
 func (s *DefaultSessionStore) Delete(token SessionToken) error {
 	s.sessionStore.Delete(token)
-	s.mutex.Lock()
+	s.lengthMutex.Lock()
 	s.length -= 1
-	s.mutex.Unlock()
+	s.lengthMutex.Unlock()
 	return nil
 }
 
@@ -138,9 +138,9 @@ func (s *DefaultSessionStore) Range(f func(key, value interface{}) bool) {
 }
 
 func (s *DefaultSessionStore) Length() int {
-	s.mutex.Lock()
+	s.lengthMutex.RLock()
 	length := s.length
-	s.mutex.Unlock()
+	s.lengthMutex.RUnlock()
 	return length
 }
 

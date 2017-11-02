@@ -3,15 +3,15 @@ package carrot
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"math"
 	"reflect"
 	"strings"
-	"math"
 )
 
 const (
-	doCacheControllers      bool = true
-	maxNumCachedControllers      = 4096
-	maxNumDispatcherIncomingRequests = 4096
+	doCacheControllers               bool = true
+	maxNumCachedControllers               = 4096
+	maxNumDispatcherIncomingRequests      = 4096
 )
 
 type Dispatcher struct {
@@ -59,16 +59,16 @@ func (dp *Dispatcher) Run() {
 	for {
 		select {
 		case req := <-dp.requests:
-			if len(dp.requests) > int(math.Floor(maxNumDispatcherIncomingRequests * 0.90)) {
+			if len(dp.requests) > int(math.Floor(maxNumDispatcherIncomingRequests*0.90)) {
 				log.WithFields(log.Fields{
-					"size" : len(dp.requests),
-					"module" : "dispatcher"}).Warn("input channel is at or above 90% capacity!")
+					"size":   len(dp.requests),
+					"module": "dispatcher"}).Warn("input channel is at or above 90% capacity!")
 			}
 
 			if len(dp.requests) == maxNumDispatcherIncomingRequests {
 				log.WithFields(log.Fields{
-					"size" : len(dp.requests),
-					"module" : "dispatcher"}).Error("input channel is full!")
+					"size":   len(dp.requests),
+					"module": "dispatcher"}).Error("input channel is full!")
 			}
 
 			req.AddMetric(DispatchLookupStart)
@@ -83,8 +83,8 @@ func (dp *Dispatcher) Run() {
 			req.AddMetric(DispatchRequestEnd)
 
 			log.WithFields(log.Fields{
-				"route" : fmt.Sprintf("%v#%v", reflect.TypeOf(route.controller).Name(), route.function),
-				"session_token" : req.SessionToken,
+				"route":         fmt.Sprintf("%v#%v", reflect.TypeOf(route.controller).Name(), route.function),
+				"session_token": req.SessionToken,
 			}).Debug("dispatching request")
 		default:
 			//delete controllers that haven't been used recently

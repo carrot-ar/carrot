@@ -6,7 +6,7 @@ import (
 	"math"
 )
 
-const maxClients = 128
+const maxClients = 16
 const maxClientPoolQueueBackup = 128
 const maxOutboundMessages = 4096
 
@@ -99,32 +99,32 @@ func (cp *ClientPool) Send(message *OutboundMessage) {
 func (cp *ClientPool) ListenAndSend() {
 	for {
 
-		if len(cp.insertQueue) > int(math.Floor(maxClientPoolQueueBackup * 0.90)) {
+		if len(cp.insertQueue) > int(math.Floor(maxClientPoolQueueBackup*0.90)) {
 			log.WithFields(log.Fields{
-				"size" : len(cp.insertQueue),
-				"module" : "client_pool",
-				"channel" : "insert_queue"}).Warn("input channel is at or above 90% capacity!")
+				"size":    len(cp.insertQueue),
+				"module":  "client_pool",
+				"channel": "insert_queue"}).Warn("input channel is at or above 90% capacity!")
 		}
 
 		if len(cp.insertQueue) == maxClientPoolQueueBackup {
 			log.WithFields(log.Fields{
-				"size" : len(cp.insertQueue),
-				"module" : "client_pool",
-				"channel" : "insert_queue"}).Error("input channel is full!")
+				"size":    len(cp.insertQueue),
+				"module":  "client_pool",
+				"channel": "insert_queue"}).Error("input channel is full!")
 		}
 
-		if len(cp.outboundMessageQueue) > int(math.Floor(maxOutboundMessages * 0.90)) {
+		if len(cp.outboundMessageQueue) > int(math.Floor(maxOutboundMessages*0.90)) {
 			log.WithFields(log.Fields{
-				"size" : len(cp.outboundMessageQueue),
-				"module" : "client_pool",
+				"size":    len(cp.outboundMessageQueue),
+				"module":  "client_pool",
 				"channel": "outbound"}).Warn("input channel is at or above 90% capacity!")
 		}
 
 		if len(cp.outboundMessageQueue) == maxOutboundMessages {
 			log.WithFields(log.Fields{
-				"size" : len(cp.outboundMessageQueue),
-				"module" : "client_pool",
-				"channel" : "outbound"}).Error("input channel is full!")
+				"size":    len(cp.outboundMessageQueue),
+				"module":  "client_pool",
+				"channel": "outbound"}).Error("input channel is full!")
 		}
 
 		select {
@@ -134,22 +134,48 @@ func (cp *ClientPool) ListenAndSend() {
 			// TODO: Figure out the logic for running a criteria
 			// function and only broadcasting to a subset of clients
 			for i, client := range cp.clients {
+				log.Infof("client %v", client)
 				if client != nil {
 
-					if client.Expired() {
-						cp.sessions.Delete(client.session.Token)
-						continue
-					} else if !client.Open() {
+					log.WithFields(log.Fields{
+						"i":     i,
+						"open?": client.Open(),
+					}).Error("open channel hit!")
+
+					if len(client.send) > int(math.Floor(sendMsgBufferSize*0.90)) {
+						log.WithFields(log.Fields{
+							"size":    len(client.send),
+							"module":  "client",
+							"channel": "send"}).Warn("input channel is at or above 90% capacity!")
+					}
+
+					if len(client.send) == sendMsgBufferSize {
+						log.WithFields(log.Fields{
+							"size":    len(client.send),
+							"module":  "client",
+							"channel": "send"}).Error("input channel is full!")
+					}
+
+					if !client.Open() {
+
 						// add the value back to the free list
 						// cleanup that slot in the client list
 						cp.free <- i
-						client = nil
-						continue
+						log.WithField("size", len(cp.free)).Info("readding to free list")
+						//client = nil
+					} else {
+						client.session.expireTime = refreshExpiryTime()
+						client.send <- message.message
 					}
+					/*
+						if client.Expired() {
+							cp.sessions.Delete(client.session.Token)
+							continue
+						} else
+					*/
 
-					client.session.expireTime = refreshExpiryTime()
-					client.send <- message.message
-
+				} else {
+					log.WithField("i", i).Warn("nil channel hit!")
 				}
 			}
 

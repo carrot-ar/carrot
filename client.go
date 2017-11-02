@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	writeWaitSeconds = 600
-	pongWaitSeconds  = 600
+	writeWaitSeconds = 10
+	pongWaitSeconds  = 60
 
 	// time allowed to write a message to the websocket
 	writeWait = writeWaitSeconds * time.Second
@@ -23,13 +23,13 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 
 	// maximum message size allowed from the websocket
-	maxMessageSize = 65536
+	maxMessageSize = 8192
 
 	// toggle to require a client secret token on WS upgrade request
 	clientSecretRequired = false
 
 	// size of client send channel
-	sendMsgBufferSize = 1
+	sendMsgBufferSize = 1024
 
 	// size of sendToken channel
 	sendTokenBufferSize = 1
@@ -60,25 +60,26 @@ type Client struct {
 	//buffered channel of outbound tokens
 	sendToken chan SessionToken
 
-	mutex *sync.Mutex
+	openMutex *sync.RWMutex
 }
 
 func (c *Client) Open() bool {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	return c.open
+	c.openMutex.RLock()
+	status := c.open
+	c.openMutex.RUnlock()
+	return status
 }
 
 func (c *Client) softOpen() {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+	c.openMutex.Lock()
 	c.open = true
+	c.openMutex.Unlock()
 }
 
 func (c *Client) softClose() {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+	c.openMutex.Lock()
 	c.open = false
+	c.openMutex.Unlock()
 }
 
 func (c *Client) Expired() bool {
@@ -124,7 +125,7 @@ func (c *Client) writePump() {
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// TODO: add session token to here once client list is updated
-				log.WithFields(log.Fields{}).Info("a connection has closed\n")
+				log.WithFields(log.Fields{"module": "client"}).Error("a connection has closed\n")
 				//the server closed the channel
 				//c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
@@ -211,7 +212,7 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 		send:      make(chan []byte, sendMsgBufferSize),
 		sendToken: make(chan SessionToken, sendTokenBufferSize),
 		start:     make(chan struct{}),
-		mutex:     &sync.Mutex{},
+		openMutex: &sync.RWMutex{},
 	}
 
 	client.sendToken <- SessionToken(sessionToken)

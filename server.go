@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	serverSecret         = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
-	port                 = 8080
+	serverSecret = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
+	port         = 8080
 )
 
 //the server maintains the list of clients and
@@ -68,6 +68,7 @@ func (svr *Server) Run() {
 			close(client.start)
 		case client := <-svr.unregister:
 			if client.Open() {
+				log.WithField("session_token", client.session.Token).Info("client unregistered")
 				client.softClose()
 				// delete client?
 				close(client.send)
