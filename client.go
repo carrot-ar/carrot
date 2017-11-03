@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	writeWaitSeconds = 10
-	pongWaitSeconds  = 60
+	writeWaitSeconds = 10 * 10
+	pongWaitSeconds  = 10 * 60
 
 	// time allowed to write a message to the websocket
 	writeWait = writeWaitSeconds * time.Second
@@ -220,7 +220,7 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 
 	func() {
 		// TODO: log session token used here
-		log.Info("a new client has joined")
+		log.Debug("a new client has joined")
 		<-client.start
 		go client.writePump()
 		go client.readPump()

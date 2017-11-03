@@ -134,13 +134,13 @@ func (cp *ClientPool) ListenAndSend() {
 			// TODO: Figure out the logic for running a criteria
 			// function and only broadcasting to a subset of clients
 			for i, client := range cp.clients {
-				log.Infof("client %v", client)
 				if client != nil {
 
 					log.WithFields(log.Fields{
-						"i":     i,
-						"open?": client.Open(),
-					}).Error("open channel hit!")
+						"module": "client_pool",
+						"i":      i,
+						"open?":  client.Open(),
+					}).Debug("open channel")
 
 					if len(client.send) > int(math.Floor(sendMsgBufferSize*0.90)) {
 						log.WithFields(log.Fields{
@@ -156,26 +156,32 @@ func (cp *ClientPool) ListenAndSend() {
 							"channel": "send"}).Error("input channel is full!")
 					}
 
-					if !client.Open() {
-
+					// see if the session is expired, if so delete the session
+					// regardless if the session is expired, see if the client is open or closed.
+					// if we are closed, then take the client out of the broadcast loop
+					// If the client is open, send them the message
+					if client.Expired() {
+						cp.sessions.Delete(client.session.Token)
+					} else if !client.Open() {
 						// add the value back to the free list
 						// cleanup that slot in the client list
 						cp.free <- i
-						log.WithField("size", len(cp.free)).Info("readding to free list")
-						//client = nil
+						log.WithField("size", len(cp.free)).Info("adding %v to free list", i)
+
+						// the client variable seems to be a copy of the value of cp.clients[i]? we want
+						// to modify the pointer. Strange behavior
+						// TODO: investigate
+						cp.clients[i] = nil
 					} else {
 						client.session.expireTime = refreshExpiryTime()
 						client.send <- message.message
 					}
-					/*
-						if client.Expired() {
-							cp.sessions.Delete(client.session.Token)
-							continue
-						} else
-					*/
 
 				} else {
-					log.WithField("i", i).Warn("nil channel hit!")
+					log.WithFields(log.Fields{
+						"i":      i,
+						"module": "client_pool",
+					}).Debug("nil channel hit!")
 				}
 			}
 
