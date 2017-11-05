@@ -166,7 +166,7 @@ func (cp *ClientPool) ListenAndSend() {
 						// add the value back to the free list
 						// cleanup that slot in the client list
 						cp.free <- i
-						log.WithField("size", len(cp.free)).Info("adding %v to free list", i)
+						log.WithField("size", len(cp.free)).Infof("adding %v to free list", i)
 
 						// the client variable seems to be a copy of the value of cp.clients[i]? we want
 						// to modify the pointer. Strange behavior
