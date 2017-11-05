@@ -1,7 +1,7 @@
 package carrot
 
 import(
-	"fmt"
+	//"fmt"
 	"time"
 )
 
@@ -11,25 +11,24 @@ const (
 	endpoint3 = "bad_method"
 )
 
-type TestDispatcherController struct{}
-type TestController struct{}
+type TestController struct {
+	count int
+}
 type TestStreamController struct {
 	count int
 }
 
-func (tdc *TestDispatcherController) Print(req *Request, broadcast *Broadcast) {
-	fmt.Println("The dispatchingRequest method worked because this controller is speaking :D!")
-}
-
 func (c *TestController) Print(req *Request, broadcast *Broadcast) {
-	fmt.Printf("Hello, world! Here is my event request!!\n")
+	c.count += 1
+	//fmt.Printf("This controller's internal count value: %v\n", c.count)	
+	//broadcast.Send([]byte("This is a controller broadcasting a message!"))
+	
 }
 
 func (c *TestStreamController) Print(req *Request, broadcast *Broadcast) {
 	c.count += 1
-	fmt.Printf("Stream Controllers internal count value: %v\n", c.count)
-
-	broadcast.Send([]byte("This is the stream controller broadcasting a message!"))
+	//fmt.Printf("This stream controller's internal count value: %v\n", c.count)
+	//broadcast.Send([]byte("This is a stream controller broadcasting a message!"))
 }
 
 func getTokenRouteAndRequestForTest(endpoint string) (SessionToken, *Route, *Request, error) {
@@ -69,11 +68,7 @@ func getTestController(endpoint string) (*AppController, error) {
 func init() {
 	Environment = "testing"
 
-	//for dispatcher_test.go
-	Add(endpoint1, TestDispatcherController{}, "Print", false)
-
-	//for controller_test.go
 	Add(endpoint1, TestController{}, "Print", false)
 	Add(endpoint2, TestStreamController{}, "Print", true)
-	Add("bad_method", TestController{}, "BadMethod", false)
+	Add(endpoint3, TestController{}, "BadMethod", false)
 }
