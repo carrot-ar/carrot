@@ -1,79 +1,28 @@
 package carrot
 
 import (
-	"fmt"
 	"testing"
-	"time"
 )
 
-type TestController struct{}
-type TestStreamController struct {
-	count int
-}
-
-func (c *TestController) Print(req *Request, broadcast *Broadcast) {
-	fmt.Printf("Hello, world! Here is my event request!!\n")
-	// req.End()
-}
-
-func (c *TestStreamController) Print(req *Request, broadcast *Broadcast) {
-	fmt.Printf("Hello, world! Here is my stream request!!\n")
-	c.count += 1
-	fmt.Printf("Stream Controllers internal count value: %v\n", c.count)
-	// req.End()
-
-	broadcast.Send([]byte("This is the stream controller broadcasting a message!"))
-}
-
-func TestControllerFactory(t *testing.T) {
-	NewController(TestController{}, false)
-	NewController(TestStreamController{}, true)
-	// handle test
-}
-
 func TestMethodInvocation(t *testing.T) {
-	// tc := AppController{
-	// 	Controller: TestController{},
-	// 	persist: false,
-	// }
-	Add("test1", TestController{}, "Print", false)
-	Add("test2", TestStreamController{}, "Print", true)
-	// route := Lookup("test")
-	// req := NewRequest(nil, nil)
-
-	// tc.Invoke(route, req)
-	ss := NewDefaultSessionManager()
-	token, err1 := ss.NewSession()
-	if err1 != nil {
-		fmt.Println(err1)
-	}
-	sesh, err2 := ss.Get(token)
-	if err2 != nil {
-		fmt.Println(err2)
+	_, _, req1, err := getTokenRouteAndRequestForTest(endpoint1)
+	if err != nil {
+		t.Error(err)
 	}
 
-	req1 := &Request{
-		SessionToken: sesh.Token,
-		metrics:      make([]time.Time, MetricCount),
-		endpoint:     "test1",
+	_, _, req2, err := getTokenRouteAndRequestForTest(endpoint2)
+	if err != nil {
+		t.Error(err)
 	}
 
-	req2 := &Request{
-		SessionToken: sesh.Token,
-		metrics:      make([]time.Time, MetricCount),
-		endpoint:     "test2",
+	_, _, req3, err := getTokenRouteAndRequestForTest(endpoint2)
+	if err != nil {
+		t.Error(err)
 	}
 
-	req3 := &Request{
-		SessionToken: sesh.Token,
-		metrics:      make([]time.Time, MetricCount),
-		endpoint:     "test2",
-	}
-
-	req4 := &Request{
-		SessionToken: sesh.Token,
-		metrics:      make([]time.Time, MetricCount),
-		endpoint:     "test2",
+	_, _, req4, err := getTokenRouteAndRequestForTest(endpoint2)
+	if err != nil {
+		t.Error(err)
 	}
 
 	d := NewDispatcher()
@@ -85,29 +34,20 @@ func TestMethodInvocation(t *testing.T) {
 }
 
 func TestInvalidMethodInvocation(t *testing.T) {
-	Add("bad_method", TestController{}, "BadMethod", false)
-	ss := NewDefaultSessionManager()
-	token, err := ss.NewSession()
+	_, _, req, err := getTokenRouteAndRequestForTest(endpoint3)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	}
 
-	req := &Request{
-		SessionToken: token,
-		metrics:      make([]time.Time, MetricCount),
-		endpoint:     "bad_method",
-	}
-
-	rt, _ := Lookup("bad_method")
+	rt, _ := Lookup(endpoint3)
 
 	c, err := NewController(rt.Controller(), false)
 	if err != nil {
-		t.Errorf("failed to make controller")
+		t.Errorf("Failed to make controller")
 	}
 
 	err = c.Invoke(rt, req)
 	if err == nil {
 		t.Errorf("Method invocation did not capture invalid method and probably crashed.")
 	}
-
 }

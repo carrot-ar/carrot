@@ -1,7 +1,6 @@
 package carrot
 
 import (
-	"fmt"
 	log "github.com/sirupsen/logrus"
 	"math"
 	"reflect"
@@ -26,7 +25,7 @@ func NewDispatcher() *Dispatcher {
 	}
 }
 
-func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
+func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) error {
 	req.AddMetric(DispatchRequestStart)
 	if doCacheControllers { //used to be "if route.persist"
 		token := req.SessionToken
@@ -34,25 +33,25 @@ func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) {
 		if exists := dp.cachedControllers.Exists(key); !exists {
 			c, err := NewController(route.Controller(), doCacheControllers) //send to controller factory with stream identifier
 			if err != nil {
-				fmt.Println(err)
+				return err
 			}
 			dp.cachedControllers.Add(key, c)
 		}
-		sc := dp.cachedControllers.Get(key)
-
-		err := sc.Invoke(route, req) //send request to controller
-		if err != nil {
-			req.err = err
+		sc, err := dp.cachedControllers.Get(key)
+		reqErr := sc.Invoke(route, req) //send request to controller
+		if reqErr != nil {
+			req.err = reqErr
 		}
-
+		return err
 	} else { //route leads to event controller
 		c, err := NewController(route.Controller(), doCacheControllers) //send to controller factory with event identifier
 		if err != nil {
-			fmt.Println(err)
+			return err
 		}
 		err = c.Invoke(route, req) //send request to controller
 		req.err = err
 	}
+	return nil
 }
 
 func (dp *Dispatcher) Run() {
@@ -74,12 +73,15 @@ func (dp *Dispatcher) Run() {
 			req.AddMetric(DispatchLookupStart)
 			route, err := Lookup(req.endpoint)
 			if err != nil {
-				fmt.Println(err)
+				log.Error(err)
 			}
 			req.AddMetric(DispatchLookupEnd)
 
 			req.AddMetric(DispatchRequestStart)
-			dp.dispatchRequest(route, req)
+			err = dp.dispatchRequest(route, req)
+			if err != nil {
+				log.Error(err)
+			}
 			req.AddMetric(DispatchRequestEnd)
 
 			log.WithFields(log.Fields{
