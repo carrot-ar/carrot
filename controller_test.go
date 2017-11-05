@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestMethodInvocation(t *testing.T) {	
+func TestMethodInvocation(t *testing.T) {
 	_, _, req1, err := getTokenRouteAndRequestForTest(endpoint1)
 	if err != nil {
 		t.Error(err)
@@ -45,7 +45,7 @@ func TestInvalidMethodInvocation(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to make controller")
 	}
-	
+
 	err = c.Invoke(rt, req)
 	if err == nil {
 		t.Errorf("Method invocation did not capture invalid method and probably crashed.")

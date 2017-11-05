@@ -1,9 +1,9 @@
 package carrot
 
 import (
+	"errors"
 	log "github.com/sirupsen/logrus"
 	"time"
-	"errors"
 )
 
 type CachedControllersList struct {

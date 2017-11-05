@@ -1,6 +1,6 @@
 package carrot
 
-import(
+import (
 	//"fmt"
 	"time"
 )
@@ -20,9 +20,9 @@ type TestStreamController struct {
 
 func (c *TestController) Print(req *Request, broadcast *Broadcast) {
 	c.count += 1
-	//fmt.Printf("This controller's internal count value: %v\n", c.count)	
+	//fmt.Printf("This controller's internal count value: %v\n", c.count)
 	//broadcast.Send([]byte("This is a controller broadcasting a message!"))
-	
+
 }
 
 func (c *TestStreamController) Print(req *Request, broadcast *Broadcast) {
@@ -57,7 +57,7 @@ func getTestController(endpoint string) (*AppController, error) {
 	_, route, _, err := getTokenRouteAndRequestForTest(endpoint)
 	if err != nil {
 		return nil, err
-	}	
+	}
 	c, err := NewController(route.Controller(), doCacheControllers)
 	if err != nil {
 		return nil, err

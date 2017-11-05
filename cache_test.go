@@ -38,7 +38,7 @@ func TestCacheGetAndAdd(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-}	
+}
 
 func TestCacheDeleteOldest(t *testing.T) {
 	key := "key"
