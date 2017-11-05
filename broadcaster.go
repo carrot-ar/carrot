@@ -2,60 +2,57 @@ package carrot
 
 import (
 	log "github.com/sirupsen/logrus"
+	"math"
 )
 
-type Broadcaster struct {
-	sessions SessionStore
+const broadcastChannelSize = 4096
 
-	//inbound messages from the controllers
+type OutboundMessage struct {
+	message []byte
+}
+
+// manage broadcast groups with the broadcaster
+type Broadcaster struct {
+	sessions   SessionStore
+	clientPool *ClientPool
+	//inbound messages from the clients
 	broadcast chan []byte
 }
 
-func NewBroadcaster() *Broadcaster {
-	return &Broadcaster{
-		sessions:  NewDefaultSessionManager(),
-		broadcast: make(chan []byte, broadcastChannelSize),
+func NewBroadcaster(pool *ClientPool) Broadcaster {
+	return Broadcaster{
+		sessions:   NewDefaultSessionManager(),
+		broadcast:  make(chan []byte, broadcastChannelSize),
+		clientPool: pool,
 	}
 }
 
+// use functions are arguments for broadcasting to the correct groups
 func (br *Broadcaster) broadcastAll(message []byte) {
-	expiredSessionCount := 0
-	closedClientCount := 0
-	refreshedClientCount := 0
-	messagesSent := 0
-	br.sessions.Range(func(key, value interface{}) bool {
-		ctx := value.(*Session)
-
-		if ctx.SessionExpired() {
-			expiredSessionCount++
-			br.sessions.Delete(ctx.Token)
-			return true
-		} else if !ctx.Client.Open() {
-			closedClientCount++
-			return true
-		}
-
-		ctx.expireTime = refreshExpiryTime()
-		refreshedClientCount++
-
-		select {
-		case ctx.Client.send <- message:
-			messagesSent++
-			return true
-		}
-	})
-	log.WithFields(log.Fields{
-		"sent":      messagesSent,
-		"refreshed": refreshedClientCount,
-		"closed":    closedClientCount,
-		"expired":   expiredSessionCount,
-	}).Debug("broadcast sent")
+	outboundMessage := OutboundMessage{
+		// set the criteria function here
+		message: message,
+	}
+	br.clientPool.Send(&outboundMessage)
 }
 
 func (br *Broadcaster) Run() {
 	for {
+		if len(br.broadcast) > int(math.Floor(broadcastChannelSize*0.90)) {
+			log.WithFields(log.Fields{
+				"size":   len(br.broadcast),
+				"module": "broadcaster"}).Warn("input channel is at or above 90% capacity!")
+		}
+
+		if len(br.broadcast) == maxNumDispatcherIncomingRequests {
+			log.WithFields(log.Fields{
+				"size":   len(br.broadcast),
+				"module": "broadcaster"}).Error("input channel is full!")
+		}
+
 		select {
 		case message := <-br.broadcast:
+			log.WithField("module", "broadcaster").Debug("broadcast all")
 			br.broadcastAll(message)
 		}
 	}

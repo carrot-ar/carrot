@@ -33,7 +33,7 @@ func (c *TestStreamController) Print(req *Request, broadcast *Broadcast) {
 
 func getTokenRouteAndRequestForTest(endpoint string) (SessionToken, *Route, *Request, error) {
 	ss := NewDefaultSessionManager()
-	token, err := ss.NewSession()
+	token, _, err := ss.NewSession()
 	if err != nil {
 		return "", nil, nil, err
 	}

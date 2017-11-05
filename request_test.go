@@ -11,7 +11,7 @@ import (
 
 func TestNewRequest(t *testing.T) {
 	sessions := NewDefaultSessionManager()
-	token, _ := sessions.NewSession()
+	token, _, _ := sessions.NewSession()
 	ctx, _ := sessions.Get(token)
 	str := fmt.Sprintf("{ "+
 		"\"session_token\": \"%v\", "+
@@ -60,7 +60,7 @@ func TestNewRequest(t *testing.T) {
 
 func TestRequestTokenMismatch(t *testing.T) {
 	sessions := NewDefaultSessionManager()
-	token, _ := sessions.NewSession()
+	token, _, _ := sessions.NewSession()
 	ctx, _ := sessions.Get(token)
 	str := `{ "session_token": "badtoken", "endpoint": "print_foo_param", "origin": { "longitude": 45.501689, "latitude": -73.567256 }, "payload": { "offset": { "x": 3, "y": 1, "z": 4 }, "params": { "foo": "bar" } } }`
 

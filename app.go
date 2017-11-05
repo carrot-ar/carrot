@@ -5,25 +5,35 @@ import (
 )
 
 var Environment string
+var broadcaster Broadcaster
 
 // TODO: refactor so that if a module fails to load, we cause an error
 func Run() error {
-	// if the environment isn't set, then we can set to debug.
 
-	if Environment != "testing" {
+	Environment = "development"
+
+	if Environment == "production" {
+		log.SetLevel(log.WarnLevel)
+	} else if Environment == "development" {
+		log.SetLevel(log.InfoLevel)
+	} else if Environment == "debug" {
 		log.SetLevel(log.DebugLevel)
-	} else {
+	} else if Environment == "testing" {
 		log.SetLevel(log.PanicLevel)
 	}
 
 	sessions := NewDefaultSessionManager()
 	log.Debug("session store initialized")
-	server := NewServer(sessions)
+	clientPool := NewClientPool()
+	log.Debug("client pool initialized")
+	server := NewServer(clientPool, sessions)
 	log.Debug("server initialized")
-	dispatcher := NewDispatcher()
-	log.Debug("dispatcher initialized")
-	go dispatcher.Run()
-	log.Debug("dispatcher started")
+
+	// TODO: clean all this up
+	broadcaster = NewBroadcaster(clientPool)
+	log.Debug("global broadcaster created")
+	go broadcaster.clientPool.ListenAndSend()
+	log.Debug("global broadcaster running")
 	go server.Middleware.Run()
 	log.Debug("middleware started")
 	go server.Run()

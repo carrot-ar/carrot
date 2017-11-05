@@ -8,9 +8,8 @@ import (
 )
 
 const (
-	serverSecret         = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
-	broadcastChannelSize = 4096
-	port                 = 8080
+	serverSecret = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
+	port         = 8080
 )
 
 //the server maintains the list of clients and
@@ -28,14 +27,17 @@ type Server struct {
 
 	//keep track of middleware
 	Middleware *MiddlewarePipeline
+
+	clientPool *ClientPool
 }
 
-func NewServer(sessionStore SessionStore) *Server {
+func NewServer(clientPool *ClientPool, sessionStore SessionStore) *Server {
 	return &Server{
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		sessions:   sessionStore,
 		Middleware: NewMiddlewarePipeline(),
+		clientPool: clientPool,
 	}
 }
 
@@ -49,19 +51,24 @@ func (svr *Server) Run() {
 			exists := svr.sessions.Exists(token)
 			if (token == "") || !exists {
 				var err error
-				token, err = svr.sessions.NewSession()
+				token, sessionPtr, err := svr.sessions.NewSession()
 				if err != nil {
 					//handle later
 					log.Error(err)
 				}
+
+				client.session = sessionPtr
+
+				svr.clientPool.insertQueue <- client
+
 				//return the new token for the session
 				client.sendToken <- token
 			}
 
-			svr.sessions.SetClient(token, client)
 			close(client.start)
 		case client := <-svr.unregister:
 			if client.Open() {
+				log.WithField("session_token", client.session.Token).Info("client unregistered")
 				client.softClose()
 				// delete client?
 				close(client.send)

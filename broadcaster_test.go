@@ -5,7 +5,8 @@ import (
 )
 
 func TestBroadcasting(t *testing.T) {
-	broadcaster := NewBroadcaster()
+	clientPool := NewClientPool()
+	broadcaster := NewBroadcaster(clientPool)
 	broadcast := NewBroadcast(broadcaster)
 	go broadcast.broadcaster.Run()
 
