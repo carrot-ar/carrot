@@ -3,7 +3,6 @@ package carrot
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"sync"
 	"testing"
 	"time"
 )
@@ -11,7 +10,7 @@ import (
 func TestDefaultSessionManagerNewSessionGet(t *testing.T) {
 	store := NewDefaultSessionManager()
 
-	token, err := store.NewSession()
+	token, _, err := store.NewSession()
 	if err != nil {
 		t.Errorf("Failed to create session")
 	}
@@ -25,7 +24,7 @@ func TestDefaultSessionManagerNewSessionGet(t *testing.T) {
 func TestContextPersistence(t *testing.T) {
 	store := NewDefaultSessionManager()
 
-	token, err := store.NewSession()
+	token, _, err := store.NewSession()
 	if err != nil {
 		t.Errorf("Failed to create session")
 	}
@@ -40,7 +39,7 @@ func TestContextPersistence(t *testing.T) {
 func TestSessionDelete(t *testing.T) {
 	store := NewDefaultSessionManager()
 
-	token, err := store.NewSession()
+	token, _, err := store.NewSession()
 	if err != nil {
 		t.Errorf("Failed to create session")
 	}
@@ -59,7 +58,7 @@ func TestSessionDelete(t *testing.T) {
 func TestSessionExists(t *testing.T) {
 	store := NewDefaultSessionManager()
 
-	token, err := store.NewSession()
+	token, _, err := store.NewSession()
 	if err != nil {
 		t.Errorf("Failed to create session")
 	}
@@ -87,7 +86,7 @@ func TestSessionExists(t *testing.T) {
 
 func TestSessionExpired(t *testing.T) {
 	store := NewDefaultSessionManager()
-	token, err := store.NewSession()
+	token, _, err := store.NewSession()
 	if err != nil {
 		t.Errorf("Failed to create session")
 	}
@@ -95,53 +94,10 @@ func TestSessionExpired(t *testing.T) {
 	ctx, _ := store.Get(token)
 	expireTime := time.Now().Add(time.Second)
 	ctx.expireTime = expireTime
-	ctx.Client = &Client{
-		mutex: &sync.Mutex{},
-		open:  false,
-	}
 
 	time.Sleep(time.Second)
 
-	if !ctx.SessionExpired() {
+	if !ctx.sessionDurationExpired() {
 		t.Errorf("Session did not expire after period of disconnection")
 	}
-}
-
-func TestSetClient(t *testing.T) {
-	store := NewDefaultSessionManager()
-	token, err := store.NewSession()
-	if err != nil {
-		t.Errorf("Failed to create session")
-	}
-
-	err = store.SetClient(token, &Client{})
-
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestGetByClient(t *testing.T) {
-	store := NewDefaultSessionManager()
-	token, err := store.NewSession()
-	if err != nil {
-		t.Errorf("Failed to create session")
-	}
-
-	client := &Client{}
-
-	err = store.SetClient(token, client)
-	if err != nil {
-		t.Error(err)
-	}
-
-	session, err := store.GetByClient(client)
-	if err != nil {
-		t.Errorf("Failed to get client")
-	}
-
-	if session.Client != client {
-		t.Errorf("Client does not match client! %v != %v", client, session.Client)
-	}
-
 }

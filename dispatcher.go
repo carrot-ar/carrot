@@ -1,6 +1,7 @@
 package carrot
 
 import (
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"math"
 	"reflect"
