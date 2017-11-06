@@ -61,6 +61,8 @@ type Client struct {
 	sendToken chan SessionToken
 
 	openMutex *sync.RWMutex
+
+	logger *log.Entry
 }
 
 func (c *Client) Open() bool {
@@ -106,7 +108,7 @@ func (c *Client) readPump() {
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
 		req := NewRequest(c.session, message)
-		log.WithField("session_token", c.session.Token).Debug("request being sent to middleware")
+		c.logger.WithField("session_token", c.session.Token).Debug("request being sent to middleware")
 		c.server.Middleware.In <- req
 		//c.server.broadcast <- message
 	}
@@ -125,7 +127,7 @@ func (c *Client) writePump() {
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// TODO: add session token to here once client list is updated
-				log.WithFields(log.Fields{"module": "client"}).Error("a connection has closed\n")
+				c.logger.Error("a connection has closed\n")
 				//the server closed the channel
 				//c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
@@ -213,6 +215,7 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 		sendToken: make(chan SessionToken, sendTokenBufferSize),
 		start:     make(chan struct{}),
 		openMutex: &sync.RWMutex{},
+		logger:    log.WithField("module", "client"),
 	}
 
 	client.sendToken <- SessionToken(sessionToken)

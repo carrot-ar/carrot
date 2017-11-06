@@ -2,7 +2,6 @@ package carrot
 
 import (
 	"errors"
-	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -30,11 +29,9 @@ func (ccl *CachedControllersList) Get(key string) (*AppController, error) {
 	var err error
 	cc, ok := ccl.cachedControllers[key]
 	if !ok || cc == nil {
-		log.WithFields(log.Fields{
-			"session_token": key,
-		})
 		err = errors.New("cached controller does not exist")
 	}
+
 	//update priority to reflect recent controller usage
 	ccl.lru.UpdatePriority(key, getPriority())
 	return cc, err
@@ -45,10 +42,6 @@ func (ccl *CachedControllersList) Add(key string, ac *AppController) {
 	ccl.cachedControllers[key] = ac
 	//add to LRU to keep track of deletion order
 	ccl.lru.Insert(key, getPriority())
-	log.WithFields(log.Fields{
-		"key":        key,
-		"cache_size": ccl.lru.Len(),
-	}).Debug("new controller cached")
 }
 
 func (ccl *CachedControllersList) DeleteOldest() error {
