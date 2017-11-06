@@ -4,8 +4,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var Environment string
-var broadcaster Broadcaster
+var (
+	Environment string
+	broadcaster Broadcaster
+	config      Config
+)
 
 // TODO: refactor so that if a module fails to load, we cause an error
 func Run() error {

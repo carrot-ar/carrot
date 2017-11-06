@@ -5,12 +5,11 @@ import (
 	"math"
 )
 
-const (
-	InputChannelSize = 4096
+var (
+	InputChannelSize         = config.Middleware.InputChannelSize
+	count            int     = 0
+	rate             float64 = 0
 )
-
-var count int = 0
-var rate float64 = 0
 
 /*
 	Middlewares
@@ -50,7 +49,7 @@ func (mw *MiddlewarePipeline) Run() {
 		for {
 			select {
 			case req := <-mw.In:
-				if len(mw.In) > int(math.Floor(InputChannelSize*0.90)) {
+				if len(mw.In) > int(math.Floor(float64(InputChannelSize)*0.90)) {
 					log.WithFields(log.Fields{
 						"size":   len(mw.In),
 						"module": "middleware"}).Warn("input channel is at or above 90% capacity!")

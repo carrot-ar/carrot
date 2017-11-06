@@ -7,9 +7,10 @@ import (
 	"net/http"
 )
 
-const (
-	serverSecret = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
-	port         = 8080
+var (
+	serverConfig = config.Server
+	serverSecret = serverConfig.ServerSecret
+	port         = serverConfig.Port
 )
 
 //the server maintains the list of clients and

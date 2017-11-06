@@ -9,9 +9,10 @@ import (
 	"time"
 )
 
-const (
-	nilSessionToken                     = ""
-	defaultSessionClosedTimeoutDuration = 10 // seconds
+var (
+	sessionConfig                       = config.Session
+	nilSessionToken                     = sessionConfig.NilSessionToken
+	defaultSessionClosedTimeoutDuration = sessionConfig.DefaultSessionClosedTimeoutDuration //seconds
 )
 
 var (

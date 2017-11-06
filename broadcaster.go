@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-const broadcastChannelSize = 4096
+var broadcastChannelSize = config.Server.BroadcastChannelSize
 
 type OutboundMessage struct {
 	message []byte
@@ -38,7 +38,7 @@ func (br *Broadcaster) broadcastAll(message []byte) {
 
 func (br *Broadcaster) Run() {
 	for {
-		if len(br.broadcast) > int(math.Floor(broadcastChannelSize*0.90)) {
+		if len(br.broadcast) > int(math.Floor(float64(broadcastChannelSize)*0.90)) {
 			log.WithFields(log.Fields{
 				"size":   len(br.broadcast),
 				"module": "broadcaster"}).Warn("input channel is at or above 90% capacity!")

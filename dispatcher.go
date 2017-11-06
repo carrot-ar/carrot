@@ -8,10 +8,11 @@ import (
 	"strings"
 )
 
-const (
-	doCacheControllers               bool = true
-	maxNumCachedControllers               = 4096
-	maxNumDispatcherIncomingRequests      = 4096
+var (
+	dispatcherConfig                 = config.Dispatcher
+	doCacheControllers               = dispatcherConfig.DoCacheControllers
+	maxNumCachedControllers          = dispatcherConfig.MaxNumCachedControllers
+	maxNumDispatcherIncomingRequests = dispatcherConfig.MaxNumDispatcherIncomingRequests
 )
 
 type Dispatcher struct {
@@ -59,7 +60,7 @@ func (dp *Dispatcher) Run() {
 	for {
 		select {
 		case req := <-dp.requests:
-			if len(dp.requests) > int(math.Floor(maxNumDispatcherIncomingRequests*0.90)) {
+			if len(dp.requests) > int(math.Floor(float64(maxNumDispatcherIncomingRequests)*0.90)) {
 				log.WithFields(log.Fields{
 					"size":   len(dp.requests),
 					"module": "dispatcher"}).Warn("input channel is at or above 90% capacity!")
