@@ -1,0 +1,35 @@
+server:
+  server_secret: "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b" # TODO: Change this because using a default secret is insecure
+  broadcast_channel_size: 4096
+  port: 8080
+
+session:
+  nil_session_token: ""
+  default_sess_closed_timeout_duration_secs: 10
+
+router:
+  route_delimiter: "_"
+  stream_identifier: "StreamController"
+  controller_identifier: "Controller"
+
+dispatcher:
+  do_cache_controllers: true
+  max_num_cached_controllers: 4096
+  max_num_dispatcher_incoming_requests: 4096
+
+client:
+  write_wait_secs: 100    # 10 * 10
+  pong_wait_secs: 600     # 10 * 60
+  max_message_size: 8192
+  client_secret_required: false
+  send_msg_buffer_size: 1024
+  send_token_buffer_size: 1
+
+clientpool:
+  max_clients: 16
+  max_client_pool_queue_backup: 128
+  max_outbound_messages: 4096
+
+middleware:
+  input_channel_size: 256
+  rate: 0

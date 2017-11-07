@@ -6,10 +6,6 @@ import (
 	"math"
 )
 
-const maxClients = 16
-const maxClientPoolQueueBackup = 128
-const maxOutboundMessages = 4096
-
 type ClientPool struct {
 	sessions             SessionStore
 	clients              []*Client
@@ -19,19 +15,20 @@ type ClientPool struct {
 }
 
 func NewClientPool() *ClientPool {
+	clientPoolConfig := config.ClientPool
 	// setup the free list by filling up a channel of
 	// integers from 0 to maxClients
-	free := make(chan int, maxClients)
-	for i := 0; i < maxClients; i++ {
+	free := make(chan int, clientPoolConfig.MaxClients)
+	for i := 0; i < clientPoolConfig.MaxClients; i++ {
 		free <- i
 	}
 
 	return &ClientPool{
 		sessions:             NewDefaultSessionManager(),
-		clients:              make([]*Client, maxClients, maxClients),
+		clients:              make([]*Client, clientPoolConfig.MaxClients, clientPoolConfig.MaxClients),
 		free:                 free,
-		insertQueue:          make(chan *Client, maxClientPoolQueueBackup),
-		outboundMessageQueue: make(chan *OutboundMessage, maxOutboundMessages),
+		insertQueue:          make(chan *Client, clientPoolConfig.MaxClientPoolQueueBackup),
+		outboundMessageQueue: make(chan *OutboundMessage, clientPoolConfig.MaxOutboundMessages),
 	}
 }
 
@@ -39,7 +36,7 @@ func NewClientPool() *ClientPool {
 // by adding the client to a queue that will insert new clients
 // on the broadcast loop
 func (cp *ClientPool) Insert(client *Client) error {
-	if len(cp.insertQueue) == maxClientPoolQueueBackup {
+	if len(cp.insertQueue) == config.ClientPool.MaxClientPoolQueueBackup {
 		return fmt.Errorf("unable to queue client")
 	}
 
@@ -97,36 +94,37 @@ func (cp *ClientPool) Send(message *OutboundMessage) {
 
 // loop and send
 func (cp *ClientPool) ListenAndSend() {
+	clientPoolConfig := config.ClientPool
 	for {
 
-		if len(cp.insertQueue) > int(math.Floor(maxClientPoolQueueBackup*0.90)) {
+		if len(cp.insertQueue) > int(math.Floor(float64(clientPoolConfig.MaxClientPoolQueueBackup)*0.90)) {
 			log.WithFields(log.Fields{
 				"size":    len(cp.insertQueue),
 				"module":  "client_pool",
 				"channel": "insert_queue"}).Warn("input channel is at or above 90% capacity!")
 		}
 
-		if len(cp.insertQueue) == maxClientPoolQueueBackup {
+		if len(cp.insertQueue) == clientPoolConfig.MaxClientPoolQueueBackup {
 			log.WithFields(log.Fields{
 				"size":    len(cp.insertQueue),
 				"module":  "client_pool",
 				"channel": "insert_queue"}).Error("input channel is full!")
 		}
 
-		if len(cp.outboundMessageQueue) > int(math.Floor(maxOutboundMessages*0.90)) {
+		if len(cp.outboundMessageQueue) > int(math.Floor(float64(clientPoolConfig.MaxOutboundMessages)*0.90)) {
 			log.WithFields(log.Fields{
 				"size":    len(cp.outboundMessageQueue),
 				"module":  "client_pool",
 				"channel": "outbound"}).Warn("input channel is at or above 90% capacity!")
 		}
 
-		if len(cp.outboundMessageQueue) == maxOutboundMessages {
+		if len(cp.outboundMessageQueue) == clientPoolConfig.MaxOutboundMessages {
 			log.WithFields(log.Fields{
 				"size":    len(cp.outboundMessageQueue),
 				"module":  "client_pool",
 				"channel": "outbound"}).Error("input channel is full!")
 		}
-
+		clientConfig := config.Client
 		select {
 		case newClient := <-cp.insertQueue:
 			cp.insert(newClient)
@@ -142,14 +140,14 @@ func (cp *ClientPool) ListenAndSend() {
 						"open?":  client.Open(),
 					}).Debug("open channel")
 
-					if len(client.send) > int(math.Floor(sendMsgBufferSize*0.90)) {
+					if len(client.send) > int(math.Floor(float64(clientConfig.SendMessageBufferSize)*0.90)) {
 						log.WithFields(log.Fields{
 							"size":    len(client.send),
 							"module":  "client",
 							"channel": "send"}).Warn("input channel is at or above 90% capacity!")
 					}
 
-					if len(client.send) == sendMsgBufferSize {
+					if len(client.send) == clientConfig.SendMessageBufferSize {
 						log.WithFields(log.Fields{
 							"size":    len(client.send),
 							"module":  "client",

@@ -8,12 +8,6 @@ import (
 	"strings"
 )
 
-const (
-	doCacheControllers               bool = true
-	maxNumCachedControllers               = 4096
-	maxNumDispatcherIncomingRequests      = 4096
-)
-
 type Dispatcher struct {
 	cachedControllers *CachedControllersList
 	requests          chan *Request
@@ -22,11 +16,12 @@ type Dispatcher struct {
 func NewDispatcher() *Dispatcher {
 	return &Dispatcher{
 		cachedControllers: NewCachedControllersList(),
-		requests:          make(chan *Request, maxNumDispatcherIncomingRequests),
+		requests:          make(chan *Request, config.Dispatcher.MaxNumDispatcherIncomingRequests),
 	}
 }
 
 func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) error {
+	doCacheControllers := config.Dispatcher.DoCacheControllers
 	req.AddMetric(DispatchRequestStart)
 	if doCacheControllers { //used to be "if route.persist"
 		token := req.SessionToken
@@ -56,16 +51,17 @@ func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) error {
 }
 
 func (dp *Dispatcher) Run() {
+	dispatcherConfig := config.Dispatcher
 	for {
 		select {
 		case req := <-dp.requests:
-			if len(dp.requests) > int(math.Floor(maxNumDispatcherIncomingRequests*0.90)) {
+			if len(dp.requests) > int(math.Floor(float64(dispatcherConfig.MaxNumDispatcherIncomingRequests)*0.90)) {
 				log.WithFields(log.Fields{
 					"size":   len(dp.requests),
 					"module": "dispatcher"}).Warn("input channel is at or above 90% capacity!")
 			}
 
-			if len(dp.requests) == maxNumDispatcherIncomingRequests {
+			if len(dp.requests) == dispatcherConfig.MaxNumDispatcherIncomingRequests {
 				log.WithFields(log.Fields{
 					"size":   len(dp.requests),
 					"module": "dispatcher"}).Error("input channel is full!")
@@ -91,7 +87,7 @@ func (dp *Dispatcher) Run() {
 			}).Debug("dispatching request")
 		default:
 			//delete controllers that haven't been used recently
-			if dp.cachedControllers.Length() > maxNumCachedControllers {
+			if dp.cachedControllers.Length() > dispatcherConfig.MaxNumCachedControllers {
 				dp.cachedControllers.DeleteOldest()
 				log.WithField("cache_size", dp.cachedControllers.lru.Len()).Debug("deleting least recently used controller")
 			}

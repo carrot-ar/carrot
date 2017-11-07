@@ -4,10 +4,7 @@ import (
 	"testing"
 )
 
-var (
-	Middleware = NewMiddlewarePipeline()
-)
-
 func TestMiddlewareRun(t *testing.T) {
+	Middleware := NewMiddlewarePipeline()
 	go Middleware.Run()
 }

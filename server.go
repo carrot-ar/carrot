@@ -7,11 +7,6 @@ import (
 	"net/http"
 )
 
-const (
-	serverSecret = "37FUqWlvJhRgwPMM1mlHOGyPNwkVna3b"
-	port         = 8080
-)
-
 //the server maintains the list of clients and
 //broadcasts messages to the clients
 type Server struct {
@@ -95,7 +90,8 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func (svr *Server) Serve() {
-	addr := flag.String("addr", fmt.Sprintf(":%d", port), "http service address")
+	serverConfig := config.Server
+	addr := flag.String("addr", fmt.Sprintf(":%d", serverConfig.Port), "http service address")
 
 	http.HandleFunc("/", serveHome)
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
@@ -103,7 +99,7 @@ func (svr *Server) Serve() {
 	})
 
 	log.WithFields(log.Fields{
-		"port": port,
+		"port": serverConfig.Port,
 		"url":  "ws://localhost/",
 	}).Infof("Listening...")
 

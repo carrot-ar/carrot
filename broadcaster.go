@@ -5,8 +5,6 @@ import (
 	"math"
 )
 
-const broadcastChannelSize = 4096
-
 type OutboundMessage struct {
 	message []byte
 }
@@ -22,7 +20,7 @@ type Broadcaster struct {
 func NewBroadcaster(pool *ClientPool) Broadcaster {
 	return Broadcaster{
 		sessions:   NewDefaultSessionManager(),
-		broadcast:  make(chan []byte, broadcastChannelSize),
+		broadcast:  make(chan []byte, config.Server.BroadcastChannelSize),
 		clientPool: pool,
 	}
 }
@@ -38,13 +36,13 @@ func (br *Broadcaster) broadcastAll(message []byte) {
 
 func (br *Broadcaster) Run() {
 	for {
-		if len(br.broadcast) > int(math.Floor(broadcastChannelSize*0.90)) {
+		if len(br.broadcast) > int(math.Floor(float64(config.Server.BroadcastChannelSize)*0.90)) {
 			log.WithFields(log.Fields{
 				"size":   len(br.broadcast),
 				"module": "broadcaster"}).Warn("input channel is at or above 90% capacity!")
 		}
 
-		if len(br.broadcast) == maxNumDispatcherIncomingRequests {
+		if len(br.broadcast) == config.Dispatcher.MaxNumDispatcherIncomingRequests {
 			log.WithFields(log.Fields{
 				"size":   len(br.broadcast),
 				"module": "broadcaster"}).Error("input channel is full!")

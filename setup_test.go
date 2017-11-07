@@ -54,11 +54,12 @@ func getTokenRouteAndRequestForTest(endpoint string) (SessionToken, *Route, *Req
 }
 
 func getTestController(endpoint string) (*AppController, error) {
+
 	_, route, _, err := getTokenRouteAndRequestForTest(endpoint)
 	if err != nil {
 		return nil, err
 	}
-	c, err := NewController(route.Controller(), doCacheControllers)
+	c, err := NewController(route.Controller(), config.Dispatcher.DoCacheControllers)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +68,7 @@ func getTestController(endpoint string) (*AppController, error) {
 
 func init() {
 	Environment = "testing"
-
+	SetConfig("conf.yaml")
 	Add(endpoint1, TestController{}, "Print", false)
 	Add(endpoint2, TestStreamController{}, "Print", true)
 	Add(endpoint3, TestController{}, "BadMethod", false)

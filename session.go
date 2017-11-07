@@ -9,11 +9,6 @@ import (
 	"time"
 )
 
-const (
-	nilSessionToken                     = ""
-	defaultSessionClosedTimeoutDuration = 10 // seconds
-)
-
 var (
 	oneSessionStore sync.Once
 
@@ -28,7 +23,7 @@ type Session struct {
 }
 
 func refreshExpiryTime() time.Time {
-	return time.Now().Add(time.Second * defaultSessionClosedTimeoutDuration)
+	return time.Now().Add(time.Second * config.Session.DefaultSessionClosedTimeoutDuration)
 }
 
 func (c *Session) sessionDurationExpired() bool {
@@ -74,7 +69,7 @@ func (s *DefaultSessionStore) NewSession() (SessionToken, *Session, error) {
 	b := make([]byte, 16)
 	_, err := rand.Read(b)
 	if err != nil {
-		return nilSessionToken, nil, err
+		return config.Session.NilSessionToken, nil, err
 	}
 
 	uuid, err := generateUUID()
