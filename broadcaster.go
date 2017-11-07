@@ -17,6 +17,7 @@ type Broadcaster struct {
 	clientPool *ClientPool
 	//inbound messages from the clients
 	broadcast chan []byte
+	logger    *log.Entry
 }
 
 func NewBroadcaster(pool *ClientPool) Broadcaster {
@@ -24,6 +25,7 @@ func NewBroadcaster(pool *ClientPool) Broadcaster {
 		sessions:   NewDefaultSessionManager(),
 		broadcast:  make(chan []byte, broadcastChannelSize),
 		clientPool: pool,
+		logger:     log.WithField("module", "broadcaster"),
 	}
 }
 
@@ -39,15 +41,11 @@ func (br *Broadcaster) broadcastAll(message []byte) {
 func (br *Broadcaster) Run() {
 	for {
 		if len(br.broadcast) > int(math.Floor(broadcastChannelSize*0.90)) {
-			log.WithFields(log.Fields{
-				"size":   len(br.broadcast),
-				"module": "broadcaster"}).Warn("input channel is at or above 90% capacity!")
+			br.logger.WithField("buf_size", len(br.broadcast)).Warn("input channel is at or above 90% capacity!")
 		}
 
 		if len(br.broadcast) == maxNumDispatcherIncomingRequests {
-			log.WithFields(log.Fields{
-				"size":   len(br.broadcast),
-				"module": "broadcaster"}).Error("input channel is full!")
+			br.logger.WithField("buf_size", len(br.broadcast)).Error("input channel is full!")
 		}
 
 		select {

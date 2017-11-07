@@ -29,6 +29,8 @@ type Server struct {
 	Middleware *MiddlewarePipeline
 
 	clientPool *ClientPool
+
+	logger *log.Entry
 }
 
 func NewServer(clientPool *ClientPool, sessionStore SessionStore) *Server {
@@ -38,6 +40,7 @@ func NewServer(clientPool *ClientPool, sessionStore SessionStore) *Server {
 		sessions:   sessionStore,
 		Middleware: NewMiddlewarePipeline(),
 		clientPool: clientPool,
+		logger:     log.WithField("module", "server"),
 	}
 }
 
@@ -68,7 +71,7 @@ func (svr *Server) Run() {
 			close(client.start)
 		case client := <-svr.unregister:
 			if client.Open() {
-				log.WithField("session_token", client.session.Token).Info("client unregistered")
+				svr.logger.WithField("session_token", client.session.Token).Info("client unregistered")
 				client.softClose()
 				// delete client?
 				close(client.send)

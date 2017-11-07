@@ -16,6 +16,7 @@ type ClientPool struct {
 	free                 chan int
 	insertQueue          chan *Client
 	outboundMessageQueue chan *OutboundMessage
+	logger               *log.Entry
 }
 
 func NewClientPool() *ClientPool {
@@ -32,6 +33,7 @@ func NewClientPool() *ClientPool {
 		free:                 free,
 		insertQueue:          make(chan *Client, maxClientPoolQueueBackup),
 		outboundMessageQueue: make(chan *OutboundMessage, maxOutboundMessages),
+		logger:               log.WithField("module", "client_pool"),
 	}
 }
 
@@ -91,7 +93,7 @@ func (cp *ClientPool) Count() int {
 
 // send a message to the clients
 func (cp *ClientPool) Send(message *OutboundMessage) {
-	log.Debug("in the send method")
+	cp.logger.Debug("in the send method")
 	cp.outboundMessageQueue <- message
 }
 
@@ -100,30 +102,26 @@ func (cp *ClientPool) ListenAndSend() {
 	for {
 
 		if len(cp.insertQueue) > int(math.Floor(maxClientPoolQueueBackup*0.90)) {
-			log.WithFields(log.Fields{
+			cp.logger.WithFields(log.Fields{
 				"size":    len(cp.insertQueue),
-				"module":  "client_pool",
 				"channel": "insert_queue"}).Warn("input channel is at or above 90% capacity!")
 		}
 
 		if len(cp.insertQueue) == maxClientPoolQueueBackup {
-			log.WithFields(log.Fields{
+			cp.logger.WithFields(log.Fields{
 				"size":    len(cp.insertQueue),
-				"module":  "client_pool",
 				"channel": "insert_queue"}).Error("input channel is full!")
 		}
 
 		if len(cp.outboundMessageQueue) > int(math.Floor(maxOutboundMessages*0.90)) {
-			log.WithFields(log.Fields{
+			cp.logger.WithFields(log.Fields{
 				"size":    len(cp.outboundMessageQueue),
-				"module":  "client_pool",
 				"channel": "outbound"}).Warn("input channel is at or above 90% capacity!")
 		}
 
 		if len(cp.outboundMessageQueue) == maxOutboundMessages {
-			log.WithFields(log.Fields{
+			cp.logger.WithFields(log.Fields{
 				"size":    len(cp.outboundMessageQueue),
-				"module":  "client_pool",
 				"channel": "outbound"}).Error("input channel is full!")
 		}
 
@@ -137,22 +135,23 @@ func (cp *ClientPool) ListenAndSend() {
 				if client != nil {
 
 					log.WithFields(log.Fields{
-						"module": "client_pool",
-						"i":      i,
-						"open?":  client.Open(),
+						"i":     i,
+						"open?": client.Open(),
 					}).Debug("open channel")
 
 					if len(client.send) > int(math.Floor(sendMsgBufferSize*0.90)) {
-						log.WithFields(log.Fields{
+						cp.logger.WithFields(log.Fields{
+							"i":       i,
+							"open?":   client.Open(),
 							"size":    len(client.send),
-							"module":  "client",
 							"channel": "send"}).Warn("input channel is at or above 90% capacity!")
 					}
 
 					if len(client.send) == sendMsgBufferSize {
-						log.WithFields(log.Fields{
+						cp.logger.WithFields(log.Fields{
+							"i":       i,
+							"open?":   client.Open(),
 							"size":    len(client.send),
-							"module":  "client",
 							"channel": "send"}).Error("input channel is full!")
 					}
 
@@ -178,9 +177,8 @@ func (cp *ClientPool) ListenAndSend() {
 					}
 
 				} else {
-					log.WithFields(log.Fields{
-						"i":      i,
-						"module": "client_pool",
+					cp.logger.WithFields(log.Fields{
+						"i": i,
 					}).Debug("nil channel hit!")
 				}
 			}
