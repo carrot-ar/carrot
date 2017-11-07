@@ -10,7 +10,7 @@ var broadcaster Broadcaster
 // TODO: refactor so that if a module fails to load, we cause an error
 func Run() error {
 
-	Environment = "development"
+	Environment = "z"
 
 	if Environment == "production" {
 		log.SetLevel(log.WarnLevel)
@@ -19,6 +19,8 @@ func Run() error {
 	} else if Environment == "debug" {
 		log.SetLevel(log.DebugLevel)
 	} else if Environment == "testing" {
+		log.SetLevel(log.PanicLevel)
+	} else {
 		log.SetLevel(log.PanicLevel)
 	}
 

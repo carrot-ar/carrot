@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sync"
 	"time"
+	"fmt"
 )
 
 const (
@@ -124,18 +125,32 @@ func (c *Client) writePump() {
 		case message, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
-				// TODO: add session token to here once client list is updated
-				log.WithFields(log.Fields{"module": "client"}).Error("a connection has closed\n")
+				log.WithFields(log.Fields{"module" : "client"}).Error("a connection has closed\n")
 				//the server closed the channel
 				//c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
+
+
+			fmt.Printf("%v, %v, %v\n", c.session.Token, time.Now().Unix(), len(c.send))
+			c.conn.WriteMessage(websocket.TextMessage, message)
+
+			n := len(c.send)
+			for i := 0; i < n; i++ {
+				fmt.Printf("%v, %v, %v\n", c.session.Token, time.Now().Unix(), len(c.send))
+				c.conn.WriteMessage(websocket.TextMessage, <-c.send)
+			}
+
+
+			/*
+			fmt.Printf("%v, %v\n", time.Now(), len(c.send))
 
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
 				return
 			}
 			w.Write(message)
+
 
 
 			//add queued messages to the current websocket message
@@ -147,11 +162,15 @@ func (c *Client) writePump() {
 				}).Info("writing from buffer")
 				w.Write(newline)
 				w.Write(<-c.send)
+				fmt.Printf("%v, %v\n", time.Now(), len(c.send))
 			}
 
 			if err := w.Close(); err != nil {
 				return
 			}
+
+			*/
+
 		case token, ok := <-c.sendToken:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
