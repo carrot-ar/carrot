@@ -133,6 +133,7 @@ func (cp *ClientPool) ListenAndSend() {
 		case message := <-cp.outboundMessageQueue:
 			// TODO: Figure out the logic for running a criteria
 			// function and only broadcasting to a subset of clients
+
 			for i, client := range cp.clients {
 				if client != nil {
 
@@ -184,6 +185,7 @@ func (cp *ClientPool) ListenAndSend() {
 					}).Debug("nil channel hit!")
 				}
 			}
+
 
 		default:
 			//log.Debug("DEFAULT ENTRY HIT")

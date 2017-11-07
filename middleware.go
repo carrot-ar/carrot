@@ -3,6 +3,7 @@ package carrot
 import (
 	log "github.com/sirupsen/logrus"
 	"math"
+	"time"
 )
 
 const (
@@ -83,22 +84,21 @@ func NewMiddlewarePipeline() *MiddlewarePipeline {
 	// List of middleware functions
 	mw := []func(*Request) error{discardBadRequest, logger}
 
-	/*
-		seconds := 0
+
 		go func() {
 			for {
 				time.Sleep(time.Second)
-				seconds++
-				rate = float64(count) / float64(seconds)
 
+				rate = float64(count)
 				log.WithFields(log.Fields{
 					"rps":    rate,
 					"module": "middleware",
 				}).Info("middleware metrics")
+				count = 0
 
 			}
 		}()
-	*/
+
 	return &MiddlewarePipeline{
 		In:          make(chan *Request, InputChannelSize),
 		middlewares: mw,

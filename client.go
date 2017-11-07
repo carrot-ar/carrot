@@ -137,9 +137,14 @@ func (c *Client) writePump() {
 			}
 			w.Write(message)
 
+
 			//add queued messages to the current websocket message
 			n := len(c.send)
 			for i := 0; i < n; i++ {
+				log.WithFields(log.Fields{
+					"buf_size" : len(c.send),
+					"session_token" : c.session.Token,
+				}).Info("writing from buffer")
 				w.Write(newline)
 				w.Write(<-c.send)
 			}
