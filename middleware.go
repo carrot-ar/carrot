@@ -5,18 +5,14 @@ import (
 	"math"
 )
 
-var (
-	InputChannelSize         = config.Middleware.InputChannelSize
-	count            int     = 0
-	rate             float64 = 0
-)
-
 /*
 	Middlewares
 */
 // func parseRequest(req *Request) {
 // 	loggerMw.Print("I am going to parse a request!")
 // }
+
+var count int
 
 func logger(req *Request) error {
 
@@ -49,12 +45,12 @@ func (mw *MiddlewarePipeline) Run() {
 		for {
 			select {
 			case req := <-mw.In:
-				if len(mw.In) > int(math.Floor(float64(InputChannelSize)*0.90)) {
+				if len(mw.In) > int(math.Floor(float64(config.Middleware.InputChannelSize)*0.90)) {
 					log.WithFields(log.Fields{
 						"size":   len(mw.In),
 						"module": "middleware"}).Warn("input channel is at or above 90% capacity!")
 				}
-				if len(mw.In) == InputChannelSize {
+				if len(mw.In) == config.Middleware.InputChannelSize {
 					log.WithFields(log.Fields{
 						"size":   len(mw.In),
 						"module": "middleware"}).Error("input channel is full!")
@@ -99,7 +95,7 @@ func NewMiddlewarePipeline() *MiddlewarePipeline {
 		}()
 	*/
 	return &MiddlewarePipeline{
-		In:          make(chan *Request, InputChannelSize),
+		In:          make(chan *Request, config.Middleware.InputChannelSize),
 		middlewares: mw,
 		dispatcher:  NewDispatcher(),
 	}

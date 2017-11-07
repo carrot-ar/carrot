@@ -10,34 +10,6 @@ import (
 )
 
 var (
-	clientConfig = config.Client
-
-	writeWaitSeconds = clientConfig.WriteWaitSecs
-	pongWaitSeconds  = clientConfig.PongWaitSecs
-
-	// maximum message size allowed from the websocket
-	maxMessageSize = clientConfig.MaxMessageSize
-
-	// toggle to require a client secret token on WS upgrade request
-	clientSecretRequired = clientConfig.ClientSecretRequired
-
-	// size of client send channel
-	sendMsgBufferSize = clientConfig.SendMessageBufferSize
-
-	// size of sendToken channel
-	sendTokenBufferSize = clientConfig.SendTokenBufferSize
-
-	// time allowed to write a message to the websocket
-	writeWait = writeWaitSeconds * time.Second
-
-	// time allowed to read the next pong message from the websocket
-	pongWait = pongWaitSeconds * time.Second
-
-	// send pings to the websocket with this period, must be less than pongWait
-	pingPeriod = (pongWait * 9) / 10
-)
-
-var (
 	newline = []byte{'\n'}
 	space   = []byte{' '}
 )
@@ -90,13 +62,14 @@ func (c *Client) Expired() bool {
 
 //readPump pumps messages from the websocket to the server
 func (c *Client) readPump() {
+	clientConfig := config.Client
 	defer func() {
 		c.server.unregister <- c
 		c.conn.Close()
 	}()
-	c.conn.SetReadLimit(maxMessageSize)
-	c.conn.SetReadDeadline(time.Now().Add(pongWait))
-	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	c.conn.SetReadLimit(clientConfig.MaxMessageSize)
+	c.conn.SetReadDeadline(time.Now().Add(clientConfig.pongWait))
+	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(clientConfig.pongWait)); return nil })
 	for {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
@@ -116,7 +89,8 @@ func (c *Client) readPump() {
 
 //writePump pumps messages from the hub to the websocket connection
 func (c *Client) writePump() {
-	ticker := time.NewTicker(pingPeriod)
+	clientConfig := config.Client
+	ticker := time.NewTicker(clientConfig.pingPeriod)
 	defer func() {
 		ticker.Stop()
 		c.conn.Close()
@@ -124,7 +98,7 @@ func (c *Client) writePump() {
 	for {
 		select {
 		case message, ok := <-c.send:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			c.conn.SetWriteDeadline(time.Now().Add(clientConfig.writeWait))
 			if !ok {
 				// TODO: add session token to here once client list is updated
 				log.WithFields(log.Fields{"module": "client"}).Error("a connection has closed\n")
@@ -150,7 +124,7 @@ func (c *Client) writePump() {
 				return
 			}
 		case token, ok := <-c.sendToken:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			c.conn.SetWriteDeadline(time.Now().Add(clientConfig.writeWait))
 			if !ok {
 				//the server closed the channel
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
@@ -174,7 +148,7 @@ func (c *Client) writePump() {
 				return
 			}
 		case <-ticker.C:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			c.conn.SetWriteDeadline(time.Now().Add(clientConfig.writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
 				return
 			}
@@ -184,7 +158,7 @@ func (c *Client) writePump() {
 
 // validate that the client should be allowed to connect
 func validClientSecret(clientSecret string) bool {
-	if clientSecret != serverSecret {
+	if clientSecret != config.Server.ServerSecret {
 		log.WithField("attempted_secret", clientSecret).Error("client and server secrets do not match :(")
 		return false
 	}
@@ -193,10 +167,11 @@ func validClientSecret(clientSecret string) bool {
 }
 
 func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
+	clientConfig := config.Client
 	sessionToken, clientSecret, _ := r.BasicAuth()
 	//log.Printf("Session Token: %v | Client Secret: %v", SessionToken, clientSecret)
 
-	if clientSecretRequired && !validClientSecret(clientSecret) {
+	if clientConfig.ClientSecretRequired && !validClientSecret(clientSecret) {
 		http.Error(w, "Not Authorized!", 403)
 		return
 	}
@@ -211,8 +186,8 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 		session:   nil,
 		server:    server,
 		conn:      conn,
-		send:      make(chan []byte, sendMsgBufferSize),
-		sendToken: make(chan SessionToken, sendTokenBufferSize),
+		send:      make(chan []byte, clientConfig.SendMessageBufferSize),
+		sendToken: make(chan SessionToken, clientConfig.SendTokenBufferSize),
 		start:     make(chan struct{}),
 		openMutex: &sync.RWMutex{},
 	}

@@ -5,13 +5,6 @@ import (
 	"sync"
 )
 
-var (
-	routerConfig         = config.Router
-	routeDelimiter       = routerConfig.RouteDelimiter
-	streamIdentifier     = routerConfig.StreamIdentifier
-	controllerIdentifier = routerConfig.ControllerIdentifier
-)
-
 type RoutingTable map[string]Route
 
 var (

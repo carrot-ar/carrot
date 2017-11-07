@@ -7,7 +7,6 @@ import (
 var (
 	Environment string
 	broadcaster Broadcaster
-	config      Config
 )
 
 // TODO: refactor so that if a module fails to load, we cause an error

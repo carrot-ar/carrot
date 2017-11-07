@@ -32,3 +32,4 @@ clientpool:
 
 middleware:
   input_channel_size: 256
+  rate: 0
