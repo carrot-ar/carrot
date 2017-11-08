@@ -52,37 +52,35 @@ func (br *Broadcaster) Run() {
 
 		select {
 		case message := <-br.broadcast:
-			// TODO: Figure out the logic for running a criteria
-			// function and only broadcasting to a subset of clients
 			for i, client := range br.clients.clients {
 				if client.Valid() {
 
 					client.logBufferRedZone()
 					client.logBufferFull()
 
-					if client.Full() {
-						// This can be used to experiment how to handle only writing on our own conditions
-						// such as when the buffer size falls below a certain threshold. We can also consider
-						// throttling *only* when we reach the red zone or a yellow zone.
-					}
+					/*
+						TODO: handle full buffers better
+						if client.Full() {
+							// This can be used to experiment how to handle only writing on our own conditions
+							// such as when the buffer size falls below a certain threshold. We can also consider
+							// throttling *only* when we reach the red zone or a yellow zone.
+						}
+					*/
 
-					// see if the session is expired, if so delete the session
-					// regardless if the session is expired, see if the client is open or closed.
-					// if we are closed, then take the client out of the broadcast loop
+					// **Maintenance Operations**
+					// see if the session is expired, if so delete the session.
+					// if the client isn't open, then take the client out of the broadcast loop
 					// If the client is open, send them the message
 					if client.Expired() {
 						br.clients.sessions.Delete(client.session.Token)
-					} else if !client.Open() {
-						// add the value back to the free list
-						// cleanup that slot in the client list
-						br.clients.free <- i
-						log.WithField("size", len(br.clients.free)).Debugf("adding %v to free list", i)
-
-						br.clients.clients[i] = nil
-					} else {
-						client.session.expireTime = refreshExpiryTime()
-						client.send <- message
+					} else if !client.Open() { // regardless if the session is expired, see if the client is open or closed.
+						br.clients.Release(i)
 					}
+
+					// sending operation
+					client.session.expireTime = refreshExpiryTime()
+					client.send <- message
+
 				} else {
 					br.clients.logger.WithFields(log.Fields{
 						"i": i,

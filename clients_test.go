@@ -20,3 +20,18 @@ func TestClientsInsert(t *testing.T) {
 		t.Fatalf("failed to insert into client list, %v", err)
 	}
 }
+
+func TestClientsRelease(t *testing.T) {
+	clientList, _ := NewClientList()
+
+	client := &Client{}
+	clientList.Insert(client)
+
+	clientList.Release(0)
+
+	for _, client := range clientList.clients {
+		if client.Valid() {
+			t.Fatalf("no clients should be valid!")
+		}
+	}
+}

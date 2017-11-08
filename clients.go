@@ -57,6 +57,17 @@ func (cp *Clients) Insert(client *Client) error {
 	return nil
 }
 
+/*
+ * Releases an index in the client list. The index is added back onto the free list
+ * then the slot in the client list is set to nil.
+ * This more or less a maintenance operation that will occur is a client is not longer open
+ */
+func (cp *Clients) Release(index int) {
+	log.WithField("size", len(cp.free)).Debugf("releasing %v", index)
+	cp.free <- index
+	cp.clients[index] = nil
+}
+
 func (cp *Clients) setClient(index int, client *Client) error {
 	if cp.clients[index] != nil {
 		return fmt.Errorf("index %v contained a client when it should not have", index)
