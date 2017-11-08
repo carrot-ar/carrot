@@ -28,23 +28,29 @@ type Server struct {
 	//keep track of middleware
 	Middleware *MiddlewarePipeline
 
-	clientPool *ClientPool
+	clients *Clients
 
 	logger *log.Entry
 }
 
-func NewServer(clientPool *ClientPool, sessionStore SessionStore) *Server {
+func NewServer(sessionStore SessionStore) (*Server, error) {
+	clients, err := NewClientList()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Server{
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		sessions:   sessionStore,
 		Middleware: NewMiddlewarePipeline(),
-		clientPool: clientPool,
+		clients:    clients,
 		logger:     log.WithField("module", "server"),
-	}
+	}, nil
 }
 
 func (svr *Server) Run() {
+	go svr.Middleware.Run()
 	for {
 		select {
 		case client := <-svr.register:
@@ -62,7 +68,7 @@ func (svr *Server) Run() {
 
 				client.session = sessionPtr
 
-				svr.clientPool.insertQueue <- client
+				svr.clients.Insert(client)
 
 				//return the new token for the session
 				client.sendToken <- token
