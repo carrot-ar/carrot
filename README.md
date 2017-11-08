@@ -40,6 +40,8 @@ func main() {
 }
 ```
 
+Clients will need to implement the Carrot client framework. Currently, only iOS support exists. To see how to do so, visit the carrot-ios repository [https://github.com/carrot-ar/carrot-ios](https://github.com/carrot-ar/carrot-ios)
+
 ## Message Format
 Carrot has two message types: request and responses. 
 
