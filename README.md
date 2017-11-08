@@ -1,8 +1,9 @@
-[![Build Status](https://travis-ci.org/carrot-ar/carrot.svg?branch=master)](https://travis-ci.org/carrot-ar/carrot) [![codecov](https://codecov.io/gh/carrot-ar/carrot/branch/master/graph/badge.svg)](https://codecov.io/gh/carrot-ar/carrot)
-
 <p align="center">
 <img src="https://github.com/carrot-ar/carrot-ios/wiki/resources/Carrot@2x.png" alt="Carrot" width="300">
+[![Build Status](https://travis-ci.org/carrot-ar/carrot.svg?branch=master)](https://travis-ci.org/carrot-ar/carrot) [![codecov](https://codecov.io/gh/carrot-ar/carrot/branch/master/graph/badge.svg)](https://codecov.io/gh/carrot-ar/carrot)
 </p>
+
+
 
 Carrot is an easy-to-use, real-time framework for building multiplayer applications in Augmented Reality. Currently, not many AR frameworks exist with multiplayer in mind. There are a few reasons for this, with the most important being the difficulty of resolving location to an acceptable degree of accuracy with traditional GPS based coordinates. This is where Carrot flourishes. 
 
@@ -37,6 +38,14 @@ func main() {
 }
 ```
 
+## Message Format
+Carrot has two message types: request and responses. 
+
+### Requests
+
+### Responses
+
+## Sessions
 
 
 
