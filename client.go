@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
+	"math"
 	"net/http"
 	"sync"
 	"time"
@@ -33,6 +34,8 @@ const (
 
 	// size of sendToken channel
 	sendTokenBufferSize = 1
+
+	sendMsgBufferWarningTrigger = 0.9
 )
 
 var (
@@ -86,6 +89,39 @@ func (c *Client) softClose() {
 
 func (c *Client) Expired() bool {
 	return !c.Open() && c.session.sessionDurationExpired()
+}
+
+func (c *Client) Full() bool {
+	// check for buffer full
+	if len(c.send) == sendMsgBufferSize {
+		return true
+	}
+
+	return false
+}
+
+func (c *Client) Valid() bool {
+	// TODO: Specify critirea for what is a "valid" connection aside from existing
+	return c != nil
+}
+
+func (c *Client) logBufferRedZone() {
+	// check for buffer warning
+	if len(c.send) > int(math.Floor(sendMsgBufferSize*sendMsgBufferWarningTrigger)) {
+		c.logger.WithFields(log.Fields{
+			"open?":   c.Open(),
+			"size":    len(c.send),
+			"channel": "send"}).Error("input channel is 90% full!")
+	}
+}
+
+func (c *Client) logBufferFull() {
+	if len(c.send) == sendMsgBufferSize {
+		c.logger.WithFields(log.Fields{
+			"open?":   c.Open(),
+			"size":    len(c.send),
+			"channel": "send"}).Error("input channel is full!")
+	}
 }
 
 //readPump pumps messages from the websocket to the server
@@ -214,6 +250,7 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 		send:      make(chan []byte, sendMsgBufferSize),
 		sendToken: make(chan SessionToken, sendTokenBufferSize),
 		start:     make(chan struct{}),
+		open:      false,
 		openMutex: &sync.RWMutex{},
 		logger:    log.WithField("module", "client"),
 	}
