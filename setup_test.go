@@ -2,6 +2,7 @@ package carrot
 
 import (
 	//"fmt"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -67,6 +68,8 @@ func getTestController(endpoint string) (*AppController, error) {
 
 func init() {
 	Environment = "testing"
+
+	log.SetLevel(log.PanicLevel)
 
 	Add(endpoint1, TestController{}, "Print", false)
 	Add(endpoint2, TestStreamController{}, "Print", true)

@@ -1,6 +1,8 @@
 package carrot
 
 import (
+	log "github.com/sirupsen/logrus"
+	"math"
 	"sync"
 	"testing"
 	"time"
@@ -81,5 +83,51 @@ func TestClientValid(t *testing.T) {
 
 	if client.Valid() != false {
 		t.Fatal("client is valid when it should not be valid")
+	}
+}
+
+func TestClientcheckBufferRedzone(t *testing.T) {
+	client := &Client{
+		send:   make(chan []byte, sendMsgBufferSize),
+		logger: log.WithField("module", "client_test"),
+	}
+
+	res := client.checkBufferRedZone()
+
+	if res == true {
+		t.Fatalf("buffer was signaling redzone when it shouldn't have been")
+	}
+
+	for i := 0; i < int(math.Floor(sendMsgBufferSize*0.95)); i++ {
+		client.send <- ([]byte("test message!"))
+	}
+
+	res = client.checkBufferRedZone()
+
+	if res != true {
+		t.Fatalf("buffer was not signaling redzone when it should have been ")
+	}
+}
+
+func TestClientcheckBufferFull(t *testing.T) {
+	client := &Client{
+		send:   make(chan []byte, sendMsgBufferSize),
+		logger: log.WithField("module", "client_test"),
+	}
+
+	res := client.checkBufferFull()
+
+	if res == true {
+		t.Fatalf("buffer was signaling full when it shouldn't have been")
+	}
+
+	for i := 0; i < sendMsgBufferSize; i++ {
+		client.send <- ([]byte("test message!"))
+	}
+
+	res = client.checkBufferFull()
+
+	if res != true {
+		t.Fatalf("buffer was not full redzone when it should have been ")
 	}
 }

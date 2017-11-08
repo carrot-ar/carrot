@@ -105,23 +105,29 @@ func (c *Client) Valid() bool {
 	return c != nil
 }
 
-func (c *Client) logBufferRedZone() {
+func (c *Client) checkBufferRedZone() bool {
 	// check for buffer warning
 	if len(c.send) > int(math.Floor(sendMsgBufferSize*sendMsgBufferWarningTrigger)) {
 		c.logger.WithFields(log.Fields{
-			"open?":   c.Open(),
 			"size":    len(c.send),
 			"channel": "send"}).Error("input channel is 90% full!")
+
+		return true
 	}
+
+	return false
 }
 
-func (c *Client) logBufferFull() {
+func (c *Client) checkBufferFull() bool {
 	if len(c.send) == sendMsgBufferSize {
 		c.logger.WithFields(log.Fields{
-			"open?":   c.Open(),
 			"size":    len(c.send),
 			"channel": "send"}).Error("input channel is full!")
+
+		return true
 	}
+
+	return false
 }
 
 //readPump pumps messages from the websocket to the server

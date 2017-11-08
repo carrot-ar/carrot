@@ -30,33 +30,40 @@ func NewBroadcaster(pool *Clients) Broadcaster {
 	}
 }
 
-func (br *Broadcaster) logBufferRedZone() {
+func (br *Broadcaster) checkBufferRedZone() bool {
 	// check for buffer warning
 	if len(br.broadcast) > int(math.Floor(broadcastChannelSize*broadcastChannelWarningTrigger)) {
 		br.logger.WithField("buf_size", len(br.broadcast)).Warn("input channel is at or above 90% capacity!")
+		return true
+
 	}
+
+	return false
 }
 
-func (br *Broadcaster) logBufferFull() {
+func (br *Broadcaster) checkBufferFull() bool {
 	// check for buffer full
 	if len(br.broadcast) == broadcastChannelSize {
 		br.logger.WithField("buf_size", len(br.broadcast)).Error("input channel is full!")
+		return true
 	}
+
+	return false
 }
 
 func (br *Broadcaster) Run() {
 	for {
 
-		br.logBufferRedZone()
-		br.logBufferFull()
+		br.checkBufferRedZone()
+		br.checkBufferFull()
 
 		select {
 		case message := <-br.broadcast:
 			for i, client := range br.clients.clients {
 				if client.Valid() {
 
-					client.logBufferRedZone()
-					client.logBufferFull()
+					client.checkBufferRedZone()
+					client.checkBufferFull()
 
 					/*
 						TODO: handle full buffers better
