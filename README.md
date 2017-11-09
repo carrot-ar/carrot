@@ -1,13 +1,12 @@
-
 <p align="center">
 <img src="https://github.com/carrot-ar/carrot-ios/wiki/resources/Carrot@2x.png" alt="Carrot" width="300">
-
-<a align="center" href="https://travis-ci.org/carrot-ar/carrot"><img src="https://travis-ci.org/carrot-ar/carrot.svg?branch=master" alt="build status"></a>
-<a align="center" href=""><img src="https://codecov.io/gh/carrot-ar/carrot/branch/master/graph/badge.svg" alt="code coverage"></a>
+</p>
+<p align="center">
+<a href="https://travis-ci.org/carrot-ar/carrot"><img src="https://travis-ci.org/carrot-ar/carrot.svg?branch=master" alt="build status"></a>
+<a href=""><img src="https://codecov.io/gh/carrot-ar/carrot/branch/master/graph/badge.svg" alt="code coverage"></a>
 </p>
 
 
-# Carrot
 
 ## Building an application with Carrot
 ```
@@ -33,6 +32,7 @@ func main() {
   carrot.Run()
 }
 ```
+
 
 
 
