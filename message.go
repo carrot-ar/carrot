@@ -4,10 +4,6 @@ package carrot
 	{
 		"session_token": "KjIQhKUPNrvHkUHv1VySBg==",
 		"endpoint": "test_endpoint",
-		"origin": {
-			"longitude": 45.501689,
-			"latitude": -73.567256
-		},
 		"payload": {
 			"offset": {
 				"x": 3.2,
@@ -21,27 +17,20 @@ package carrot
 	}
 */
 
-// incoming message
-type requestData struct {
+// represents incoming requests and outgoing responses
+type messageData struct {
 	SessionToken string      `json:"session_token"`
 	Endpoint     string      `json:"endpoint"`
-	Origin       originData  `json:"origin"`
-	Payload      payloadData `json:"payload"`
+	Payload      payload	 `json:"payload"`
 }
 
-type originData struct {
-	Longitude float64 `json:"longitude"`
-	Latitude  float64 `json:"latitude"`
-	Altitude  float64 `json:"altitude"`
+type payload struct {
+	Offset	*offset				`json:"offset,omitempty"`
+	Params	map[string]string	`json:"params,omitempty"`
 }
 
-type payloadData struct {
-	Offset offsetData        `json:"offset"`
-	Params map[string]string `json:"params"`
-}
-
-type offsetData struct {
-	X float64 `json:"x"`
-	Y float64 `json:"y"`
-	Z float64 `json:"z"`
+type offset struct {
+	X	float64		`json:"x"`
+	Y	float64		`json:"y"`
+	Z	float64		`json:"z"`
 }
