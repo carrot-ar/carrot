@@ -12,12 +12,12 @@ func TestBroadcasting(t *testing.T) {
 	broadcast := NewBroadcast(broadcaster)
 	go broadcast.broadcaster.Run()
 
-	broadcast.Send([]byte("This is the broadcaster test broadcasting a message!"))
+	broadcast.Broadcast([]byte("This is the broadcaster test broadcasting a message!"))
 }
 
 func TestBroadcastercheckBufferRedzone(t *testing.T) {
 	broadcaster := &Broadcaster{
-		broadcast: make(chan []byte, broadcastChannelSize),
+		broadcast: make(chan OutMessage, broadcastChannelSize),
 		logger:    log.WithField("module", "broadcaster_test"),
 	}
 
@@ -28,7 +28,7 @@ func TestBroadcastercheckBufferRedzone(t *testing.T) {
 	}
 
 	for i := 0; i < int(math.Floor(broadcastChannelSize*0.95)); i++ {
-		broadcaster.broadcast <- ([]byte("test message!"))
+		broadcaster.broadcast <- OutboundMessage([]byte("test message!"), []string{})
 	}
 
 	res = broadcaster.checkBufferRedZone()
@@ -40,7 +40,7 @@ func TestBroadcastercheckBufferRedzone(t *testing.T) {
 
 func TestBroadcastercheckBufferFull(t *testing.T) {
 	broadcaster := &Broadcaster{
-		broadcast: make(chan []byte, broadcastChannelSize),
+		broadcast: make(chan OutMessage, broadcastChannelSize),
 		logger:    log.WithField("module", "broadcaster_test"),
 	}
 
@@ -51,7 +51,7 @@ func TestBroadcastercheckBufferFull(t *testing.T) {
 	}
 
 	for i := 0; i < broadcastChannelSize; i++ {
-		broadcaster.broadcast <- ([]byte("test message!"))
+		broadcaster.broadcast <- OutboundMessage([]byte("test message!"), []string{})
 	}
 
 	res = broadcaster.checkBufferFull()
