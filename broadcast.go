@@ -4,6 +4,19 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	Self = 0 << iota
+	All
+	// Add more types of response groups here
+
+	EmptyGroup = ""
+)
+
+/*
+	Response groups are enumerated by the constants in this file.
+	To add a new response group,  add it to the list of constants
+	at the start of the file.
+*/
 type Broadcast struct {
 	broadcaster Broadcaster
 	logger      *log.Entry
@@ -16,7 +29,26 @@ func NewBroadcast(broadcaster Broadcaster) *Broadcast {
 	}
 }
 
-func (b *Broadcast) Send(message []byte) {
+/*
+ // ...string []string
+
+ Broadcast(message, "sessiontoken", "sessiontoken")
+ Broadcast(message, sessionTokens)
+ Broadcast(message)
+
+ Broadcast(message, req.SessionToken)
+
+ func (c *TestController) EchoToSomePeople(req *carrot.Request, broadcast *carrot.Broadcast) {
+    response := carrot.Response()
+    response.AddParam("hello": "world")
+    response.Build()
+ 	responseGroup = mysql.find(/*query to find users).SessionTokens
+    broadcast.Broadcast(message, responseGroup)
+ }
+*/
+
+func (b *Broadcast) Broadcast(message []byte, sessions ...string) {
 	b.logger.Debug("sending message")
-	b.broadcaster.broadcast <- message
+
+	b.broadcaster.broadcast <- OutboundMessage(message, sessions)
 }

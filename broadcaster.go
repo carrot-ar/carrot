@@ -8,8 +8,16 @@ import (
 const broadcastChannelSize = 4096
 const broadcastChannelWarningTrigger = 0.9
 
-type OutboundMessage struct {
-	message []byte
+type OutMessage struct {
+	message  []byte
+	sessions []string
+}
+
+func OutboundMessage(message []byte, sessions []string) OutMessage {
+	return OutMessage{
+		message:  message,
+		sessions: sessions,
+	}
 }
 
 // manage broadcast groups with the broadcaster
@@ -17,14 +25,14 @@ type Broadcaster struct {
 	sessions SessionStore
 	clients  *Clients
 	//inbound messages from the clients
-	broadcast chan []byte
+	broadcast chan OutMessage
 	logger    *log.Entry
 }
 
 func NewBroadcaster(pool *Clients) Broadcaster {
 	return Broadcaster{
 		sessions:  NewDefaultSessionManager(),
-		broadcast: make(chan []byte, broadcastChannelSize),
+		broadcast: make(chan OutMessage, broadcastChannelSize),
 		clients:   pool,
 		logger:    log.WithField("module", "broadcaster"),
 	}
@@ -60,7 +68,7 @@ func (br *Broadcaster) Run() {
 		select {
 		case message := <-br.broadcast:
 			for i, client := range br.clients.clients {
-				if client.Valid() {
+				if client.Valid() && (InSlice(string(client.session.Token), message.sessions) || len(message.sessions) == 0) {
 
 					client.checkBufferRedZone()
 					client.checkBufferFull()
@@ -86,7 +94,7 @@ func (br *Broadcaster) Run() {
 
 					// sending operation
 					client.session.expireTime = refreshExpiryTime()
-					client.send <- message
+					client.send <- message.message
 
 				} else {
 					br.clients.logger.WithFields(log.Fields{
