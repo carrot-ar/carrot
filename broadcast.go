@@ -4,14 +4,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const (
-	Self = 0 << iota
-	All
-	// Add more types of response groups here
-
-	EmptyGroup = ""
-)
-
 /*
 	Response groups are enumerated by the constants in this file.
 	To add a new response group,  add it to the list of constants
