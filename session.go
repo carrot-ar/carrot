@@ -1,22 +1,18 @@
 package carrot
 
 import (
-	"crypto/rand"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"io"
 	"sync"
 	"time"
 )
 
 const (
-	nilSessionToken                     = ""
 	defaultSessionClosedTimeoutDuration = 10 // seconds
 )
 
 var (
-	oneSessionStore sync.Once
-
+	oneSessionStore      sync.Once
 	sessionStoreInstance SessionStore
 )
 
@@ -69,13 +65,6 @@ func NewDefaultSessionManager() SessionStore {
 }
 
 func (s *DefaultSessionStore) NewSession() (SessionToken, *Session, error) {
-	// Initialize context fields
-
-	b := make([]byte, 16)
-	_, err := rand.Read(b)
-	if err != nil {
-		return nilSessionToken, nil, err
-	}
 
 	uuid, err := generateUUID()
 	if err != nil {
@@ -142,20 +131,4 @@ func (s *DefaultSessionStore) Length() int {
 	length := s.length
 	s.lengthMutex.RUnlock()
 	return length
-}
-
-// generate UUID fulfilling RFC 4122
-func generateUUID() (string, error) {
-	uuid := make([]byte, 16)
-	n, err := io.ReadFull(rand.Reader, uuid)
-	if n != len(uuid) || err != nil {
-		return "", err
-	}
-
-	// variant bits
-	uuid[8] = uuid[8]&^0xc0 | 0x80
-
-	// version 4
-	uuid[6] = uuid[6]&^0xf0 | 0x40
-	return fmt.Sprintf("%x-%x-%x-%x-%x", uuid[0:4], uuid[4:6], uuid[6:8], uuid[8:10], uuid[10:]), nil
 }

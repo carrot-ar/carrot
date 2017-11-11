@@ -100,8 +100,16 @@ func (c *Client) Full() bool {
 	return false
 }
 
+func (c *Client) IsRecipient(recipientList []string) bool {
+	if InSlice(string(c.session.Token), recipientList) || len(recipientList) == 0 {
+		return true
+	}
+
+	return false
+}
+
 func (c *Client) Valid() bool {
-	// TODO: Specify critirea for what is a "valid" connection aside from existing
+	// TODO: Specify criteria for what is a "valid" connection aside from existing
 	return c != nil
 }
 

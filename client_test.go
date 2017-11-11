@@ -131,3 +131,28 @@ func TestClientcheckBufferFull(t *testing.T) {
 		t.Fatalf("buffer was not full redzone when it should have been ")
 	}
 }
+
+func TestClientIsRecipient(t *testing.T) {
+	client := &Client{}
+	sm := NewDefaultSessionManager()
+	sessionToken, session, _ := sm.NewSession()
+	client.session = session
+
+	recipients := make([]string, 0)
+	for i := 0; i < 15; i++ {
+		uuid, _ := generateUUID()
+		recipients = append(recipients, uuid)
+	}
+
+	result := client.IsRecipient(recipients)
+	if result != false {
+		t.Error("client was a recipient when it should not have been")
+	}
+
+	recipients = append(recipients, string(sessionToken))
+
+	result = client.IsRecipient(recipients)
+	if result != true {
+		t.Error("client was not a recipient when it should have been")
+	}
+}
