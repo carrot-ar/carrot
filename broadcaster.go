@@ -68,7 +68,7 @@ func (br *Broadcaster) Run() {
 		select {
 		case message := <-br.broadcast:
 			for i, client := range br.clients.clients {
-				if client.Valid() && (InSlice(string(client.session.Token), message.sessions) || len(message.sessions) == 0) {
+				if client.Valid() && client.IsRecipient(message.sessions) {
 
 					client.checkBufferRedZone()
 					client.checkBufferFull()
