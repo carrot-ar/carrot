@@ -28,7 +28,7 @@ recipients := []string{sessionToken1, sessionToken2, sessionToken3)
 carrot.Broadcast(/* carrot response message */, recipients)
 ```
 
-One way to take the best use of this feature is to keep sessions associated with users in a datastore connected to carrot. Then, a simple query can return a set of sessions to respond to. Here is some pseudocode demonstrating such:
+One way to make the best use of this feature is to keep sessions associated with users in a datastore connected to carrot. Then, a simple query can return a set of sessions to respond to. Here is some pseudocode demonstrating such:
 ```
 func (c *ExampleController) SendHelloToAll(r *carrot.Request, b *carrot.Broadcast) {
 	/* build up a response here */
