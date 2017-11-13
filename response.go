@@ -2,6 +2,7 @@ package carrot
 
 import (
 	"encoding/json"
+	//"fmt"
 )
 
 type response interface {
@@ -37,6 +38,9 @@ func NewResponse(sessionToken string, endpoint string, payload payload) (*messag
 
 //only adds new params, does not override existing ones
 func (md *messageData) AddParam(key string, value interface{}) {
+	if md.Payload.Params == nil {
+		md.Payload.Params = make(map[string]string)
+	}
 	params := md.Payload.Params
 	_, exists := params[key]
 	if !exists {

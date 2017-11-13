@@ -14,7 +14,9 @@ func TestBuildResponse(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	params := map[string]string{"red": "fish", "blue": "fish"}
+	params := map[string]string{"one": "fish", "two": "fish"}
+
+	//test building a response from scratch
 	payload_complete, err := NewPayload(offset, params)
 	if err != nil {
 		t.Error(err)
@@ -80,40 +82,75 @@ func TestBuildResponse(t *testing.T) {
 		t.Error("The response with an empty payload is not valid JSON")
 	} 
 
-	// r_c.AddParam("newparam", "test")
-	// r_np.AddParam("newparam", "test")
-	// r_no.AddParam("newparam", "test")
-	// r_e.AddParam("newparam", "test")
-	// res_c, err = r_c.Build()
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	// res_np, err = r_np.Build()
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	// res_no, err = r_no.Build()
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	// res_e, err = r_e.Build()
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	// if !isJSON(res_c)  {
-	// 	t.Error("The complete response with an extra added param is not valid JSON")
-	// }
-	// if !isJSON(res_np)  {
-	// 	t.Error("The response with a single added param is not valid JSON")
-	// }
-	// if !isJSON(res_no)  {
-	// 	t.Error("The response with no offset and an extra added param is not valid JSON")
-	// }
-	// if !isJSON(res_e)  {
-	// 	t.Error("The response with an added param and otherwise empty payload is not valid JSON")
-	// } 
+	//test AddParam and AddParams
+	testKey, testValue := "newparam", "test"
+	testMap1 := ResponseParams{"red": "fish", "blue" : "fish"}
+	testMap2 := ResponseParams{"blue": "fish", "new" : "fish"}
+	r_c.AddParam(testKey, testValue)
+	_,ok := r_c.Payload.Params[testKey]
+	if !ok {
+		t.Error("AddParam did not work correctly on a complete response")
+	}
+	r_np.AddParam(testKey, testValue)
+	_,ok = r_np.Payload.Params[testKey]
+	if !ok {
+		t.Error("AddParam did not work correctly on a response without parameters")
+	}
+	r_no.AddParam(testKey, testValue)
+	_,ok = r_no.Payload.Params[testKey]
+	if !ok {
+		t.Error("AddParam did not work correctly on a response without an offset")
+	}
+	r_e.AddParam(testKey, testValue)
+	_,ok = r_e.Payload.Params[testKey]
+	if !ok {
+		t.Error("AddParam did not work correctly on an empty response")
+	}
+	r_c.AddParams(testMap1)
+	_,ok = r_c.Payload.Params["red"]
+	if !ok {
+		t.Error("AddParams did not work correctly on a complete response")
+	}
+	r_c.AddParams(testMap2)
+	_,ok = r_c.Payload.Params["new"]
+	if !ok {
+		t.Error("AddParams ignored a value it was supposed to add")
+	}
+	_,ok = r_c.Payload.Params["fake"]
+	if ok {
+		t.Error("AddParams tried to return a value that wasn't assigned")
+	}
+	//TODO: test more edge cases of AddParams
+	res_c, err = r_c.Build()
+	if err != nil {
+		t.Error(err)
+	}
+	res_np, err = r_np.Build()
+	if err != nil {
+		t.Error(err)
+	}
+	res_no, err = r_no.Build()
+	if err != nil {
+		t.Error(err)
+	}
+	res_e, err = r_e.Build()
+	if err != nil {
+		t.Error(err)
+	}
+	if !isJSON(res_c)  {
+		t.Error("The complete response with an extra added param is not valid JSON")
+	}
+	if !isJSON(res_np)  {
+		t.Error("The response with a single added param is not valid JSON")
+	}
+	if !isJSON(res_no)  {
+		t.Error("The response with no offset and an extra added param is not valid JSON")
+	}
+	if !isJSON(res_e)  {
+		t.Error("The response with an added param and otherwise empty payload is not valid JSON")
+	} 
 
-	//TODO: test all variations of CreateDefaultResponse
+	//test all variations of CreateDefaultResponse
 	s := NewDefaultSessionManager()
 	sessionToken, _, err := s.NewSession()
 	req_c := newResponseTestRequest(sessionToken, endpoint, params, offset)
