@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+func TestRefreshExpiryTime(t *testing.T) {
+	refreshExpiryTime()
+}
+
 func TestDefaultSessionManagerNewSessionGet(t *testing.T) {
 	store := NewDefaultSessionManager()
 
