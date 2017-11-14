@@ -6,7 +6,38 @@
 <a href=""><img src="https://codecov.io/gh/carrot-ar/carrot/branch/master/graph/badge.svg" alt="code coverage"></a>
 </p>
 
+Carrot is an easy-to-use, real-time framework for building multiplayer applications in Augmented Reality. Currently, not many AR frameworks exist with multiplayer in mind. There are a few reasons for this, with the most important being the difficulty of resolving location to an acceptable degree of accuracy with traditional GPS based coordinates. This is where Carrot flourishes.
 
+By implementing the Picnic Protocol into the server and client's respective frameworks, we have decreased the error size for location resolution from 10-65 meters with GPS down to less than one foot. This enables developers (i.e. you) to focus on creating applications with rich content and need not worry about the finer details such as cross-device accuracy and networking.
+
+## Response Groups
+The broadcast module, available in all controller implementations, has a few options for narrowing down which clients to send a message to. Since all clients have a session associated with them, there is a 1-to-1 relationship between sessions and clients. Thus, every client has a `SessionToken` which is accessible within the client and within the session store.
+
+#### Broadcasting only back to the message sender
+```
+carrot.Broadcast(/* carrot response message */)
+```
+
+#### Broadcasting to a set of clients
+```
+carrot.Broadcast(/* carrot response message */, sessionToken1, sessiontoken2)
+```
+or
+```
+recipients := []string{sessionToken1, sessionToken2, sessionToken3)
+carrot.Broadcast(/* carrot response message */, recipients)
+```
+
+One way to make the best use of this feature is to keep sessions associated with users in a datastore connected to carrot. Then, a simple query can return a set of sessions to respond to. Here is some pseudocode demonstrating such:
+```
+func (c *ExampleController) SendHelloToAll(r *carrot.Request, b *carrot.Broadcast) {
+	/* build up a response here */
+	/* database call to get a list of session tokens based on a query */
+	b.Broadcast(/* response */, /* array with session tokens */)
+}
+```
+
+** BELOW THIS IS OUT OF DATE! **
 
 ## Building an application with Carrot
 ```
