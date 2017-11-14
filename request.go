@@ -29,7 +29,7 @@ const (
 type Request struct {
 	SessionToken SessionToken
 	endpoint     string
-	Params       map[string]string
+	Params       map[string]interface{}
 	Offset       *offset
 	data         []byte
 	metrics      []time.Time

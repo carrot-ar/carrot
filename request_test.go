@@ -29,10 +29,13 @@ func TestNewRequest(t *testing.T) {
 
 	actual := NewRequest(ctx, []byte(str))
 
+	params := make(map[string]interface{})
+	params["foo"] = "bar"
+
 	expected := &Request{
 		SessionToken: ctx.Token,
 		endpoint:     "test",
-		Params:       map[string]string{"foo": "bar"},
+		Params:       params,
 		Offset: &offset{
 			X: 3.1,
 			Y: 1.3,

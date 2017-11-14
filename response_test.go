@@ -14,7 +14,10 @@ func TestBuildResponse(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	params := map[string]string{"one": "fish", "two": "fish"}
+	
+	params := make(map[string]interface{})
+	params["one"] = "fish"
+	params["two"] = "fish"
 
 	//test building a response from scratch
 	payload_complete, err := NewPayload(offset, params)
@@ -180,7 +183,7 @@ func isJSON(res []byte) bool {
 	return json.Unmarshal([]byte(res), &js) == nil
 }
 
-func newResponseTestRequest(t SessionToken, e string, p map[string]string, o *offset) *Request {
+func newResponseTestRequest(t SessionToken, e string, p map[string]interface{}, o *offset) *Request {
 	return &Request{
 		SessionToken: t,
 		endpoint:     e,
