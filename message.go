@@ -19,18 +19,18 @@ package carrot
 
 // represents incoming requests and outgoing responses
 type messageData struct {
-	SessionToken string      `json:"session_token"`
-	Endpoint     string      `json:"endpoint"`
-	Payload      payload	 `json:"payload"`
+	SessionToken string  `json:"session_token"`
+	Endpoint     string  `json:"endpoint"`
+	Payload      payload `json:"payload"`
 }
 
 type payload struct {
-	Offset	*offset				`json:"offset,omitempty"`
-	Params	map[string]string	`json:"params,omitempty"`
+	Offset *offset           `json:"offset,omitempty"`
+	Params map[string]string `json:"params,omitempty"`
 }
 
 type offset struct {
-	X	float64		`json:"x"`
-	Y	float64		`json:"y"`
-	Z	float64		`json:"z"`
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
+	Z float64 `json:"z"`
 }

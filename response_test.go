@@ -69,54 +69,54 @@ func TestBuildResponse(t *testing.T) {
 	//fmt.Printf("%s\n", res_np)
 	//fmt.Printf("%s\n", res_no)
 	//fmt.Printf("%s\n", res_e)
-	if !isJSON(res_c)  {
+	if !isJSON(res_c) {
 		t.Error("The complete response is not valid JSON")
 	}
-	if !isJSON(res_np)  {
+	if !isJSON(res_np) {
 		t.Error("The response with no params is not valid JSON")
 	}
-	if !isJSON(res_no)  {
+	if !isJSON(res_no) {
 		t.Error("The response with no offset is not valid JSON")
 	}
-	if !isJSON(res_e)  {
+	if !isJSON(res_e) {
 		t.Error("The response with an empty payload is not valid JSON")
-	} 
+	}
 
 	//test AddParam and AddParams
 	testKey, testValue := "newparam", "test"
-	testMap1 := ResponseParams{"red": "fish", "blue" : "fish"}
-	testMap2 := ResponseParams{"blue": "fish", "new" : "fish"}
+	testMap1 := ResponseParams{"red": "fish", "blue": "fish"}
+	testMap2 := ResponseParams{"blue": "fish", "new": "fish"}
 	r_c.AddParam(testKey, testValue)
-	_,ok := r_c.Payload.Params[testKey]
+	_, ok := r_c.Payload.Params[testKey]
 	if !ok {
 		t.Error("AddParam did not work correctly on a complete response")
 	}
 	r_np.AddParam(testKey, testValue)
-	_,ok = r_np.Payload.Params[testKey]
+	_, ok = r_np.Payload.Params[testKey]
 	if !ok {
 		t.Error("AddParam did not work correctly on a response without parameters")
 	}
 	r_no.AddParam(testKey, testValue)
-	_,ok = r_no.Payload.Params[testKey]
+	_, ok = r_no.Payload.Params[testKey]
 	if !ok {
 		t.Error("AddParam did not work correctly on a response without an offset")
 	}
 	r_e.AddParam(testKey, testValue)
-	_,ok = r_e.Payload.Params[testKey]
+	_, ok = r_e.Payload.Params[testKey]
 	if !ok {
 		t.Error("AddParam did not work correctly on an empty response")
 	}
 	r_c.AddParams(testMap1)
-	_,ok = r_c.Payload.Params["red"]
+	_, ok = r_c.Payload.Params["red"]
 	if !ok {
 		t.Error("AddParams did not work correctly on a complete response")
 	}
 	r_c.AddParams(testMap2)
-	_,ok = r_c.Payload.Params["new"]
+	_, ok = r_c.Payload.Params["new"]
 	if !ok {
 		t.Error("AddParams ignored a value it was supposed to add")
 	}
-	_,ok = r_c.Payload.Params["fake"]
+	_, ok = r_c.Payload.Params["fake"]
 	if ok {
 		t.Error("AddParams tried to return a value that wasn't assigned")
 	}
@@ -137,55 +137,55 @@ func TestBuildResponse(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if !isJSON(res_c)  {
+	if !isJSON(res_c) {
 		t.Error("The complete response with an extra added param is not valid JSON")
 	}
-	if !isJSON(res_np)  {
+	if !isJSON(res_np) {
 		t.Error("The response with a single added param is not valid JSON")
 	}
-	if !isJSON(res_no)  {
+	if !isJSON(res_no) {
 		t.Error("The response with no offset and an extra added param is not valid JSON")
 	}
-	if !isJSON(res_e)  {
+	if !isJSON(res_e) {
 		t.Error("The response with an added param and otherwise empty payload is not valid JSON")
-	} 
+	}
 
 	//test all variations of CreateDefaultResponse
 	s := NewDefaultSessionManager()
 	sessionToken, _, err := s.NewSession()
 	req_c := newResponseTestRequest(sessionToken, endpoint, params, offset)
 	res, err := CreateDefaultResponse(req_c)
-	if !isJSON(res)  {
+	if !isJSON(res) {
 		t.Error("The default response is not valid JSON")
 	}
 	req_np := newResponseTestRequest(sessionToken, endpoint, nil, offset)
 	res, err = CreateDefaultResponse(req_np)
-	if !isJSON(res)  {
+	if !isJSON(res) {
 		t.Error("The default response is not valid JSON")
 	}
 	req_no := newResponseTestRequest(sessionToken, endpoint, params, nil)
 	res, err = CreateDefaultResponse(req_no)
-	if !isJSON(res)  {
+	if !isJSON(res) {
 		t.Error("The default response is not valid JSON")
-	} 
+	}
 	req_e := newResponseTestRequest(sessionToken, endpoint, nil, nil)
 	res, err = CreateDefaultResponse(req_e)
-	if !isJSON(res)  {
+	if !isJSON(res) {
 		t.Error("The default response is not valid JSON")
-	} 
+	}
 }
 
 func isJSON(res []byte) bool {
-    var js json.RawMessage
-    return json.Unmarshal([]byte(res), &js) == nil
+	var js json.RawMessage
+	return json.Unmarshal([]byte(res), &js) == nil
 }
 
 func newResponseTestRequest(t SessionToken, e string, p map[string]string, o *offset) *Request {
-	return &Request {
+	return &Request{
 		SessionToken: t,
-		endpoint:	  e,
-		Params:		  p,
-		Offset:	      o,
+		endpoint:     e,
+		Params:       p,
+		Offset:       o,
 		metrics:      nil,
 		data:         nil,
 	}

@@ -14,25 +14,25 @@ type response interface {
 type ResponseParams map[string]interface{}
 
 func NewOffset(x float64, y float64, z float64) (*offset, error) {
-	return &offset {
-		X:	x,
-		Y:	y,
-		Z:	z,
+	return &offset{
+		X: x,
+		Y: y,
+		Z: z,
 	}, nil
 }
 
 func NewPayload(offset *offset, params map[string]string) (payload, error) {
-	return payload {
-		Offset:	offset,
-		Params:	params,
+	return payload{
+		Offset: offset,
+		Params: params,
 	}, nil
 }
 
 func NewResponse(sessionToken string, endpoint string, payload payload) (*messageData, error) {
-	return &messageData {
-		SessionToken:	sessionToken,
-		Endpoint:		endpoint,
-		Payload:		payload,
+	return &messageData{
+		SessionToken: sessionToken,
+		Endpoint:     endpoint,
+		Payload:      payload,
 	}, nil
 }
 
