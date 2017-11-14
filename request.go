@@ -30,23 +30,10 @@ type Request struct {
 	SessionToken SessionToken
 	endpoint     string
 	Params       map[string]string
-	Origin       location
-	Offset       offset
+	Offset       *offset
 	data         []byte
 	metrics      []time.Time
 	err          error
-}
-
-type location struct {
-	Longitude float64
-	Latitude  float64
-	Altitude  float64
-}
-
-type offset struct {
-	X float64
-	Y float64
-	Z float64
 }
 
 func NewRequest(session *Session, message []byte) *Request { //returns error,
@@ -58,18 +45,17 @@ func NewRequest(session *Session, message []byte) *Request { //returns error,
 		data:         message,
 	}
 
-	var d requestData
-	err := json.Unmarshal(message, &d)
+	var md messageData
+	err := json.Unmarshal(message, &md)
 
 	if err == nil {
-		err = validSession(session.Token, SessionToken(d.SessionToken))
+		err = validSession(session.Token, SessionToken(md.SessionToken))
 	}
 
 	req.err = err
-	req.endpoint = d.Endpoint
-	req.Params = d.Payload.Params
-	req.Origin = location(d.Origin)
-	req.Offset = offset(d.Payload.Offset)
+	req.endpoint = md.Endpoint
+	req.Params = md.Payload.Params
+	req.Offset = md.Payload.Offset
 
 	req.AddMetric(RequestCreation)
 

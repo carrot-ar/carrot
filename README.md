@@ -1,6 +1,7 @@
 <p align="center">
 <img src="https://github.com/carrot-ar/carrot-ios/wiki/resources/Carrot@2x.png" alt="Carrot" width="300">
 </p>
+
 <p align="center">
 <a href="https://travis-ci.org/carrot-ar/carrot"><img src="https://travis-ci.org/carrot-ar/carrot.svg?branch=master" alt="build status"></a>
 <a href=""><img src="https://codecov.io/gh/carrot-ar/carrot/branch/master/graph/badge.svg" alt="code coverage"></a>
@@ -40,6 +41,9 @@ func (c *ExampleController) SendHelloToAll(r *carrot.Request, b *carrot.Broadcas
 ** BELOW THIS IS OUT OF DATE! **
 
 ## Building an application with Carrot
+
+Building applications on Carrot is incredibly simple. Check out this simple echo application that echos text input from one device into the AR space of all connected devices: 
+
 ```
 package main
 
@@ -47,25 +51,28 @@ import (
   "github.com/carrot-ar/carrot"
 )
 
-type PingController struct{}
+type EchoController struct{}
 
-func (c *PingController) Ping(req *carrot.Request, res *carrot.Responder) {
-	res.broadcast <- []byte("Pong!")
+func (c *PingController) Echo(req *carrot.Request, broadcast *carrot.Broadcast) {
+	responseText := req.Params["foo"]
+	response := carrot.Response(responseText)
+	broadcast.Send(response)
 }
 
 func main() {
 
-  // Register endpoints here in the order of endpoint, controller, method,
-  // and whether the route will accept streaming
-  carrot.Add("ping", PingController{}, "Ping", false)
+  // Register endpoints here in the order of endpoint, controller, method
+  carrot.Add("echo", EchoController{}, "Echo")
 
   // Run the server
   carrot.Run()
 }
 ```
 
+Clients will need to implement the Carrot client framework. Currently, only iOS support exists. To see how to do so, visit the carrot-ios repository [https://github.com/carrot-ar/carrot-ios](https://github.com/carrot-ar/carrot-ios)
 
-
+## Message Format
+Carrot has two message types: request and responses. 
 
 ## New Session with client secrets disabled
 
@@ -134,14 +141,9 @@ If this message is sent to the server over the WebSocket connection established,
 
 At the moment, all messages are echo'd back to every client. This will change once the `responder` module is complete. 
 
-## Controller Types
-Controllers take on two forms. EventControllers and StreamControllers. 
+### Responses
 
-### EventController
-EventControllers handle one time events such as placing an object. When a request is sent to an EventController, a new instance of the controller is instantiated, the request is routed to the correct method, and once the request is finished the controller is dereferenced.
+## Sessions
 
-### StreamController
-StreamControllers handle persistent events such as drawing a line or moving an object in real time. When a request is sent to a StreamController, a new instance of the controller is instantiated similar to the EventController. However, after the request is acted on by the correct method, the controller is maintained in a map from `SessionToken` to `StreamController`. This allows you to call the same route multiple times in a row to the same instance of a controller. Some benefits of this are a performance boost (no need to instantiate a controller, just a simple lookup is required) as well as the ability to set fields in the struct and have them persist between requests. 
 
-Currently, a StreamController will remain open indefinitely. 
 

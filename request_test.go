@@ -16,10 +16,6 @@ func TestNewRequest(t *testing.T) {
 	str := fmt.Sprintf("{ "+
 		"\"session_token\": \"%v\", "+
 		"\"endpoint\": \"test\","+
-		"\"origin\": { "+
-		"\"longitude\": 45.501689, "+
-		"\"latitude\": -73.567256 "+
-		"}, "+
 		"\"payload\": { "+
 		"\"offset\": { "+
 		"\"x\": 3.1,"+
@@ -37,11 +33,7 @@ func TestNewRequest(t *testing.T) {
 		SessionToken: ctx.Token,
 		endpoint:     "test",
 		Params:       map[string]string{"foo": "bar"},
-		Origin: location{
-			Longitude: 45.501689,
-			Latitude:  -73.567256,
-		},
-		Offset: offset{
+		Offset: &offset{
 			X: 3.1,
 			Y: 1.3,
 			Z: 4.0,
@@ -62,7 +54,7 @@ func TestRequestTokenMismatch(t *testing.T) {
 	sessions := NewDefaultSessionManager()
 	token, _, _ := sessions.NewSession()
 	ctx, _ := sessions.Get(token)
-	str := `{ "session_token": "badtoken", "endpoint": "print_foo_param", "origin": { "longitude": 45.501689, "latitude": -73.567256 }, "payload": { "offset": { "x": 3, "y": 1, "z": 4 }, "params": { "foo": "bar" } } }`
+	str := `{ "session_token": "badtoken", "endpoint": "print_foo_param", "payload": { "offset": { "x": 3, "y": 1, "z": 4 }, "params": { "foo": "bar" } } }`
 
 	req := NewRequest(ctx, []byte(str))
 	if !strings.Contains(req.err.Error(), "mismatch") {
