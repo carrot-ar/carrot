@@ -5,6 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"sync"
 	"time"
+	"errors"
 )
 
 const (
@@ -21,6 +22,7 @@ type Session struct {
 	Token      SessionToken
 	expireTime time.Time
 	mutex      *sync.Mutex
+	primaryDevice	bool
 }
 
 func refreshExpiryTime() time.Time {
@@ -41,6 +43,7 @@ type SessionStore interface {
 	NewSession() (SessionToken, *Session, error)
 	Exists(SessionToken) bool
 	Get(SessionToken) (*Session, error)
+	GetPrimaryDeviceToken() (SessionToken, error)
 	Range(func(key, value interface{}) bool)
 	Delete(SessionToken) error
 	Length() int
@@ -62,6 +65,10 @@ func NewDefaultSessionManager() SessionStore {
 	})
 
 	return sessionStoreInstance
+}
+
+func (s *Session) isPrimaryDevice() bool {
+	return s.primaryDevice
 }
 
 func (s *DefaultSessionStore) NewSession() (SessionToken, *Session, error) {
@@ -112,6 +119,22 @@ func (s *DefaultSessionStore) Get(token SessionToken) (*Session, error) {
 	}
 
 	return ctx.(*Session), nil
+}
+
+func (s *DefaultSessionStore) GetPrimaryDeviceToken() (SessionToken, error) {
+	var token SessionToken
+	var err error
+	s.sessionStore.Range(func(t, session interface{}) bool {
+		s := session.(*Session)
+		if s.isPrimaryDevice() {
+			token = t.(SessionToken)
+		}
+		return true
+	})
+	if token == "" {
+		err = errors.New("Could not locate primary device in sessions list")
+	}
+	return token, err
 }
 
 func (s *DefaultSessionStore) Delete(token SessionToken) error {

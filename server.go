@@ -69,10 +69,30 @@ func (svr *Server) Run() {
 
 				client.session = sessionPtr
 
+				if svr.sessions.Length() == 1 { //this is the first connected and therefore primary device
+					client.session.primaryDevice = true
+				}
+
 				svr.clients.Insert(client)
+
+				//TODO: handle way to assign a new primary device if original device disconnects
+
+				uuid, err := svr.sessions.GetPrimaryDeviceToken()
+				if err != nil {
+					//handle later
+					log.Error(err)
+				}
+				info, err := createInitialDeviceInfo(string(uuid), string(token))
+				if err != nil {
+					//handle later
+					log.Error(err)
+				}
+
+				client.sendBeaconInfo <- info
 
 				//return the new token for the session
 				client.sendToken <- token
+
 			}
 
 			close(client.start)

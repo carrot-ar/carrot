@@ -63,6 +63,9 @@ type Client struct {
 	//buffered channel of outbound tokens
 	sendToken chan SessionToken
 
+	//send JSON detailing token, primary/secondary device status, etc
+	sendBeaconInfo chan []byte
+
 	openMutex *sync.RWMutex
 
 	logger *log.Entry
@@ -213,11 +216,35 @@ func (c *Client) writePump() {
 			}
 			w.Write([]byte(token))
 
-			//add queued messages to the current websocket message
+			//add queued tokens to the current websocket message
 			n := len(c.sendToken)
 			for i := 0; i < n; i++ {
 				w.Write(newline)
 				w.Write([]byte(<-c.sendToken))
+			}
+
+			if err := w.Close(); err != nil {
+				return
+			}
+		case info, ok := <-c.sendBeaconInfo:
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if !ok {
+				//the server closed the channel
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+
+			w, err := c.conn.NextWriter(websocket.TextMessage)
+			if err != nil {
+				return
+			}
+			w.Write([]byte(info))
+
+			//add queued device handshake messages to the current websocket message
+			n := len(c.sendBeaconInfo)
+			for i := 0; i < n; i++ {
+				w.Write(newline)
+				w.Write([]byte(<-c.sendBeaconInfo))
 			}
 
 			if err := w.Close(); err != nil {
