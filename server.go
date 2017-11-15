@@ -56,7 +56,7 @@ func (svr *Server) Run() {
 		select {
 		case client := <-svr.register:
 			client.softOpen()
-			token := <-client.sendToken
+			token := SessionToken("")
 			//create persistent token for new or invalid sessions
 			exists := svr.sessions.Exists(token)
 			if (token == "") || !exists {
@@ -89,10 +89,6 @@ func (svr *Server) Run() {
 				}
 
 				client.sendBeaconInfo <- info
-
-				//return the new token for the session
-				client.sendToken <- token
-
 			}
 
 			close(client.start)
@@ -102,7 +98,7 @@ func (svr *Server) Run() {
 				client.softClose()
 				// delete client?
 				close(client.send)
-				close(client.sendToken)
+				close(client.sendBeaconInfo)
 				client = nil
 			}
 		}
