@@ -183,22 +183,27 @@ func (c *Client) writePump() {
 				return
 			}
 
-			w, err := c.conn.NextWriter(websocket.TextMessage)
-			if err != nil {
-				return
-			}
-			w.Write(message)
+			c.conn.WriteMessage(websocket.TextMessage, message)
+			/*
+				w, err := c.conn.NextWriter(websocket.TextMessage)
+				if err != nil {
+					return
+				}
+				w.Write(message)
 
-			//add queued messages to the current websocket message
-			n := len(c.send)
-			for i := 0; i < n; i++ {
-				w.Write(newline)
-				w.Write(<-c.send)
-			}
 
-			if err := w.Close(); err != nil {
-				return
-			}
+				// TODO: messages are having a \n in them, so this is a problem
+				// add queued messages to the current websocket message
+				n := len(c.send)
+				for i := 0; i < n; i++ {
+					w.Write(newline)
+					w.Write(<-c.send)
+				}
+
+				if err := w.Close(); err != nil {
+					return
+				}
+			*/
 		case info, ok := <-c.sendBeaconInfo:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {

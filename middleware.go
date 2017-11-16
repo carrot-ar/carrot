@@ -21,7 +21,6 @@ var count = 0
 func logger(req *Request, logger *log.Entry) error {
 
 	logger.WithField("session_token", req.SessionToken).Debug("new request")
-
 	return nil
 }
 
@@ -47,6 +46,7 @@ func (mw *MiddlewarePipeline) Run() {
 		for {
 			select {
 			case req := <-mw.In:
+				log.Info(req.SessionToken)
 				if len(mw.In) > int(math.Floor(InputChannelSize*0.90)) {
 					mw.logger.WithField("buf_size", len(mw.In)).Warn("input channel is at or above 90% capacity!")
 				}

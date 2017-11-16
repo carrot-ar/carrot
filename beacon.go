@@ -20,7 +20,7 @@ package carrot
 
 func createInitialDeviceInfo(uuid string, token string) ([]byte, error) {
 	params := ResponseParams{"identifier": "com.Carrot.Beacon", "uuid": uuid}
-	payload, err := NewPayload(nil, params)
+	payload, err := newPayloadNoTransform(nil, params)
 	res, err := NewResponse(token, "carrot_beacon", payload)
 	info, err := res.Build()
 	return info, err
@@ -42,7 +42,7 @@ func createInitialDeviceInfo(uuid string, token string) ([]byte, error) {
 */
 
 func getT_PFromPrimaryDeviceRes(token string) ([]byte, error) {
-	payload, err := NewPayload(nil, nil)
+	payload, err := newPayloadNoTransform(nil, nil)
 	res, err := NewResponse(token, "carrot_transform", payload)
 	ask, err := res.Build()
 	return ask, err

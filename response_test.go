@@ -20,19 +20,19 @@ func TestBuildResponse(t *testing.T) {
 	params["two"] = "fish"
 
 	//test building a response from scratch
-	payload_complete, err := NewPayload(offset, params)
+	payload_complete, err := NewPayload(token, offset, params)
 	if err != nil {
 		t.Error(err)
 	}
-	payload_noparams, err := NewPayload(offset, nil)
+	payload_noparams, err := NewPayload(token, offset, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	payload_nooffset, err := NewPayload(nil, params)
+	payload_nooffset, err := NewPayload(token, nil, params)
 	if err != nil {
 		t.Error(err)
 	}
-	payload_empty, err := NewPayload(nil, nil)
+	payload_empty, err := NewPayload(token, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}

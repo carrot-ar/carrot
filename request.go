@@ -3,6 +3,7 @@ package carrot
 import (
 	"encoding/json"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -87,6 +88,8 @@ func logBenchmarks(metrics []time.Time) {
 }
 
 func validSession(serverToken SessionToken, clientToken SessionToken) error {
+	log.Infof("client: %v, server %v", clientToken, serverToken)
+
 	if serverToken != clientToken {
 		return fmt.Errorf("client-server token mismatch")
 	}
