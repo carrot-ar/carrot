@@ -15,7 +15,6 @@ func sampleClient() *Client {
 	client := &Client{
 		session:   session,
 		send:      make(chan []byte, sendMsgBufferSize),
-		sendToken: make(chan SessionToken, sendTokenBufferSize),
 		start:     make(chan struct{}),
 		openMutex: &sync.RWMutex{},
 		open:      true,
@@ -38,22 +37,6 @@ func TestClientExpired(t *testing.T) {
 
 	if client.Expired() == false {
 		t.Fatalf("client should be expired but it isn't")
-	}
-}
-
-func TestClientFull(t *testing.T) {
-	client := sampleClient()
-
-	if client.Full() == true {
-		t.Fatalf("client send buffer is full when it should be empty size: %v", len(client.sendToken))
-	}
-
-	for i := 0; i < sendMsgBufferSize; i++ {
-		client.send <- []byte("dummy message")
-	}
-
-	if client.Full() == false {
-		t.Fatalf("client send buffer is not full when it should be! size: %v", len(client.sendToken))
 	}
 }
 

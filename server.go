@@ -56,7 +56,7 @@ func (svr *Server) Run() {
 		select {
 		case client := <-svr.register:
 			client.softOpen()
-			token := <-client.sendToken
+			token := SessionToken("")
 			//create persistent token for new or invalid sessions
 			exists := svr.sessions.Exists(token)
 			if (token == "") || !exists {
@@ -69,10 +69,26 @@ func (svr *Server) Run() {
 
 				client.session = sessionPtr
 
+				if svr.sessions.Length() == 1 { //this is the first connected and therefore primary device
+					client.session.primaryDevice = true
+				}
+
 				svr.clients.Insert(client)
 
-				//return the new token for the session
-				client.sendToken <- token
+				//TODO: handle way to assign a new primary device if original device disconnects
+
+				uuid, err := svr.sessions.GetPrimaryDeviceToken()
+				if err != nil {
+					//handle later
+					log.Error(err)
+				}
+				info, err := createInitialDeviceInfo(string(uuid), string(token))
+				if err != nil {
+					//handle later
+					log.Error(err)
+				}
+
+				client.sendBeaconInfo <- info
 			}
 
 			close(client.start)
@@ -82,7 +98,7 @@ func (svr *Server) Run() {
 				client.softClose()
 				// delete client?
 				close(client.send)
-				close(client.sendToken)
+				close(client.sendBeaconInfo)
 				client = nil
 			}
 		}

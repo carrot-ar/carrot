@@ -105,3 +105,26 @@ func TestSessionExpired(t *testing.T) {
 		t.Errorf("Session did not expire after period of disconnection")
 	}
 }
+
+func TestPrimaryDeviceAssignmentAndRetrieval(t *testing.T) {
+	store := NewDefaultSessionManager()
+	_, session, err := store.NewSession()
+	if err != nil {
+		t.Error(err)
+	}
+	if session.isPrimaryDevice() {
+		t.Errorf("The session should not be marked as a primary device")
+	}
+	_, err = store.GetPrimaryDeviceToken()
+	if err == nil {
+		t.Errorf("No primary device should have been retrieved because one doesn't exist yet")
+	}
+	session.primaryDevice = true
+	if !session.isPrimaryDevice() {
+		t.Errorf("The session should have been marked as a primary device")
+	}
+	_, err = store.GetPrimaryDeviceToken()
+	if err != nil {
+		t.Error(err)
+	}
+}

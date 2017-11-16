@@ -60,8 +60,8 @@ type Client struct {
 	//buffered channel of outbound messages
 	send chan []byte
 
-	//buffered channel of outbound tokens
-	sendToken chan SessionToken
+	//send JSON detailing token, primary/secondary device status, etc
+	sendBeaconInfo chan []byte
 
 	openMutex *sync.RWMutex
 
@@ -199,7 +199,7 @@ func (c *Client) writePump() {
 			if err := w.Close(); err != nil {
 				return
 			}
-		case token, ok := <-c.sendToken:
+		case info, ok := <-c.sendBeaconInfo:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				//the server closed the channel
@@ -211,13 +211,13 @@ func (c *Client) writePump() {
 			if err != nil {
 				return
 			}
-			w.Write([]byte(token))
+			w.Write([]byte(info))
 
-			//add queued messages to the current websocket message
-			n := len(c.sendToken)
+			//add queued device handshake messages to the current websocket message
+			n := len(c.sendBeaconInfo)
 			for i := 0; i < n; i++ {
 				w.Write(newline)
-				w.Write([]byte(<-c.sendToken))
+				w.Write([]byte(<-c.sendBeaconInfo))
 			}
 
 			if err := w.Close(); err != nil {
@@ -243,7 +243,7 @@ func validClientSecret(clientSecret string) bool {
 }
 
 func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
-	sessionToken, clientSecret, _ := r.BasicAuth()
+	_, clientSecret, _ := r.BasicAuth() //first underscore used to be sessionToken
 	//log.Printf("Session Token: %v | Client Secret: %v", SessionToken, clientSecret)
 
 	if clientSecretRequired && !validClientSecret(clientSecret) {
@@ -258,18 +258,18 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := &Client{
-		session:   nil,
-		server:    server,
-		conn:      conn,
-		send:      make(chan []byte, sendMsgBufferSize),
-		sendToken: make(chan SessionToken, sendTokenBufferSize),
-		start:     make(chan struct{}),
-		open:      false,
-		openMutex: &sync.RWMutex{},
-		logger:    log.WithField("module", "client"),
+		session:        nil,
+		server:         server,
+		conn:           conn,
+		send:           make(chan []byte, sendMsgBufferSize),
+		sendBeaconInfo: make(chan []byte, 1),
+		start:          make(chan struct{}),
+		open:           false,
+		openMutex:      &sync.RWMutex{},
+		logger:         log.WithField("module", "client"),
 	}
 
-	client.sendToken <- SessionToken(sessionToken)
+	//client.sendToken <- SessionToken(sessionToken)
 	client.server.register <- client
 
 	func() {

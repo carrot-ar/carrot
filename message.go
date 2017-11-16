@@ -25,8 +25,8 @@ type messageData struct {
 }
 
 type payload struct {
-	Offset *offset           `json:"offset,omitempty"`
-	Params map[string]string `json:"params,omitempty"`
+	Offset *offset                `json:"offset,omitempty"`
+	Params map[string]interface{} `json:"params,omitempty"`
 }
 
 type offset struct {

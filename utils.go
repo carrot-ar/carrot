@@ -31,3 +31,12 @@ func generateUUID() (string, error) {
 	uuid[6] = uuid[6]&^0xf0 | 0x40
 	return fmt.Sprintf("%x-%x-%x-%x-%x", uuid[0:4], uuid[4:6], uuid[6:8], uuid[8:10], uuid[10:]), nil
 }
+
+// a - b
+func offsetSub(a *offset, b *offset) *offset {
+	return &offset{
+		X: a.X - b.X,
+		Y: a.Y - b.Y,
+		Z: a.Z - b.Z,
+	}
+}

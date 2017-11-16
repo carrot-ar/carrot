@@ -12,6 +12,8 @@ func Run() error {
 
 	Environment = "development"
 
+	Add("carrot_transform", CarrotTransformController{}, "Transform", true)
+
 	if Environment == "production" {
 		log.SetLevel(log.WarnLevel)
 	} else if Environment == "development" {

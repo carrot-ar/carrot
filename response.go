@@ -21,7 +21,7 @@ func NewOffset(x float64, y float64, z float64) (*offset, error) {
 	}, nil
 }
 
-func NewPayload(offset *offset, params map[string]string) (payload, error) {
+func NewPayload(offset *offset, params map[string]interface{}) (payload, error) {
 	return payload{
 		Offset: offset,
 		Params: params,
@@ -39,12 +39,12 @@ func NewResponse(sessionToken string, endpoint string, payload payload) (*messag
 //only adds new params, does not override existing ones
 func (md *messageData) AddParam(key string, value interface{}) {
 	if md.Payload.Params == nil {
-		md.Payload.Params = make(map[string]string)
+		md.Payload.Params = make(map[string]interface{})
 	}
 	params := md.Payload.Params
 	_, exists := params[key]
 	if !exists {
-		params[key] = value.(string)
+		params[key] = value
 	}
 }
 
