@@ -4,40 +4,41 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-//based on Picnic Protocol requirements
-type transforms struct {
-	T_L *offset //local transform
-	T_P *offset //primary device transform
-}
-
-type dictionary map[SessionToken]transforms
-
-//internal controller used to update primary and secondary devices
+//internal controller used to update transforms of primary and secondary devices
 type CarrotTransformController struct {
-	dict		dictionary
 	sessions	SessionStore
 }
 
 func (c *CarrotTransformController) Transform(req *Request, broadcast *Broadcast) {
-	if c.dict == nil { //this req's device is the first and therefore primary device
-		c.dict = make(map[SessionToken]transforms)
+	if c.sessions == nil {
 		c.sessions = NewDefaultSessionManager()
 	}
 	primaryToken, err := c.sessions.GetPrimaryDeviceToken()
 	if err != nil {
-		log.Errorf("There was an error retrieving the primary device token in Transform")
+		log.Errorf("There was an error retrieving the primary device token in transform.go")
 	}
-	//request and update primary device transform
-	if req.SessionToken == primaryToken {
-		c.dict[primaryToken] = transforms{
-			T_P:	req.Offset,
-			T_L:	nil,
+	session, err := c.sessions.Get(req.SessionToken)
+	if err != nil {
+		log.Errorf("There was an error retrieving the session in transform.go")
+	}
+	if req.SessionToken != primaryToken { //store T_L for the secondary device and request T_P from the primary device
+		session.T_L = req.Offset
+		//broadcast response to primary device that has primaryDevice token, this endpoint, empty params
+		res, err := getT_PFromPrimaryDeviceRes(string(primaryToken))
+		if err != nil {
+			log.Errorf("There was an error creating a response to retrieve T_P in transform.go")
 		}
-	} else {
-	//request and update secondary device transforms
-		c.dict[req.SessionToken] = transforms {
-			T_P:	c.dict[primaryToken].T_P,
-			T_L:	req.Offset,
-		}
+		broadcast.Broadcast(res, string(primaryToken))
+	} else { //store T_P from primary device
+		c.sessions.Range(func(t, session interface{}) bool {
+			s := session.(*Session)
+			if s.T_P == nil && s.T_L != nil {
+				s.T_P = req.Offset
+			}
+			if s.T_P != nil && s.T_L != nil {
+				log.Printf("session w/ token %v has filled transforms and is ready to broadcast to others!\n", s.Token)
+			}
+			return true
+		})
 	}
 }

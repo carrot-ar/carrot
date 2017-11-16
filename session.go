@@ -23,6 +23,8 @@ type Session struct {
 	expireTime time.Time
 	mutex      *sync.Mutex
 	primaryDevice	bool
+	T_L		*offset
+	T_P		*offset
 }
 
 func refreshExpiryTime() time.Time {
