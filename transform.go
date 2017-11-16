@@ -9,6 +9,14 @@ type CarrotTransformController struct {
 	sessions	SessionStore
 }
 
+/*
+// calculate ep
+func (t *CarrotTransformController) convertCoordSystem(e_l *offset) *offset {
+	o_p := offsetSub(t.T_L, t.T_P)
+	return offsetSub(e_l, o_p)
+}
+*/
+
 func (c *CarrotTransformController) Transform(req *Request, broadcast *Broadcast) {
 	if c.sessions == nil {
 		c.sessions = NewDefaultSessionManager()
@@ -30,13 +38,15 @@ func (c *CarrotTransformController) Transform(req *Request, broadcast *Broadcast
 		}
 		broadcast.Broadcast(res, string(primaryToken))
 	} else { //store T_P from primary device
+		log.Infof("about to store t_p for %v", req.SessionToken)
 		c.sessions.Range(func(t, session interface{}) bool {
 			s := session.(*Session)
 			if s.T_P == nil && s.T_L != nil && s.Token != primaryToken {
 				s.T_P = req.Offset
+				log.Infof("%v has successfully saved t_p", t)
 			}
 			if s.T_P != nil && s.T_L != nil {
-				log.Printf("session w/ token %v has filled transforms and is ready to broadcast to others!\n", s.Token)
+				log.Infof("session w/ token %v has filled transforms and is ready to broadcast to others!\n", s.Token)
 			}
 			return true
 		})
