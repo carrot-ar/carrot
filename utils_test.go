@@ -23,7 +23,6 @@ func TestGenerateUUID(t *testing.T) {
 	}
 }
 
-
 func TestOffsetSub(t *testing.T) {
 	a := &offset{
 		X: 1,
@@ -31,7 +30,7 @@ func TestOffsetSub(t *testing.T) {
 		Z: 1,
 	}
 
-	b:= &offset{
+	b := &offset{
 		X: 1,
 		Y: 1,
 		Z: 1,

@@ -14,7 +14,7 @@ func TestBuildResponse(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	params := make(map[string]interface{})
 	params["one"] = "fish"
 	params["two"] = "fish"

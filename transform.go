@@ -6,7 +6,7 @@ import (
 
 //internal controller used to update transforms of primary and secondary devices
 type CarrotTransformController struct {
-	sessions	SessionStore
+	sessions SessionStore
 }
 
 /*

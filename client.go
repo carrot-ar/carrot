@@ -258,15 +258,15 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := &Client{
-		session:   nil,
-		server:    server,
-		conn:      conn,
-		send:      make(chan []byte, sendMsgBufferSize),
-		sendBeaconInfo:	make(chan []byte, 1),
-		start:     make(chan struct{}),
-		open:      false,
-		openMutex: &sync.RWMutex{},
-		logger:    log.WithField("module", "client"),
+		session:        nil,
+		server:         server,
+		conn:           conn,
+		send:           make(chan []byte, sendMsgBufferSize),
+		sendBeaconInfo: make(chan []byte, 1),
+		start:          make(chan struct{}),
+		open:           false,
+		openMutex:      &sync.RWMutex{},
+		logger:         log.WithField("module", "client"),
 	}
 
 	//client.sendToken <- SessionToken(sessionToken)

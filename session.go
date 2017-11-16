@@ -1,11 +1,11 @@
 package carrot
 
 import (
+	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"sync"
 	"time"
-	"errors"
 )
 
 const (
@@ -19,12 +19,12 @@ var (
 
 // Potentially will need to be a sync Map
 type Session struct {
-	Token      SessionToken
-	expireTime time.Time
-	mutex      *sync.Mutex
-	primaryDevice	bool
-	T_L		*offset
-	T_P		*offset
+	Token         SessionToken
+	expireTime    time.Time
+	mutex         *sync.Mutex
+	primaryDevice bool
+	T_L           *offset
+	T_P           *offset
 }
 
 func refreshExpiryTime() time.Time {
