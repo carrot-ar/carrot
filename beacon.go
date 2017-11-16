@@ -47,3 +47,21 @@ func getT_PFromPrimaryDeviceRes(token string) ([]byte, error) {
 	ask, err := res.Build()
 	return ask, err
 }
+
+/* 
+
+Example response from a primary device sending its T_P.
+
+{
+	"session_token": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
+	"endpoint": "carrot_transform",
+	"payload": {
+		"offset": {
+			"x": 1,
+			"y": 1,
+			"z": 1
+		}
+	}
+}
+
+*/

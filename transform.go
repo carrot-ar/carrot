@@ -24,7 +24,7 @@ func (c *CarrotTransformController) Transform(req *Request, broadcast *Broadcast
 	if req.SessionToken != primaryToken { //store T_L for the secondary device and request T_P from the primary device
 		session.T_L = req.Offset
 		//broadcast response to primary device that has primaryDevice token, this endpoint, empty params
-		res, err := getT_PFromPrimaryDeviceRes(string(primaryToken))
+		res, err := getT_PFromPrimaryDeviceRes(string(req.SessionToken))
 		if err != nil {
 			log.Errorf("There was an error creating a response to retrieve T_P in transform.go")
 		}
@@ -32,7 +32,7 @@ func (c *CarrotTransformController) Transform(req *Request, broadcast *Broadcast
 	} else { //store T_P from primary device
 		c.sessions.Range(func(t, session interface{}) bool {
 			s := session.(*Session)
-			if s.T_P == nil && s.T_L != nil {
+			if s.T_P == nil && s.T_L != nil && s.Token != primaryToken {
 				s.T_P = req.Offset
 			}
 			if s.T_P != nil && s.T_L != nil {
