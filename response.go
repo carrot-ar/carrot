@@ -46,7 +46,7 @@ func NewPayload(sessionToken string, offset *offset, params map[string]interface
 	if err != nil {
 		return payload{}, err
 	}
-	
+
 	log.Info()
 	return payload{
 		Offset: e_p,

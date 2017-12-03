@@ -3,7 +3,7 @@ package carrot
 /*
 
 This file describes the construction and types of messages sent during the Picnic Protocol handshake
-between the server and primary and secondary devices. 
+between the server and primary and secondary devices.
 
 
  Example initial message to devices. Since the session_token and uuid are the same,

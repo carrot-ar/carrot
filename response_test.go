@@ -13,7 +13,7 @@ func TestBuildResponse(t *testing.T) {
 		t.Error(err)
 	}
 	primarySession.primaryDevice = true
-	token , secondarySession, err := sm.NewSession()
+	token, secondarySession, err := sm.NewSession()
 	if err != nil {
 		t.Error(err)
 	}
@@ -52,7 +52,7 @@ func TestBuildResponse(t *testing.T) {
 	payload_empty, err := NewPayload(string(token), nil, nil)
 	if err != nil {
 		t.Error(err)
-	}	
+	}
 	r_c, err := NewResponse(string(token), endpoint, payload_complete)
 	if err != nil {
 		t.Error(err)
@@ -68,7 +68,7 @@ func TestBuildResponse(t *testing.T) {
 	r_e, err := NewResponse(string(token), endpoint, payload_empty)
 	if err != nil {
 		t.Error(err)
-	}	
+	}
 	res_c, err := r_c.Build()
 	if err != nil {
 		t.Error(err)

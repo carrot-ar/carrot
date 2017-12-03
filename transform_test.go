@@ -19,8 +19,8 @@ func TestTransformFunctions(t *testing.T) {
 		t.Errorf("There was an error retrieving the session in transform.go")
 	}
 	req := &Request{}
-	req.Offset, err = NewOffset(3,2,1)
-	if (err != nil) {
+	req.Offset, err = NewOffset(3, 2, 1)
+	if err != nil {
 		t.Error(err)
 	}
 
@@ -29,7 +29,7 @@ func TestTransformFunctions(t *testing.T) {
 	_, err = c.requestT_P(req)
 	if err != nil {
 		t.Error(err)
-	}	
+	}
 
-	c.storeT_P(req, primaryToken)	
+	c.storeT_P(req, primaryToken)
 }
