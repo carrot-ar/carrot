@@ -29,26 +29,44 @@ func (c *CarrotTransformController) Transform(req *Request, broadcast *Broadcast
 	if err != nil {
 		log.Errorf("There was an error retrieving the session in transform.go")
 	}
-	if req.SessionToken != primaryToken { //store T_L for the secondary device and request T_P from the primary device
-		session.T_L = req.Offset
-		//broadcast response to primary device that has primaryDevice token, this endpoint, empty params
-		res, err := getT_PFromPrimaryDeviceRes(string(req.SessionToken))
+	if req.SessionToken != primaryToken { //a secondary device wants to establish its transform information
+		//store T_L for the secondary device
+		c.storeT_L(req, session)
+		//request T_P from the primary device and
+		//broadcast the response with primaryDevice token, this endpoint, & empty params
+		res, err := c.requestT_P(req)
 		if err != nil {
-			log.Errorf("There was an error creating a response to retrieve T_P in transform.go")
+			log.Error(err)
 		}
 		broadcast.Broadcast(res, string(primaryToken))
-	} else { //store T_P from primary device
+	} else { //the primary device is offering its transform information, requested by a secondary device
 		log.Infof("about to store t_p for %v", req.SessionToken)
-		c.sessions.Range(func(t, session interface{}) bool {
-			s := session.(*Session)
-			if s.T_P == nil && s.T_L != nil && s.Token != primaryToken {
-				s.T_P = req.Offset
-				log.Infof("%v has successfully saved t_p", t)
-			}
-			if s.T_P != nil && s.T_L != nil {
-				log.Infof("session w/ token %v has filled transforms and is ready to broadcast to others!\n", s.Token)
-			}
-			return true
-		})
+		c.storeT_P(req, primaryToken)
 	}
+}
+
+func (c *CarrotTransformController) storeT_L(req *Request, session *Session) {
+	session.T_L = req.Offset
+}
+
+func (c *CarrotTransformController) requestT_P(req *Request) ([]byte, error) {
+	res, err := getT_PFromPrimaryDeviceRes(string(req.SessionToken))
+	if err != nil {
+		log.Errorf("There was an error creating a response to retrieve T_P in transform.go")
+	}
+	return res, err
+}
+
+func (c *CarrotTransformController) storeT_P(req *Request, primaryToken SessionToken) {
+	c.sessions.Range(func(t, session interface{}) bool {
+		s := session.(*Session)
+		if s.T_P == nil && s.T_L != nil && s.Token != primaryToken {
+			s.T_P = req.Offset
+			log.Infof("%v has successfully saved t_p", t)
+		}
+		if s.T_P != nil && s.T_L != nil {
+			log.Infof("session w/ token %v has filled transforms and is ready to broadcast to others!\n", s.Token)
+		}
+		return true
+	})
 }

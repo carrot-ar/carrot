@@ -2,7 +2,9 @@ package carrot
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"strings"
 )
@@ -40,4 +42,31 @@ func offsetSub(a *offset, b *offset) *offset {
 		Y: a.Y - b.Y,
 		Z: a.Z - b.Z,
 	}
+}
+
+func getE_P(currentSession *Session, offset *offset) (*offset, error) {
+	var err error
+	if currentSession.T_L == nil || currentSession.T_P == nil {
+		err = errors.New("The session did not complete the Picnic Protocol handshake")
+		return nil, err
+	}
+	primaryT_P := currentSession.T_P
+	log.Infof("t_p: x: %v y: %v z: %v", primaryT_P.X, primaryT_P.Y, primaryT_P.Z)
+
+	currentT_L := currentSession.T_L
+
+	log.Infof("t_l: x: %v y: %v z: %v", currentT_L.X, currentT_L.Y, currentT_L.Z)
+
+	// offset is the e_l
+	// o_p = t_l - t_p
+	// e_p = e_l - o_p
+	o_p := offsetSub(currentT_L, primaryT_P)
+	log.Infof("o_p: x: %v y: %v z: %v", o_p.X, o_p.Y, o_p.Z)
+
+	e_p := offsetSub(offset, o_p)
+
+	log.Infof("e_p: x: %v y: %v z: %v", e_p.X, e_p.Y, e_p.Z)
+	log.Infof("e_l: x: %v y: %v z: %v", offset.X, offset.Y, offset.Z)
+
+	return e_p, err
 }

@@ -7,7 +7,24 @@ import (
 )
 
 func TestBuildResponse(t *testing.T) {
-	token := "totally_a_real_token"
+	sm := NewDefaultSessionManager()
+	_, primarySession, err := sm.NewSession()
+	if err != nil {
+		t.Error(err)
+	}
+	primarySession.primaryDevice = true
+	token, secondarySession, err := sm.NewSession()
+	if err != nil {
+		t.Error(err)
+	}
+	secondarySession.T_L, err = NewOffset(3, 2, 1)
+	if err != nil {
+		t.Error(err)
+	}
+	secondarySession.T_P, err = NewOffset(6, 5, 4)
+	if err != nil {
+		t.Error(err)
+	}
 	endpoint := "test_endpoint"
 	x, y, z := 3.2, 1.3, 4.0
 	offset, err := NewOffset(x, y, z)
@@ -20,35 +37,35 @@ func TestBuildResponse(t *testing.T) {
 	params["two"] = "fish"
 
 	//test building a response from scratch
-	payload_complete, err := NewPayload(token, offset, params)
+	payload_complete, err := NewPayload(string(token), offset, params)
 	if err != nil {
 		t.Error(err)
 	}
-	payload_noparams, err := NewPayload(token, offset, nil)
+	payload_noparams, err := NewPayload(string(token), offset, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	payload_nooffset, err := NewPayload(token, nil, params)
+	payload_nooffset, err := NewPayload(string(token), nil, params)
 	if err != nil {
 		t.Error(err)
 	}
-	payload_empty, err := NewPayload(token, nil, nil)
+	payload_empty, err := NewPayload(string(token), nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	r_c, err := NewResponse(token, endpoint, payload_complete)
+	r_c, err := NewResponse(string(token), endpoint, payload_complete)
 	if err != nil {
 		t.Error(err)
 	}
-	r_np, err := NewResponse(token, endpoint, payload_noparams)
+	r_np, err := NewResponse(string(token), endpoint, payload_noparams)
 	if err != nil {
 		t.Error(err)
 	}
-	r_no, err := NewResponse(token, endpoint, payload_nooffset)
+	r_no, err := NewResponse(string(token), endpoint, payload_nooffset)
 	if err != nil {
 		t.Error(err)
 	}
-	r_e, err := NewResponse(token, endpoint, payload_empty)
+	r_e, err := NewResponse(string(token), endpoint, payload_empty)
 	if err != nil {
 		t.Error(err)
 	}
