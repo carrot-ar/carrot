@@ -9,14 +9,30 @@ import (
 
 const maxClients = 16
 
+/*
+	Clients is the data structure used to keep track of individual connections
+	to the Carrot server. The Clients structure maintenance occurs within the Broadcaster
+	which handles sending data to individual connections.
+ */
 type Clients struct {
+	// Pointer to the global session store
 	sessions SessionStore
+
+	// Client list
 	clients  []*Client
+
+	// Free list used for choosing which slot to add a new client to
 	free     chan int
+
+	// Mutex for client list access
 	mutex    *sync.RWMutex
+
 	logger   *log.Entry
 }
 
+/*
+	Creates a new Clients structure and builds a free list.
+ */
 func NewClientList() (*Clients, error) {
 	if maxClients < 1 {
 		return nil, errors.New("client list size must be greater than 0")
@@ -38,7 +54,7 @@ func NewClientList() (*Clients, error) {
 	}, nil
 }
 
-// Thread-safe add to the client list
+// Thread-safe addition of a client to the client list.
 func (cp *Clients) Insert(client *Client) error {
 
 	var index int
@@ -57,11 +73,9 @@ func (cp *Clients) Insert(client *Client) error {
 	return nil
 }
 
-/*
- * Releases an index in the client list. The index is added back onto the free list
- * then the slot in the client list is set to nil.
- * This more or less a maintenance operation that will occur is a client is not longer open
- */
+
+// Releases an index in the client list. This happens by adding the entry back into the free list,
+// then the slot in the client list is set to nil.
 func (cp *Clients) Release(index int) {
 	log.WithField("size", len(cp.free)).Debugf("releasing %v", index)
 	cp.free <- index

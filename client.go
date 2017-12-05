@@ -48,11 +48,17 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+// Client represents a WebSocket connection as well as all necessary metadata, sync primitives, and Picnic Protocol
+// data needed to represent a device connected to the server.
+//
+// The Client also handles reading and writing to the WebSocket. However, those fields are private.
 type Client struct {
 	session *Session
+
 	server  *Server
 	// acts as a signal for when to start the go routines
 	start chan struct{}
+
 	open  bool
 
 	conn *websocket.Conn
@@ -68,6 +74,7 @@ type Client struct {
 	logger *log.Entry
 }
 
+// Returns whether the client is connected (true) or not (false)
 func (c *Client) Open() bool {
 	c.openMutex.RLock()
 	status := c.open
@@ -87,10 +94,12 @@ func (c *Client) softClose() {
 	c.openMutex.Unlock()
 }
 
+// Tests to determine if the client has an expired session (true) or not (false)
 func (c *Client) Expired() bool {
 	return !c.Open() && c.session.sessionDurationExpired()
 }
 
+// Checks whether the client's buffer for writing to the WebSocket is full
 func (c *Client) Full() bool {
 	// check for buffer full
 	if len(c.send) == sendMsgBufferSize {
@@ -100,6 +109,7 @@ func (c *Client) Full() bool {
 	return false
 }
 
+// Checks against a list of recipients whether the Client is in that list or not
 func (c *Client) IsRecipient(recipientList []string) bool {
 	if InSlice(string(c.session.Token), recipientList) || len(recipientList) == 0 {
 		return true
@@ -108,8 +118,9 @@ func (c *Client) IsRecipient(recipientList []string) bool {
 	return false
 }
 
+// TODO: Specify criteria for what is a "valid" connection aside from existing
+// Checks whether a client is nil or not
 func (c *Client) Valid() bool {
-	// TODO: Specify criteria for what is a "valid" connection aside from existing
 	return c != nil
 }
 

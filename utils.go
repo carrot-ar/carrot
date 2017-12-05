@@ -47,7 +47,7 @@ func offsetSub(a *offset, b *offset) *offset {
 func getE_P(currentSession *Session, offset *offset) (*offset, error) {
 	var err error
 	if currentSession.T_L == nil || currentSession.T_P == nil {
-		err = errors.New("The session did not complete the Picnic Protocol handshake")
+		err = errors.New("the session did not complete the Picnic Protocol handshake")
 		return nil, err
 	}
 	primaryT_P := currentSession.T_P

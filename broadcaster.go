@@ -8,11 +8,13 @@ import (
 const broadcastChannelSize = 4096
 const broadcastChannelWarningTrigger = 0.9
 
+// TODO: Try to make this private
 type OutMessage struct {
 	message  []byte
 	sessions []string
 }
 
+// TODO: Try to make this private
 func OutboundMessage(message []byte, sessions []string) OutMessage {
 	return OutMessage{
 		message:  message,
@@ -20,7 +22,7 @@ func OutboundMessage(message []byte, sessions []string) OutMessage {
 	}
 }
 
-// manage broadcast groups with the broadcaster
+// The main event loop for sending messages to a set of clients connected to the carrot server
 type Broadcaster struct {
 	sessions SessionStore
 	clients  *Clients
@@ -29,6 +31,7 @@ type Broadcaster struct {
 	logger    *log.Entry
 }
 
+// Create a new broadcaster
 func NewBroadcaster(pool *Clients) Broadcaster {
 	return Broadcaster{
 		sessions:  NewDefaultSessionManager(),

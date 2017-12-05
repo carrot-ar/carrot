@@ -4,16 +4,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-/*
-	Response groups are enumerated by the constants in this file.
-	To add a new response group,  add it to the list of constants
-	at the start of the file.
-*/
+
+// Acts as a proxy to the Broadcaster. Messages placed in the Broadcast
+// method are broadcasted to the recipients indicated.
 type Broadcast struct {
 	broadcaster Broadcaster
 	logger      *log.Entry
 }
 
+// Creates a new instance of the Broadcaster
 func NewBroadcast(broadcaster Broadcaster) *Broadcast {
 	return &Broadcast{
 		broadcaster: broadcaster,
@@ -21,24 +20,8 @@ func NewBroadcast(broadcaster Broadcaster) *Broadcast {
 	}
 }
 
-/*
- // ...string []string
-
- Broadcast(message, "sessiontoken", "sessiontoken")
- Broadcast(message, sessionTokens)
- Broadcast(message)
-
- Broadcast(message, req.SessionToken)
-
- func (c *TestController) EchoToSomePeople(req *carrot.Request, broadcast *carrot.Broadcast) {
-    response := carrot.Response()
-    response.AddParam("hello": "world")
-    response.Build()
- 	responseGroup = mysql.find(/*query to find users).SessionTokens
-    broadcast.Broadcast(message, responseGroup)
- }
-*/
-
+// Given a message and a set of sessions, it forwards the message to the
+// broadcaster.
 func (b *Broadcast) Broadcast(message []byte, sessions ...string) {
 	b.logger.Debug("sending message")
 

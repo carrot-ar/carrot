@@ -22,6 +22,7 @@ func NewOffset(x float64, y float64, z float64) (*offset, error) {
 	}, nil
 }
 
+// This is a new payload
 func NewPayload(sessionToken string, offset *offset, params map[string]interface{}) (payload, error) {
 	sessions := NewDefaultSessionManager()
 	primaryToken, err := sessions.GetPrimaryDeviceToken()
