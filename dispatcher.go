@@ -72,14 +72,15 @@ func (dp *Dispatcher) Run() {
 			req.AddMetric(DispatchLookupStart)
 			route, err := Lookup(req.endpoint)
 			if err != nil {
-				log.Error(err)
+				dp.logger.Error(err)
+				break
 			}
 			req.AddMetric(DispatchLookupEnd)
 
 			req.AddMetric(DispatchRequestStart)
 			err = dp.dispatchRequest(route, req)
 			if err != nil {
-				log.Error(err)
+				dp.logger.Error(err)
 			}
 			req.AddMetric(DispatchRequestEnd)
 
