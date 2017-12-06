@@ -50,9 +50,10 @@ import (
 	"github.com/carrot-ar/carrot"
 )
 
-// Controller implementation
+// Controller declaration
 type EchoController struct{}
 
+//Controller method implementation
 func (c *EchoController) Echo(req *carrot.Request, br *carrot.Broadcast) {
 	message, err := carrot.CreateDefaultResponse(req)
 	if err != nil {
@@ -64,21 +65,21 @@ func (c *EchoController) Echo(req *carrot.Request, br *carrot.Broadcast) {
 
 func main() {
 
-	// Register endpoints here in the form of endpoint, controller, method
+	// Register endpoint connection here by providing endpoint, controller, and method, respectively
 	carrot.Add("echo", EchoController{}, "Echo", true)
 
-	// Run the server and serve traffic
+	// Run the server to handle traffic
 	carrot.Run()
 }
 ```
 The example above ommits extra functionality to showcase the basic components required to connect carrot to your application. The required components are the following:
 
-1. Import inclusion
-2. Controller declaration
-3. Controller method(s) implementation
-4. Main method which
-	a. Sets up connections between methods and controllers for Carrot to route and maintain
-	b. Runs the Carrot server
+* Import inclusion
+* Controller declaration
+* Controller method(s) implementation
+* Main method that
+	* Registers connections between methods and controllers for Carrot to route and maintain
+	* Runs the Carrot server
 
 To make the framework interact with platform-specific code, developers will need to implement the Carrot client framework. Currently, only iOS support exists. To see how to do so, visit the carrot-ios repository [https://github.com/carrot-ar/carrot-ios](https://github.com/carrot-ar/carrot-ios)
 
@@ -87,8 +88,7 @@ Carrot has two message types: request and responses.
 
 Requests are sent by the client framework to the server framework. Conversely, responses are sent by a developer defined controller back to the client framework. The structure of messages are identical, so the two types of messages represent the opposite directions (and ultimate paths) data travels.
 
-/*
-  Requests and responses are in the form of the following JSON:
+Requests and responses are in the form of the following JSON:
 
 	{
 		"session_token": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
@@ -104,8 +104,6 @@ Requests are sent by the client framework to the server framework. Conversely, r
 			}
 		}
 	}
-
-*/
 
 Depending on the the intent of the message, the payload may be completely or partially empty. These scenarios are explained below.
 
