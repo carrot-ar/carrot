@@ -11,15 +11,62 @@ Carrot is an easy-to-use, real-time framework for building multiplayer applicati
 
 By implementing the Picnic Protocol into the server and client's respective frameworks, we have decreased the error size for location resolution from 10-65 meters with GPS down to less than one foot. This enables developers (i.e. you) to focus on creating applications with rich content and need not worry about the finer details such as cross-device accuracy and networking.
 
-## Response Groups
-The broadcast module, available in all controller implementations, has a few options for narrowing down which clients to send a message to. Since all clients have a session associated with them, there is a 1-to-1 relationship between sessions and clients. Thus, every client has a `SessionToken` which is accessible within the client and within the session store.
+## Building an application with Carrot
 
-#### Broadcasting only back to the message sender
+Building applications on Carrot is incredibly simple. Check out this simple echo application that echos text input from one device into the AR space of all connected devices: 
+
+```
+package main
+
+import (
+	"fmt"
+	"github.com/carrot-ar/carrot"
+)
+
+// Controller declaration
+type EchoController struct{}
+
+//Controller method implementation
+func (c *EchoController) Echo(req *carrot.Request, br *carrot.Broadcast) {
+	message, err := carrot.CreateDefaultResponse(req)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	br.Broadcast(message)
+}
+
+func main() {
+
+	// Register endpoint connection here by providing endpoint, controller, and method, respectively
+	carrot.Add("echo", EchoController{}, "Echo", true)
+
+	// Run the server to handle traffic
+	carrot.Run()
+}
+```
+The example above ommits extra functionality to showcase the basic components required to connect carrot to your application. The required components are the following:
+
+* Import inclusion
+* Controller declaration
+* Controller method(s) implementation
+* Main method that
+	* Registers connections between methods and controllers for Carrot to route and maintain
+	* Runs the Carrot server
+	
+Controller methods receieve requests and broadcast responses to clients. Requests can be passed as-is, demonstrated with the CreateDefaultResponse method above, or information can be appended before responses are broadcasted.
+
+To make the framework interact with platform-specific code, developers will need to implement the Carrot client framework. Currently, only iOS support exists. To see how to do so, visit the carrot-ios repository [https://github.com/carrot-ar/carrot-ios](https://github.com/carrot-ar/carrot-ios)
+
+## Response Groups
+The broadcast module, available in all controller implementations, has a few options for narrowing down which clients to send a message to. Since all clients have a session associated with them, there is a 1-to-1 relationship between sessions and clients. Thus, every client has a `SessionToken` which is accessible within the client and within the session store internal to Carrot. 
+
+#### Broadcasting to all clients
 ```
 carrot.Broadcast(/* carrot response message */)
 ```
 
-#### Broadcasting to a set of clients
+#### Broadcasting to a subset of clients
 ```
 carrot.Broadcast(/* carrot response message */, sessionToken1, sessiontoken2)
 ```
@@ -29,71 +76,40 @@ recipients := []string{sessionToken1, sessionToken2, sessionToken3)
 carrot.Broadcast(/* carrot response message */, recipients)
 ```
 
-One way to make the best use of this feature is to keep sessions associated with users in a datastore connected to carrot. Then, a simple query can return a set of sessions to respond to. Here is some pseudocode demonstrating such:
+One way to make the best use of this feature is to keep sessions associated with users in a datastore connected to carrot. Then, a simple query can return a set of sessions that should be sent a response. Here is some pseudocode demonstrating this:
 ```
 func (c *ExampleController) SendHelloToAll(r *carrot.Request, b *carrot.Broadcast) {
-	/* build up a response here */
+	/* build up a response message here */
 	/* database call to get a list of session tokens based on a query */
-	b.Broadcast(/* response */, /* array with session tokens */)
+	b.Broadcast(/* response message */, /* array with session tokens */)
 }
 ```
-
-** BELOW THIS IS OUT OF DATE! **
-
-## Building an application with Carrot
-
-Building applications on Carrot is incredibly simple. Check out this simple echo application that echos text input from one device into the AR space of all connected devices: 
-
-```
-package main
-
-import (
-  "github.com/carrot-ar/carrot"
-)
-
-type EchoController struct{}
-
-func (c *PingController) Echo(req *carrot.Request, broadcast *carrot.Broadcast) {
-	responseText := req.Params["foo"]
-	response := carrot.Response(responseText)
-	broadcast.Send(response)
-}
-
-func main() {
-
-  // Register endpoints here in the order of endpoint, controller, method
-  carrot.Add("echo", EchoController{}, "Echo")
-
-  // Run the server
-  carrot.Run()
-}
-```
-
-Clients will need to implement the Carrot client framework. Currently, only iOS support exists. To see how to do so, visit the carrot-ios repository [https://github.com/carrot-ar/carrot-ios](https://github.com/carrot-ar/carrot-ios)
 
 ## Message Format
-Carrot has two message types: request and responses. 
+Carrot has two message types: request and responses.
 
-## New Session with client secrets disabled
+Requests are sent by the client framework to the server framework. Conversely, responses are sent by a developer defined controller back to the client framework. The structure of messages are identical, so the two types of messages represent the opposite directions (and ultimate paths) data travels.
 
-To connect to the server, connect to the WebSocket url the server is running on. For this example, `localhost:8080` will be used and a Ruby WebSocket client will be used for demo purposes.
+Requests and responses are in the form of the following JSON:
 
-```
-ws = WebSocket::Client::Simple.connect 'ws://localhost:8080/ws'
-```
+	{
+		"session_token": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
+		"endpoint": "test_endpoint",
+		"payload": {
+			"offset": {
+				"x": 3.2,
+				"y": 1.3,
+				"z": 4.0
+			},
+			"params": {
+				"foo": "bar"
+			}
+		}
+	}
 
-Once the client connects, a welcoming message consisting of the `SessionToken` will be sent. It will look like this:
-```
-KjIQhKUPNrvHkUHv1VySBg==
-```
-Save this token. It will be required to be attached to every message sent to the server.
+Depending on the the intent of the message, the payload may be completely or partially empty. These scenarios are explained below.
 
-From this point on you can begin sending/receiving messages to the server. 
-
-## Resuming a Session
-When a WebSocket connection is closed, the session state is maintained for a period of time determined by the application configuration. 
-
-tbd
+** BELOW THIS IS OUT OF DATE! **
 
 ## Sending Messages
 
@@ -144,6 +160,27 @@ At the moment, all messages are echo'd back to every client. This will change on
 ### Responses
 
 ## Sessions
+
+## New Session with client secrets disabled
+
+To connect to the server, connect to the WebSocket url the server is running on. For this example, `localhost:8080` will be used and a Ruby WebSocket client will be used for demo purposes.
+
+```
+ws = WebSocket::Client::Simple.connect 'ws://localhost:8080/ws'
+```
+
+Once the client connects, a welcoming message consisting of the `SessionToken` will be sent. It will look like this:
+```
+KjIQhKUPNrvHkUHv1VySBg==
+```
+Save this token. It will be required to be attached to every message sent to the server.
+
+From this point on you can begin sending/receiving messages to the server. 
+
+## Resuming a Session
+When a WebSocket connection is closed, the session state is maintained for a period of time determined by the application configuration. 
+
+tbd
 
 
 
