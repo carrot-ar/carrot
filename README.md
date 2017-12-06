@@ -162,7 +162,7 @@ The first two functions define the contents for all of the fields that are copie
 
 func (c *EchoController) EchoExtendable(req *carrot.Request, br *carrot.Broadcast) {
 	token := string(req.SessionToken)
-	payload, err := carrot.NewPayload(token, nil, nil)
+	payload, err := carrot.NewPayload(token, req.Offset, req.Params)
 	if err != nil {
 		fmt.Println(err)
 		return
