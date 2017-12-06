@@ -97,9 +97,9 @@ func (br *Broadcaster) Run() {
 					client.send <- message.message
 
 				} else {
-					br.clients.logger.WithFields(log.Fields{
-						"i": i,
-					}).Debug("nil channel hit!")
+					//br.clients.logger.WithFields(log.Fields{
+					//	"i": i,
+					//}).Debug("nil channel hit!")
 				}
 			}
 		}
