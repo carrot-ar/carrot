@@ -177,7 +177,7 @@ func (c *EchoController) EchoExtendable(req *carrot.Request, br *carrot.Broadcas
 
 ```
 
-The next and most interesting functions to note are the AddParam(s) functions. They allow the developer to append key-value pairs to a custom response.
+The next and most interesting functions to note are the `AddParam` and `AddParams` functions. They allow the developer to append key-value pairs to a custom response.
 
 ``` go
 
