@@ -80,6 +80,8 @@ The example above ommits extra functionality to showcase the basic components re
 * Main method that
 	* Registers connections between methods and controllers for Carrot to route and maintain
 	* Runs the Carrot server
+	
+Controller methods receieve requests and broadcast responses to clients. Requests can be passed as-is, demonstrated with the CreateDefaultResponse method above, or information can be appended before responses are broadcasted.
 
 To make the framework interact with platform-specific code, developers will need to implement the Carrot client framework. Currently, only iOS support exists. To see how to do so, visit the carrot-ios repository [https://github.com/carrot-ar/carrot-ios](https://github.com/carrot-ar/carrot-ios)
 
