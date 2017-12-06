@@ -11,33 +11,6 @@ Carrot is an easy-to-use, real-time framework for building multiplayer applicati
 
 By implementing the Picnic Protocol into the server and client's respective frameworks, we have decreased the error size for location resolution from 10-65 meters with GPS down to less than one foot. This enables developers (i.e. you) to focus on creating applications with rich content and need not worry about the finer details such as cross-device accuracy and networking.
 
-## Response Groups
-The broadcast module, available in all controller implementations, has a few options for narrowing down which clients to send a message to. Since all clients have a session associated with them, there is a 1-to-1 relationship between sessions and clients. Thus, every client has a `SessionToken` which is accessible within the client and within the session store internal to Carrot. 
-
-#### Broadcasting to all clients
-```
-carrot.Broadcast(/* carrot response message */)
-```
-
-#### Broadcasting to a subset of clients
-```
-carrot.Broadcast(/* carrot response message */, sessionToken1, sessiontoken2)
-```
-or
-```
-recipients := []string{sessionToken1, sessionToken2, sessionToken3)
-carrot.Broadcast(/* carrot response message */, recipients)
-```
-
-One way to make the best use of this feature is to keep sessions associated with users in a datastore connected to carrot. Then, a simple query can return a set of sessions that should be sent a response. Here is some pseudocode demonstrating this:
-```
-func (c *ExampleController) SendHelloToAll(r *carrot.Request, b *carrot.Broadcast) {
-	/* build up a response message here */
-	/* database call to get a list of session tokens based on a query */
-	b.Broadcast(/* response message */, /* array with session tokens */)
-}
-```
-
 ## Building an application with Carrot
 
 Building applications on Carrot is incredibly simple. Check out this simple echo application that echos text input from one device into the AR space of all connected devices: 
@@ -84,6 +57,33 @@ The example above ommits extra functionality to showcase the basic components re
 Controller methods receieve requests and broadcast responses to clients. Requests can be passed as-is, demonstrated with the CreateDefaultResponse method above, or information can be appended before responses are broadcasted.
 
 To make the framework interact with platform-specific code, developers will need to implement the Carrot client framework. Currently, only iOS support exists. To see how to do so, visit the carrot-ios repository [https://github.com/carrot-ar/carrot-ios](https://github.com/carrot-ar/carrot-ios)
+
+## Response Groups
+The broadcast module, available in all controller implementations, has a few options for narrowing down which clients to send a message to. Since all clients have a session associated with them, there is a 1-to-1 relationship between sessions and clients. Thus, every client has a `SessionToken` which is accessible within the client and within the session store internal to Carrot. 
+
+#### Broadcasting to all clients
+```
+carrot.Broadcast(/* carrot response message */)
+```
+
+#### Broadcasting to a subset of clients
+```
+carrot.Broadcast(/* carrot response message */, sessionToken1, sessiontoken2)
+```
+or
+```
+recipients := []string{sessionToken1, sessionToken2, sessionToken3)
+carrot.Broadcast(/* carrot response message */, recipients)
+```
+
+One way to make the best use of this feature is to keep sessions associated with users in a datastore connected to carrot. Then, a simple query can return a set of sessions that should be sent a response. Here is some pseudocode demonstrating this:
+```
+func (c *ExampleController) SendHelloToAll(r *carrot.Request, b *carrot.Broadcast) {
+	/* build up a response message here */
+	/* database call to get a list of session tokens based on a query */
+	b.Broadcast(/* response message */, /* array with session tokens */)
+}
+```
 
 ## Message Format
 Carrot has two message types: request and responses.
