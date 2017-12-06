@@ -82,6 +82,8 @@ The structure of messages are identical, so the two types of messages represent 
 
 ## Sending Messages to Carrot
 
+Carrot expects to recieve requests from clients.
+
 In order for a client to send messages to other devices, a route must be defined so the server knows the destination controller and method to handle the incoming requests. Consider this example application snippet:
 
 ``` go
@@ -99,7 +101,7 @@ func main() {
 }
 ```
 
-In order to send a message to this endpoint, all we need to do is specify the endpoint in our request. Messages for carrot take on the following form:
+In order to send a message to this endpoint, all we need to do is specify the endpoint in our request. A request to be sent to the endpoint defined above could look something like this :
 
 ```
 {
