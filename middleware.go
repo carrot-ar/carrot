@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	InputChannelSize = 4096
+	InputChannelSize = 16384
 )
 
 var count = 0
