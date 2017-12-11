@@ -71,7 +71,7 @@ func (br *Broadcaster) checkBufferFull() bool {
 
 func (br *Broadcaster) Run() {
 	for {
-		br.statsd.Gauge("carrot.broadcaster.outbound.buffer_size", float64(len(br.broadcast)), nil, 1)
+		br.statsd.Gauge("carrot.broadcaster.outbound.buffer_size", float64(len(br.broadcast)), nil, 100)
 
 		br.checkBufferRedZone()
 		br.checkBufferFull()
@@ -82,7 +82,7 @@ func (br *Broadcaster) Run() {
 			for i, client := range br.clients.clients {
 				if client.Valid() && client.IsRecipient(message.sessions) {
 					statsdName := fmt.Sprintf("carrot.client.%v.buffer_size", i)
-					client.statsd.Gauge(statsdName, float64(len(client.send)), nil, 1)
+					client.statsd.Gauge(statsdName, float64(len(client.send)), nil, 100)
 
 					client.checkBufferRedZone()
 					client.checkBufferFull()
