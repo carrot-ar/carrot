@@ -2,7 +2,9 @@ package carrot
 
 import (
 	log "github.com/sirupsen/logrus"
+	"github.com/DataDog/datadog-go/statsd"
 	"math"
+	"fmt"
 )
 
 const broadcastChannelSize = 4096
@@ -27,14 +29,22 @@ type Broadcaster struct {
 	//inbound messages from the clients
 	broadcast chan OutMessage
 	logger    *log.Entry
+	statsd    *statsd.Client
 }
 
 func NewBroadcaster(pool *Clients) Broadcaster {
+	logger := log.WithField("module", "broadcaster")
+	c, err := statsd.New("127.0.0.1:8125")
+	if err != nil {
+		logger.Error(err)
+	}
+
 	return Broadcaster{
 		sessions:  NewDefaultSessionManager(),
 		broadcast: make(chan OutMessage, broadcastChannelSize),
 		clients:   pool,
-		logger:    log.WithField("module", "broadcaster"),
+		logger:    logger,
+		statsd:	   c,
 	}
 }
 
@@ -61,17 +71,22 @@ func (br *Broadcaster) checkBufferFull() bool {
 
 func (br *Broadcaster) Run() {
 	for {
+		br.statsd.Gauge("carrot.broadcaster.outbound.buffer_size", float64(len(br.broadcast)), nil, 1)
 
 		br.checkBufferRedZone()
 		br.checkBufferFull()
+
 
 		select {
 		case message := <-br.broadcast:
 			for i, client := range br.clients.clients {
 				if client.Valid() && client.IsRecipient(message.sessions) {
+					statsdName := fmt.Sprintf("carrot.client.%v.buffer_size", i)
+					client.statsd.Gauge(statsdName, float64(len(client.send)), nil, 1)
 
 					client.checkBufferRedZone()
 					client.checkBufferFull()
+
 
 					/*
 						TODO: handle full buffers better

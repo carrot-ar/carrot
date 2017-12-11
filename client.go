@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"sync"
 	"time"
+	"github.com/DataDog/datadog-go/statsd"
 )
 
 const (
@@ -66,6 +67,8 @@ type Client struct {
 	openMutex *sync.RWMutex
 
 	logger *log.Entry
+
+	statsd *statsd.Client
 }
 
 func (c *Client) Open() bool {
@@ -262,6 +265,13 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logger := log.WithField("module", "client")
+	c, err := statsd.New("127.0.0.1:8125")
+	if err != nil {
+		logger.Error(err)
+	}
+
+
 	client := &Client{
 		session:        nil,
 		server:         server,
@@ -271,7 +281,8 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 		start:          make(chan struct{}),
 		open:           false,
 		openMutex:      &sync.RWMutex{},
-		logger:         log.WithField("module", "client"),
+		logger:         logger,
+		statsd:         c,
 	}
 
 	//client.sendToken <- SessionToken(sessionToken)
