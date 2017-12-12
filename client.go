@@ -31,7 +31,7 @@ const (
 	clientSecretRequired = false
 
 	// size of client send channel
-	sendMsgBufferSize = 1024
+	sendMsgBufferSize = 8192
 
 	// size of sendToken channel
 	sendTokenBufferSize = 1
@@ -167,6 +167,7 @@ func (c *Client) readPump() {
 
 		req := NewRequest(c.session, message)
 		c.logger.WithField("session_token", c.session.Token).Debug("request being sent to middleware")
+		c.statsd.Incr("carrot.client.request_rate.total", nil, 1)
 		c.server.Middleware.In <- req
 		//c.server.broadcast <- message
 	}

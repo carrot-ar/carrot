@@ -11,7 +11,7 @@ import (
 const (
 	doCacheControllers               bool = true
 	maxNumCachedControllers               = 4096
-	maxNumDispatcherIncomingRequests      = 4096
+	maxNumDispatcherIncomingRequests      = 16384
 )
 
 type Dispatcher struct {

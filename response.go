@@ -40,8 +40,8 @@ func NewPayload(sessionToken string, offset *offset, params map[string]interface
 		return payload{}, err
 	}
 
-	// do transform math to get event placement
-	e_p, _ := getE_P(currentSession, offset)
+	//do transform math to get event placement
+	e_p, err := getE_P(currentSession, offset)
 	//if err != nil {
 	//	return payload{}, err
 	//}

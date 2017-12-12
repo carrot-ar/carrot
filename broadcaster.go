@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-const broadcastChannelSize = 4096
+const broadcastChannelSize = 65536
 const broadcastChannelWarningTrigger = 0.9
 
 type OutMessage struct {
