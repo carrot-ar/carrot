@@ -58,7 +58,7 @@ func getE_P(currentSession *Session, offset *offset) (*offset, error) {
 	log.Infof("t_l: x: %v y: %v z: %v", currentT_L.X, currentT_L.Y, currentT_L.Z)
 
 	// offset is the e_l
-	// o_p = t_l - t_p
+	// o_p = t_l - t_p`
 	// e_p = e_l - o_p
 	o_p := offsetSub(currentT_L, primaryT_P)
 	log.Infof("o_p: x: %v y: %v z: %v", o_p.X, o_p.Y, o_p.Z)

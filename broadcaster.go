@@ -1,11 +1,13 @@
 package carrot
 
 import (
+	"fmt"
+	"github.com/DataDog/datadog-go/statsd"
 	log "github.com/sirupsen/logrus"
 	"math"
 )
 
-const broadcastChannelSize = 4096
+const broadcastChannelSize = 65536
 const broadcastChannelWarningTrigger = 0.9
 
 type OutMessage struct {
@@ -27,14 +29,22 @@ type Broadcaster struct {
 	//inbound messages from the clients
 	broadcast chan OutMessage
 	logger    *log.Entry
+	statsd    *statsd.Client
 }
 
 func NewBroadcaster(pool *Clients) Broadcaster {
+	logger := log.WithField("module", "broadcaster")
+	c, err := statsd.New("127.0.0.1:8125")
+	if err != nil {
+		logger.Error(err)
+	}
+
 	return Broadcaster{
 		sessions:  NewDefaultSessionManager(),
 		broadcast: make(chan OutMessage, broadcastChannelSize),
 		clients:   pool,
-		logger:    log.WithField("module", "broadcaster"),
+		logger:    logger,
+		statsd:    c,
 	}
 }
 
@@ -61,6 +71,7 @@ func (br *Broadcaster) checkBufferFull() bool {
 
 func (br *Broadcaster) Run() {
 	for {
+		br.statsd.Gauge("carrot.broadcaster.outbound.buffer_size", float64(len(br.broadcast)), nil, 100)
 
 		br.checkBufferRedZone()
 		br.checkBufferFull()
@@ -69,18 +80,15 @@ func (br *Broadcaster) Run() {
 		case message := <-br.broadcast:
 			for i, client := range br.clients.clients {
 				if client.Valid() && client.IsRecipient(message.sessions) {
+					br.clients.logger.WithFields(log.Fields{
+						"i": i,
+					}).Debug("valid channel hit!")
+
+					statsdName := fmt.Sprintf("carrot.client.%v.buffer_size", i)
+					client.statsd.Gauge(statsdName, float64(len(client.send)), nil, 100)
 
 					client.checkBufferRedZone()
 					client.checkBufferFull()
-
-					/*
-						TODO: handle full buffers better
-						if client.Full() {
-							// This can be used to experiment how to handle only writing on our own conditions
-							// such as when the buffer size falls below a certain threshold. We can also consider
-							// throttling *only* when we reach the red zone or a yellow zone.
-						}
-					*/
 
 					// **Maintenance Operations**
 					// see if the session is expired, if so delete the session.
@@ -90,16 +98,18 @@ func (br *Broadcaster) Run() {
 						br.clients.sessions.Delete(client.session.Token)
 					} else if !client.Open() { // regardless if the session is expired, see if the client is open or closed.
 						br.clients.Release(i)
+						continue
 					}
 
 					// sending operation
 					client.session.expireTime = refreshExpiryTime()
+					client.logger.Infof("client is %v", client.Open())
 					client.send <- message.message
 
 				} else {
-					//br.clients.logger.WithFields(log.Fields{
-					//	"i": i,
-					//}).Debug("nil channel hit!")
+					br.clients.logger.WithFields(log.Fields{
+						"i": i,
+					}).Debug("nil channel hit!")
 				}
 			}
 		}

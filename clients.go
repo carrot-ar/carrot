@@ -47,9 +47,7 @@ func (cp *Clients) Insert(client *Client) error {
 		return err
 	}
 
-	cp.mutex.Lock()
 	err = cp.setClient(index, client)
-	cp.mutex.Unlock()
 	if err != nil {
 		return err
 	}
@@ -64,8 +62,12 @@ func (cp *Clients) Insert(client *Client) error {
  */
 func (cp *Clients) Release(index int) {
 	log.WithField("size", len(cp.free)).Debugf("releasing %v", index)
+
 	cp.free <- index
+
+	cp.mutex.Lock()
 	cp.clients[index] = nil
+	cp.mutex.Unlock()
 }
 
 func (cp *Clients) setClient(index int, client *Client) error {
@@ -73,7 +75,10 @@ func (cp *Clients) setClient(index int, client *Client) error {
 		return fmt.Errorf("index %v contained a client when it should not have", index)
 	}
 
+	cp.mutex.Lock()
 	cp.clients[index] = client
+	cp.mutex.Unlock()
+
 	return nil
 }
 
@@ -83,8 +88,8 @@ func (cp *Clients) getFreeIndex() (int, error) {
 		return -1, fmt.Errorf("client pool is full")
 	}
 
-	freeSpot := <-cp.free
-	return freeSpot, nil
+	free := <-cp.free
+	return free, nil
 }
 
 /*
