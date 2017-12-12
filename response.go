@@ -31,22 +31,34 @@ func NewPayload(sessionToken string, offset *offset, params map[string]interface
 
 	// if the requester is a primary device,
 	// don't do any transform math
-	//likewise, if the incoming offset is empty, don't perform a transform
-	if sessionToken == string(primaryToken) || offset == nil {
+	// likewise, if the incoming offset is empty, don't perform a transform
+	if offset == nil { //used to be "if sessionToken == string(primaryToken) || offset == nil {""
 		return newPayloadNoTransform(offset, params)
 	}
 
-	currentSession, err := sessions.Get(SessionToken(sessionToken))
+	sender, err := sessions.Get(SessionToken(sessionToken))
 	if err != nil {
 		return payload{}, err
 	}
 
 	//do transform math to get event placement
-	e_p, err := getE_P(currentSession, offset)
+	//right now only handles transform between single primary and single secondary device
+	var recipient *Session
+	if sender.isPrimaryDevice() {
+		recipient, err = sessions.GetASecondarySession()
+		if err != nil {
+			return payload{}, err
+		}
+	} else { //sender is a secondary device
+		recipient, err = sessions.Get(SessionToken(primaryToken))
+		if err != nil {
+			return payload{}, err
+		}
+	}
+	e_p, err := getE_P(sender, recipient, offset)
 	if err != nil {
 		return payload{}, err
 	}
-
 	log.Info()
 	return payload{
 		Offset: e_p,

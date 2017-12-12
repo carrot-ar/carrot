@@ -48,6 +48,18 @@ func TestGetE_P(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	primaryToken, err := store.GetPrimaryDeviceToken()
+	if err != nil {
+		t.Error(err)
+	}
+	primarySession, err := store.Get(SessionToken(primaryToken))
+	if err != nil {
+		t.Error(err)
+	}
+	//make sure you are testing two different session roles
+	if session == primarySession {
+		_, session, err = store.NewSession()
+	}
 	session.T_L = &offset{
 		X: 2,
 		Y: 2,
@@ -63,7 +75,16 @@ func TestGetE_P(t *testing.T) {
 		Y: 1,
 		Z: 1,
 	}
-	e_p, err := getE_P(session, testOffset)
+	//test secondary sender and primary recipient
+	e_p, err := getE_P(session, primarySession, testOffset)
+	if err != nil {
+		t.Error(err)
+	}
+	if e_p.X != 0 || e_p.Y != 0 || e_p.Z != 0 {
+		t.Errorf("all E_P values should equal zero: X: %v, Y: %v, Z: %v", e_p.X, e_p.Y, e_p.Z)
+	}
+	//test primary sender and secondary recipient
+	e_p, err = getE_P(primarySession, session, testOffset)
 	if err != nil {
 		t.Error(err)
 	}

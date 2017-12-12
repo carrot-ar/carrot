@@ -44,29 +44,35 @@ func offsetSub(a *offset, b *offset) *offset {
 	}
 }
 
-func getE_P(currentSession *Session, offset *offset) (*offset, error) {
+
+func getE_P(sender *Session, recipient *Session, event *offset) (*offset, error) {
 	var err error
-	if currentSession.T_L == nil || currentSession.T_P == nil {
-		err = errors.New("The session did not complete the Picnic Protocol handshake")
-		return nil, err
+	var T_F *offset //transform foreign
+	var T_L *offset //transform local
+	if !sender.isPrimaryDevice() {
+		if sender.T_L == nil || sender.T_P == nil {
+			err = errors.New("The session did not complete the Picnic Protocol handshake")
+			return nil, err
+		}
+		T_F = sender.T_P
+		T_L = sender.T_L
+	} else { //the sender is a primary device
+		T_F = recipient.T_P
+		T_L = recipient.T_L
 	}
-	primaryT_P := currentSession.T_P
-	log.Infof("t_p: x: %v y: %v z: %v", primaryT_P.X, primaryT_P.Y, primaryT_P.Z)
 
-	currentT_L := currentSession.T_L
+	log.Infof("t_p: x: %v y: %v z: %v", T_F.X, T_F.Y, T_F.Z)
+	log.Infof("t_l: x: %v y: %v z: %v", T_L.X, T_L.Y, T_L.Z)
 
-	log.Infof("t_l: x: %v y: %v z: %v", currentT_L.X, currentT_L.Y, currentT_L.Z)
+	// event is the e_l, event local
+	// o_p = t_l - t_p, foreign recipient's origin placement in this coordinate system
+	// e_p = e_l - o_p, event placement
+	O_P := offsetSub(T_L, T_F)
+	log.Infof("o_p: x: %v y: %v z: %v", O_P.X, O_P.Y, O_P.Z)
 
-	// offset is the e_l
-	// o_p = t_l - t_p
-	// e_p = e_l - o_p
-	o_p := offsetSub(currentT_L, primaryT_P)
-	log.Infof("o_p: x: %v y: %v z: %v", o_p.X, o_p.Y, o_p.Z)
+	E_P := offsetSub(event, O_P)
+	log.Infof("e_l: x: %v y: %v z: %v", event.X, event.Y, event.Z)	
+	log.Infof("e_p: x: %v y: %v z: %v", E_P.X, E_P.Y, E_P.Z)
 
-	e_p := offsetSub(offset, o_p)
-
-	log.Infof("e_p: x: %v y: %v z: %v", e_p.X, e_p.Y, e_p.Z)
-	log.Infof("e_l: x: %v y: %v z: %v", offset.X, offset.Y, offset.Z)
-
-	return e_p, err
+	return E_P, err
 }

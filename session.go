@@ -46,6 +46,7 @@ type SessionStore interface {
 	Exists(SessionToken) bool
 	Get(SessionToken) (*Session, error)
 	GetPrimaryDeviceToken() (SessionToken, error)
+	GetASecondarySession() (*Session, error)
 	Range(func(key, value interface{}) bool)
 	Delete(SessionToken) error
 	Length() int
@@ -137,6 +138,22 @@ func (s *DefaultSessionStore) GetPrimaryDeviceToken() (SessionToken, error) {
 		err = errors.New("Could not locate primary device in sessions list")
 	}
 	return token, err
+}
+
+func (s *DefaultSessionStore) GetASecondarySession() (*Session, error) {
+	var secondary *Session
+	var err error
+	s.sessionStore.Range(func(t, session interface{}) bool {
+		ses := session.(*Session)
+		if (!ses.isPrimaryDevice()) {
+			secondary = ses
+		}
+		return true
+	})
+	if secondary == nil {
+		err = errors.New("Could not locate secondary device in sessions list")
+	}
+	return secondary, err		
 }
 
 func (s *DefaultSessionStore) Delete(token SessionToken) error {

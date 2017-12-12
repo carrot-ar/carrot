@@ -131,3 +131,32 @@ func TestPrimaryDeviceAssignmentAndRetrieval(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestGetASecondaryDevice(t *testing.T) {
+	store := NewDefaultSessionManager()
+	if store.Length() == 0 {
+		//create 2 sessions to simulate one primary and one secondary device
+		_, _, err := store.NewSession()
+		if err != nil {
+			t.Error(err)
+		}
+		_, _, err = store.NewSession()
+		if err != nil {
+			t.Error(err)
+		}
+	} else if store.Length() == 1 {
+		//primary device should exist but a secondary device needs to be added
+		_, err := store.GetPrimaryDeviceToken()
+		if err != nil {
+			t.Error(err)
+		}
+		_, _, err = store.NewSession()
+		if err != nil {
+			t.Error(err)
+		}
+	}
+	_, err := store.GetASecondarySession()
+	if err != nil {
+		t.Error(err)
+	}
+}
