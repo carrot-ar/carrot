@@ -1,9 +1,9 @@
 package carrot
 
 import (
+	"github.com/DataDog/datadog-go/statsd"
 	log "github.com/sirupsen/logrus"
 	"math"
-	"github.com/DataDog/datadog-go/statsd"
 )
 
 const (
@@ -39,7 +39,7 @@ type MiddlewarePipeline struct {
 	middlewares []func(*Request, *log.Entry) error
 	dispatcher  *Dispatcher
 	logger      *log.Entry
-	statsd 		*statsd.Client
+	statsd      *statsd.Client
 }
 
 func (mw *MiddlewarePipeline) Run() {
@@ -87,12 +87,11 @@ func NewMiddlewarePipeline() *MiddlewarePipeline {
 		logger.Error(err)
 	}
 
-
 	return &MiddlewarePipeline{
 		In:          make(chan *Request, InputChannelSize),
 		middlewares: mw,
 		dispatcher:  NewDispatcher(),
 		logger:      logger,
-		statsd: 		 c,
+		statsd:      c,
 	}
 }

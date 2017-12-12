@@ -35,7 +35,7 @@ func TestClientExpired(t *testing.T) {
 	client.session.expireTime = waitTime
 	client.softClose()
 
-	time.Sleep(time.Second)	// needed for test to pass on Windows
+	time.Sleep(time.Second) // needed for test to pass on Windows
 
 	if client.Expired() == false {
 		t.Fatalf("client should be expired but it isn't")

@@ -1,10 +1,10 @@
 package carrot
 
 import (
-	log "github.com/sirupsen/logrus"
-	"github.com/DataDog/datadog-go/statsd"
-	"math"
 	"fmt"
+	"github.com/DataDog/datadog-go/statsd"
+	log "github.com/sirupsen/logrus"
+	"math"
 )
 
 const broadcastChannelSize = 65536
@@ -44,7 +44,7 @@ func NewBroadcaster(pool *Clients) Broadcaster {
 		broadcast: make(chan OutMessage, broadcastChannelSize),
 		clients:   pool,
 		logger:    logger,
-		statsd:	   c,
+		statsd:    c,
 	}
 }
 
@@ -76,7 +76,6 @@ func (br *Broadcaster) Run() {
 		br.checkBufferRedZone()
 		br.checkBufferFull()
 
-
 		select {
 		case message := <-br.broadcast:
 			for i, client := range br.clients.clients {
@@ -90,7 +89,6 @@ func (br *Broadcaster) Run() {
 
 					client.checkBufferRedZone()
 					client.checkBufferFull()
-
 
 					// **Maintenance Operations**
 					// see if the session is expired, if so delete the session.

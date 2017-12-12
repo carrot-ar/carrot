@@ -2,13 +2,13 @@ package carrot
 
 import (
 	"bytes"
+	"github.com/DataDog/datadog-go/statsd"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 	"math"
 	"net/http"
 	"sync"
 	"time"
-	"github.com/DataDog/datadog-go/statsd"
 )
 
 const (
@@ -69,7 +69,6 @@ type Client struct {
 	logger *log.Entry
 
 	statsd *statsd.Client
-
 }
 
 func (c *Client) Open() bool {
@@ -275,7 +274,6 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Error(err)
 	}
-
 
 	client := &Client{
 		session:        nil,
