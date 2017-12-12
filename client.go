@@ -69,6 +69,7 @@ type Client struct {
 	logger *log.Entry
 
 	statsd *statsd.Client
+
 }
 
 func (c *Client) Open() bool {
@@ -113,7 +114,11 @@ func (c *Client) IsRecipient(recipientList []string) bool {
 
 func (c *Client) Valid() bool {
 	// TODO: Specify criteria for what is a "valid" connection aside from existing
-	return c != nil
+	return !c.nil()
+}
+
+func (c *Client) nil() bool {
+	return c == nil
 }
 
 func (c *Client) checkBufferRedZone() bool {

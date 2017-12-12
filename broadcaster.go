@@ -81,21 +81,16 @@ func (br *Broadcaster) Run() {
 		case message := <-br.broadcast:
 			for i, client := range br.clients.clients {
 				if client.Valid() && client.IsRecipient(message.sessions) {
+					br.clients.logger.WithFields(log.Fields{
+						"i": i,
+					}).Debug("valid channel hit!")
+
 					statsdName := fmt.Sprintf("carrot.client.%v.buffer_size", i)
 					client.statsd.Gauge(statsdName, float64(len(client.send)), nil, 100)
 
 					client.checkBufferRedZone()
 					client.checkBufferFull()
 
-
-					/*
-						TODO: handle full buffers better
-						if client.Full() {
-							// This can be used to experiment how to handle only writing on our own conditions
-							// such as when the buffer size falls below a certain threshold. We can also consider
-							// throttling *only* when we reach the red zone or a yellow zone.
-						}
-					*/
 
 					// **Maintenance Operations**
 					// see if the session is expired, if so delete the session.
@@ -105,16 +100,18 @@ func (br *Broadcaster) Run() {
 						br.clients.sessions.Delete(client.session.Token)
 					} else if !client.Open() { // regardless if the session is expired, see if the client is open or closed.
 						br.clients.Release(i)
+						continue
 					}
 
 					// sending operation
 					client.session.expireTime = refreshExpiryTime()
+					client.logger.Info("client is %v", client.Open())
 					client.send <- message.message
 
 				} else {
-					//br.clients.logger.WithFields(log.Fields{
-					//	"i": i,
-					//}).Debug("nil channel hit!")
+					br.clients.logger.WithFields(log.Fields{
+						"i": i,
+					}).Debug("nil channel hit!")
 				}
 			}
 		}

@@ -2,7 +2,6 @@ package carrot
 
 import (
 	"encoding/json"
-	//"fmt"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -41,11 +40,11 @@ func NewPayload(sessionToken string, offset *offset, params map[string]interface
 		return payload{}, err
 	}
 
-	//do transform math to get event placement
-	e_p, err := getE_P(currentSession, offset)
-	if err != nil {
-		return payload{}, err
-	}
+	// do transform math to get event placement
+	e_p, _ := getE_P(currentSession, offset)
+	//if err != nil {
+	//	return payload{}, err
+	//}
 
 	log.Info()
 	return payload{

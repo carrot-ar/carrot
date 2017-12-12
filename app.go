@@ -10,7 +10,7 @@ var broadcaster Broadcaster
 // TODO: refactor so that if a module fails to load, we cause an error
 func Run() error {
 
-	Environment = "production"
+	Environment = "debug"
 
 	Add("carrot_transform", CarrotTransformController{}, "Transform", true)
 
