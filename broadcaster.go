@@ -105,7 +105,7 @@ func (br *Broadcaster) Run() {
 
 					// sending operation
 					client.session.expireTime = refreshExpiryTime()
-					client.logger.Info("client is %v", client.Open())
+					client.logger.Infof("client is %v", client.Open())
 					client.send <- message.message
 
 				} else {

@@ -167,9 +167,8 @@ func (c *Client) readPump() {
 
 		req := NewRequest(c.session, message)
 		c.logger.WithField("session_token", c.session.Token).Debug("request being sent to middleware")
-		c.statsd.Incr("carrot.client.request_rate.total", nil, 1)
+		c.statsd.Incr("carrot.client.request_rate.total", nil, 100)
 		c.server.Middleware.In <- req
-		//c.server.broadcast <- message
 	}
 }
 
@@ -185,10 +184,10 @@ func (c *Client) writePump() {
 		case message, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
-				// TODO: add session token to here once client list is updated
-				c.logger.Error("a connection has closed\n")
+				c.softClose()
+				c.logger.Info("a connection has closed")
 				//the server closed the channel
-				//c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
 
@@ -201,7 +200,7 @@ func (c *Client) writePump() {
 				w.Write(message)
 
 
-				// TODO: messages are having a \n in them, so this is a problem
+				// TODO: messages are having a \n in them, this is a problem
 				// add queued messages to the current websocket message
 				n := len(c.send)
 				for i := 0; i < n; i++ {
