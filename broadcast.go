@@ -39,7 +39,7 @@ func NewBroadcast(broadcaster Broadcaster) *Broadcast {
  }
 */
 
-func (b *Broadcast) Broadcast(message []byte, sessions ...string) {
+func (b *Broadcast) Broadcast(message *messageData, sessions ...string) {
 	b.logger.Debug("sending message")
 
 	b.broadcaster.broadcast <- OutboundMessage(message, sessions)

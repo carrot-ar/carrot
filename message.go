@@ -22,11 +22,13 @@ type messageData struct {
 	SessionToken string  `json:"session_token"`
 	Endpoint     string  `json:"endpoint"`
 	Payload      payload `json:"payload"`
+	params 		 ResponseParams
+	request 	 *Request
 }
 
 type payload struct {
 	Offset *offset                `json:"offset,omitempty"`
-	Params map[string]interface{} `json:"params,omitempty"`
+	Params ResponseParams		  `json:"params,omitempty"`
 }
 
 type offset struct {

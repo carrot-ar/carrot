@@ -9,11 +9,11 @@ const broadcastChannelSize = 4096
 const broadcastChannelWarningTrigger = 0.9
 
 type OutMessage struct {
-	message  []byte
+	message  *messageData
 	sessions []string
 }
 
-func OutboundMessage(message []byte, sessions []string) OutMessage {
+func OutboundMessage(message *messageData, sessions []string) OutMessage {
 	return OutMessage{
 		message:  message,
 		sessions: sessions,
@@ -73,14 +73,10 @@ func (br *Broadcaster) Run() {
 					client.checkBufferRedZone()
 					client.checkBufferFull()
 
-					/*
-						TODO: handle full buffers better
-						if client.Full() {
-							// This can be used to experiment how to handle only writing on our own conditions
-							// such as when the buffer size falls below a certain threshold. We can also consider
-							// throttling *only* when we reach the red zone or a yellow zone.
-						}
-					*/
+					msg, err :=  message.message.build(client.session)
+					if err != nil {
+						log.Errorf("unable to build message for broadcast: %v", err)
+					}
 
 					// **Maintenance Operations**
 					// see if the session is expired, if so delete the session.
@@ -94,7 +90,7 @@ func (br *Broadcaster) Run() {
 
 					// sending operation
 					client.session.expireTime = refreshExpiryTime()
-					client.send <- message.message
+					client.send <- msg
 
 				} else {
 					//br.clients.logger.WithFields(log.Fields{
