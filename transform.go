@@ -17,7 +17,7 @@ func (t *CarrotTransformController) convertCoordSystem(e_l *offset) *offset {
 }
 */
 
-func (c *CarrotTransformController) Transform(req *Request, broadcast *Broadcast) {
+func (c *CarrotTransformController) Transform(ctx *CContext, broadcast *Broadcast) {
 	if c.sessions == nil {
 		c.sessions = NewDefaultSessionManager()
 	}
@@ -25,23 +25,26 @@ func (c *CarrotTransformController) Transform(req *Request, broadcast *Broadcast
 	if err != nil {
 		log.Errorf("There was an error retrieving the primary device token in transform.go")
 	}
-	session, err := c.sessions.Get(req.SessionToken)
+	session, err := c.sessions.Get(ctx.Session().Token)
 	if err != nil {
 		log.Errorf("There was an error retrieving the session in transform.go")
 	}
-	if req.SessionToken != primaryToken { //a secondary device wants to establish its transform information
+	if ctx.Session().Token != primaryToken { //a secondary device wants to establish its transform information
 		//store T_L for the secondary device
-		c.storeT_L(req, session)
+		c.storeT_L(ctx.Request(), session)
 		//request T_P from the primary device and
 		//broadcast the response with primaryDevice token, this endpoint, & empty params
-		res, err := c.requestT_P(req)
+		res, err := c.requestT_P(ctx.Request())
 		if err != nil {
 			log.Error(err)
 		}
+
+		// TODO: the response needs to not be a byte array and instead needs to be message data. However this should
+		// also be done as part of the context itself
 		broadcast.Broadcast(res, string(primaryToken))
 	} else { //the primary device is offering its transform information, requested by a secondary device
-		log.Infof("about to store t_p for %v", req.SessionToken)
-		c.storeT_P(req, primaryToken)
+		log.Infof("about to store t_p for %v", ctx.Session().Token)
+		c.storeT_P(ctx.Request(), primaryToken)
 	}
 }
 

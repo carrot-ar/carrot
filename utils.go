@@ -9,6 +9,16 @@ import (
 	"strings"
 )
 
+
+func validSession(serverToken SessionToken, clientToken SessionToken) error {
+
+	if serverToken != clientToken {
+		return fmt.Errorf("client-server token mismatch")
+	}
+
+	return nil
+}
+
 func InSlice(str string, items []string) bool {
 	for _, item := range items {
 		if item == str {
@@ -44,7 +54,6 @@ func offsetSub(a *offset, b *offset) *offset {
 	}
 }
 
-
 func getE_P(sender *Session, recipient *Session, event *offset) (*offset, error) {
 	var err error
 	var T_F *offset //transform foreign
@@ -71,7 +80,7 @@ func getE_P(sender *Session, recipient *Session, event *offset) (*offset, error)
 	log.Infof("o_p: x: %v y: %v z: %v", O_P.X, O_P.Y, O_P.Z)
 
 	E_P := offsetSub(event, O_P)
-	log.Infof("e_l: x: %v y: %v z: %v", event.X, event.Y, event.Z)	
+	log.Infof("e_l: x: %v y: %v z: %v", event.X, event.Y, event.Z)
 	log.Infof("e_p: x: %v y: %v z: %v", E_P.X, E_P.Y, E_P.Z)
 
 	return E_P, err

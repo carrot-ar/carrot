@@ -18,24 +18,24 @@ var count = 0
 // 	logger.Info("I am going to parse a request!")
 // }
 
-func logger(req *Request, logger *log.Entry) error {
+func logger(ctx *CContext, logger *log.Entry) error {
 
-	logger.WithField("session_token", req.SessionToken).Debug("new request")
+	//logger.WithField("session_token", ctx.SessionToken).Debug("new request")
 	return nil
 }
 
-func discardBadRequest(req *Request, logger *log.Entry) error {
-	if req.err != nil {
-		logger.WithField("session_token", req.SessionToken).Errorf("invalid request: %v", req.err.Error())
-		return req.err
+func discardBadRequest(ctx *CContext, logger *log.Entry) error {
+	if ctx.Error() != nil {
+		//logger.WithField("session_token", ctx.SessionToken).Errorf("invalid request: %v", ctx.err.Error())
+		return ctx.Error()
 	}
 
 	return nil
 }
 
 type MiddlewarePipeline struct {
-	In          chan *Request
-	middlewares []func(*Request, *log.Entry) error
+	In          chan *CContext
+	middlewares []func(*CContext, *log.Entry) error
 	dispatcher  *Dispatcher
 	logger      *log.Entry
 }
@@ -45,7 +45,7 @@ func (mw *MiddlewarePipeline) Run() {
 	func() {
 		for {
 			select {
-			case req := <-mw.In:
+			case ctx := <-mw.In:
 				if len(mw.In) > int(math.Floor(InputChannelSize*0.90)) {
 					mw.logger.WithField("buf_size", len(mw.In)).Warn("input channel is at or above 90% capacity!")
 				}
@@ -53,23 +53,19 @@ func (mw *MiddlewarePipeline) Run() {
 					mw.logger.WithField("buf_size", len(mw.In)).Warn("input channel is full!")
 				}
 
-				req.AddMetric(MiddlewareInput)
-
 				var err error
 				for _, f := range mw.middlewares {
-					err = f(req, mw.logger)
+					err = f(ctx, mw.logger)
 					if err != nil {
-						req.End()
 						break
 					}
 					count++
 				}
 
 				if err == nil {
-					mw.dispatcher.requests <- req
+					mw.dispatcher.requests <- ctx
 				}
 
-				req.AddMetric(MiddlewareOutputToDispatcher)
 			}
 		}
 	}()
@@ -77,10 +73,10 @@ func (mw *MiddlewarePipeline) Run() {
 
 func NewMiddlewarePipeline() *MiddlewarePipeline {
 	// middleware function index
-	mw := []func(*Request, *log.Entry) error{discardBadRequest, logger}
+	mw := []func(*CContext, *log.Entry) error{discardBadRequest, logger}
 
 	return &MiddlewarePipeline{
-		In:          make(chan *Request, InputChannelSize),
+		In:          make(chan *CContext, InputChannelSize),
 		middlewares: mw,
 		dispatcher:  NewDispatcher(),
 		logger:      log.WithField("module", "middleware"),

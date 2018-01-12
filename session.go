@@ -145,7 +145,7 @@ func (s *DefaultSessionStore) GetASecondarySession() (*Session, error) {
 	var err error
 	s.sessionStore.Range(func(t, session interface{}) bool {
 		ses := session.(*Session)
-		if (!ses.isPrimaryDevice()) {
+		if !ses.isPrimaryDevice() {
 			secondary = ses
 		}
 		return true
@@ -153,7 +153,7 @@ func (s *DefaultSessionStore) GetASecondarySession() (*Session, error) {
 	if secondary == nil {
 		err = errors.New("Could not locate secondary device in sessions list")
 	}
-	return secondary, err		
+	return secondary, err
 }
 
 func (s *DefaultSessionStore) Delete(token SessionToken) error {

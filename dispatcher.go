@@ -16,22 +16,21 @@ const (
 
 type Dispatcher struct {
 	cachedControllers *CachedControllersList
-	requests          chan *Request
+	requests          chan *CContext
 	logger            *log.Entry
 }
 
 func NewDispatcher() *Dispatcher {
 	return &Dispatcher{
 		cachedControllers: NewCachedControllersList(),
-		requests:          make(chan *Request, maxNumDispatcherIncomingRequests),
+		requests:          make(chan *CContext, maxNumDispatcherIncomingRequests),
 		logger:            log.WithField("module", "dispatcher"),
 	}
 }
 
-func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) error {
-	req.AddMetric(DispatchRequestStart)
+func (dp *Dispatcher) dispatchRequest(route *Route, ctx *CContext) error {
 	if doCacheControllers { //used to be "if route.persist"
-		token := req.SessionToken
+		token := ctx.Session().Token
 		key := getCacheKey(token, route.controller)
 		if exists := dp.cachedControllers.Exists(key); !exists {
 			c, err := NewController(route.Controller(), doCacheControllers) //send to controller factory with stream identifier
@@ -41,9 +40,9 @@ func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) error {
 			dp.cachedControllers.Add(key, c)
 		}
 		sc, err := dp.cachedControllers.Get(key)
-		reqErr := sc.Invoke(route, req) //send request to controller
+		reqErr := sc.Invoke(route, ctx) //send request to controller
 		if reqErr != nil {
-			req.err = reqErr
+			ctx.error = reqErr
 		}
 		return err
 	} else { //route leads to event controller
@@ -51,8 +50,8 @@ func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) error {
 		if err != nil {
 			return err
 		}
-		err = c.Invoke(route, req) //send request to controller
-		req.err = err
+		err = c.Invoke(route, ctx) //send request to controller
+		ctx.error = err
 	}
 	return nil
 }
@@ -60,7 +59,7 @@ func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) error {
 func (dp *Dispatcher) Run() {
 	for {
 		select {
-		case req := <-dp.requests:
+		case ctx := <-dp.requests:
 			if len(dp.requests) > int(math.Floor(maxNumDispatcherIncomingRequests*0.90)) {
 				dp.logger.WithField("buf_size", len(dp.requests)).Warn("input channel is at or above 90% capacity!")
 			}
@@ -69,24 +68,23 @@ func (dp *Dispatcher) Run() {
 				dp.logger.WithField("buf_size", len(dp.requests)).Error("input channel is full!")
 			}
 
-			req.AddMetric(DispatchLookupStart)
-			route, err := Lookup(req.endpoint)
+			route, err := Lookup(ctx.Request().Endpoint)
 			if err != nil {
 				dp.logger.Error(err)
 				break
 			}
-			req.AddMetric(DispatchLookupEnd)
+			//req.AddMetric(DispatchLookupEnd)
 
-			req.AddMetric(DispatchRequestStart)
-			err = dp.dispatchRequest(route, req)
+			//req.AddMetric(DispatchRequestStart)
+			err = dp.dispatchRequest(route, ctx)
 			if err != nil {
 				dp.logger.Error(err)
 			}
-			req.AddMetric(DispatchRequestEnd)
+			//req.AddMetric(DispatchRequestEnd)
 
 			dp.logger.WithFields(log.Fields{
 				"route":         fmt.Sprintf("%v#%v", reflect.TypeOf(route.controller).Name(), route.function),
-				"session_token": req.SessionToken,
+				"session_token": ctx.Session().Token,
 			}).Debug("dispatching request")
 		default:
 			//delete controllers that haven't been used recently

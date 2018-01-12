@@ -157,9 +157,12 @@ func (c *Client) readPump() {
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
-		req := NewRequest(c.session, message)
+		//req := NewRequest(c.session, message)
+
+		// Think about handling errors here
+		ctx, _ := NewCContext(c.session, message)
 		c.logger.WithField("session_token", c.session.Token).Debug("request being sent to middleware")
-		c.server.Middleware.In <- req
+		c.server.Middleware.In <- ctx
 		//c.server.broadcast <- message
 	}
 }

@@ -73,7 +73,7 @@ func (br *Broadcaster) Run() {
 					client.checkBufferRedZone()
 					client.checkBufferFull()
 
-					msg, err :=  message.message.build(client.session)
+					msg, err := message.message.build(client.session)
 					if err != nil {
 						log.Errorf("unable to build message for broadcast: %v", err)
 					}
