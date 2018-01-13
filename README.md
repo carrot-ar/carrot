@@ -11,7 +11,7 @@ DEMO: https://www.youtube.com/watch?v=6EVtb0pJPgk
 
 Carrot is an easy-to-use, real-time framework for building multiplayer applications in Augmented Reality. Currently, not many AR frameworks exist with multiplayer in mind. There are a few reasons for this, with the most important being the difficulty of resolving location to an acceptable degree of accuracy with traditional GPS based coordinates. This is where Carrot flourishes.
 
-By implementing the Picnic Protocol into the server and client's respective frameworks, we have decreased the error size for location resolution from 10-65 meters with GPS down to less than one foot. This enables developers (i.e. you) to focus on creating applications with rich content and need not worry about the finer details such as cross-device accuracy and networking. 👨‍🌾👩‍🌾
+By implementing the Picnic Protocol into the server and client's respective frameworks, we have decreased the error size for location resolution from 10-65 meters with GPS to less than one meter. This enables developers (i.e. you) to focus on creating applications with rich content and need not worry about the finer details such as cross-device accuracy and networking. 👨‍🌾👩‍🌾
 
 ## Building an application with Carrot
 
