@@ -268,5 +268,3 @@ When a WebSocket connection is closed, the session state is maintained for a per
 
 tbd
 
-
-
