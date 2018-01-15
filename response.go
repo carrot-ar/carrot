@@ -55,7 +55,7 @@ func NewPayload(sessionToken string, offset *offset, params map[string]interface
 			return payload{}, err
 		}
 	}
-	e_p, err := getE_P(sender, recipient, offset)
+	e_p, err := getE_L(sender, recipient, offset)
 	if err != nil {
 		return payload{}, err
 	}
