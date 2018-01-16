@@ -239,35 +239,14 @@ func (c *ExampleController) SendHelloToAll(r *carrot.Request, b *carrot.Broadcas
 
 Once the response reaches its intended recipient(s), it has reached the end of its life cycle.
 
-/* EVERYTHING BEYOND THIS IS OLLLLDDDD */
-
-
 ## Sessions
 
 Maintaining the state of clients are done using sessions inside of Carrot. Due to the shared, concurrent access of sessions throughout the lifecycle of a request, they are stored isnide of Golang's `sync.Map`. However, an interface is provided such that future extensibility could be easily integrated into Carrot to allow session storage within in-memory data stores like Redis. 
 
 Within Carrot, the session store is maintained using a singleton pattern and within any point of carrot the current state of sessions is accessible by calling the `NewDefaultSessionManager()`, which returns a pointer to the `SessionStore` interface. F See the GoDoc for the `SessionStore` interface and `DefaultSessionStore` struct for more details.
 
-## New Session with client secrets disabled
-
-To connect to the server, connect to the WebSocket url the server is running on. For this example, `localhost:8080` will be used and a Ruby WebSocket client will be used for demo purposes.
-
-```
-ws = WebSocket::Client::Simple.connect 'ws://localhost:8080/ws'
-```
-
-Once the client connects, a welcoming message consisting of the `SessionToken` will be sent. It will look like this:
-```
-KjIQhKUPNrvHkUHv1VySBg==
-```
-Save this token. It will be required to be attached to every message sent to the server.
-
-From this point on you can begin sending/receiving messages to the server. 
-
 ## Resuming a Session
-When a WebSocket connection is closed, the session state is maintained for a period of time determined by the application configuration. 
-
-tbd
+To be implemented
 
 
 
