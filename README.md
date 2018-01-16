@@ -244,6 +244,9 @@ Once the response reaches its intended recipient(s), it has reached the end of i
 
 ## Sessions
 
+Maintaining the state of clients are done using sessions inside of Carrot. Due to the shared, concurrent access of sessions throughout the lifecycle of a request, they are stored isnide of Golang's `sync.Map`. However, an interface is provided such that future extensibility could be easily integrated into Carrot to allow session storage within in-memory data stores like Redis. 
+
+Within Carrot, the session store is maintained using a singleton pattern and within any point of carrot the current state of sessions is accessible by calling the `NewDefaultSessionManager()`, which returns a pointer to the `SessionStore` interface. F See the GoDoc for the `SessionStore` interface and `DefaultSessionStore` struct for more details.
 
 ## New Session with client secrets disabled
 
