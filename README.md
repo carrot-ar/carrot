@@ -7,7 +7,17 @@
 <a href=""><img src="https://codecov.io/gh/carrot-ar/carrot/branch/master/graph/badge.svg" alt="code coverage"></a>
 </p>
 
-Carrot is an easy-to-use, real-time framework for building multiplayer applications in Augmented Reality. It works using WebSockets, Golang, client libraries written for iOS, and a unique location tracking system based on iBeacons that we aptly titled The Picnic Protocol. Using Carrot, AR apps can be created with sub-meter location tracking accuracy to provide rich and lifelike experiences. To see for yourself, check out Scribbles, a multiplayer drawing application made with Carrot. You can see the demo video [here](https://www.youtube.com/watch?v=6EVtb0pJPgk) and the code [here](https://github.com/carrot-ar/scribbles).
+Carrot is an easy-to-use, real-time framework for building multi-user applications in Augmented Reality. It works using WebSockets, Golang, client libraries written for iOS, and a unique location tracking system based on iBeacons that we aptly named The Picnic Protocol. Using Carrot, AR apps can be created with sub-meter location tracking accuracy to provide rich and lifelike experiences. To see for yourself, check out Scribbles, a multiplayer drawing application made with Carrot. You can see the demo video [here](https://www.youtube.com/watch?v=6EVtb0pJPgk) and the code [here](https://github.com/carrot-ar/scribbles).
+
+## Table of Contents
+1. Features
+2. Todo
+3. Building an Application
+4. The Picnic Protocol
+5. Message Format
+6. Sending Messages to Carrot
+7. Receiving Messages from Carrot
+8. Session Management
 
 ## Building an application with Carrot
 
