@@ -245,7 +245,7 @@ Maintaining the state of clients are done using sessions inside of Carrot. Due t
 
 Within Carrot, the session store is maintained using a singleton pattern and within any point of carrot the current state of sessions is accessible by calling the `NewDefaultSessionManager()`, which returns a pointer to the `SessionStore` interface. F See the GoDoc for the `SessionStore` interface and `DefaultSessionStore` struct for more details.
 
-## Resuming a Session
+### Resuming a Session
 To be implemented
 
 
