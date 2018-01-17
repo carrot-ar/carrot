@@ -11,14 +11,14 @@ Carrot is an easy-to-use, real-time framework for building applications with mul
 
 ## 🗂 Table of Contents
 [☑️ Features](#features)</br>
-[🖋️ Todo](#Todo)</br>
-[🛠 Building an Application with Carrot](#Building-an-application-with-Carrot)</br>
-[✉️ Message Format](#Message-Format)</br>
-[🥕 The Picnic Protocol](#The-Picnic-Protocol)</br>
-[🎙 Sending Messages To Carrot](#Sending-Messages-To-Carrot)</br>
-[📨 Receiving Messages from Carrot](#Receiving-Messages-From-Carrot)</br>
-[📺 Broadcasting Responses](#Broadcasting-Responses)</br>
-[🌎 Session Management](#Session-Management)</br>
+[🖋️ Todo](#todo)</br>
+[🛠 Building an Application with Carrot](#building-an-application-with-carrot)</br>
+[✉️ Message Format](#message-format)</br>
+[🥕 The Picnic Protocol](#the-picnic-protocol)</br>
+[🎙 Sending Messages To Carrot](#sending-messages-to-carrot)</br>
+[📨 Receiving Messages from Carrot](#receiving-messages-from-carrot)</br>
+[📺 Broadcasting Responses](#broadcasting-responses)</br>
+[🌎 Session Management](#session-management)</br>
 
 ## Features
 
