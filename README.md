@@ -30,7 +30,7 @@ tbd
 
 ## Building an application with Carrot
 
-Building applications with Carrot is incredibly simple. Check out this simple echo application that echos text input from one device into the AR space of all connected devices: 
+Building applications with Carrot is incredibly simple. Check out this echo application that echos a payload from one device into the AR space of all connected devices: 
 
 ``` go
 package main
