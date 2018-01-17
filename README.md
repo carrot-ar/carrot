@@ -12,7 +12,7 @@ Carrot is an easy-to-use, real-time framework for building applications with mul
 |         | 🗂 Table of Contents |
 ----------|----------------------
 ✨        | [Features](#features)
-📋	  | [To Do](#to-do)
+📋	  | [To-Do](#to-do)
 🛠	  | [Building an Application with Carrot](#building-an-application-with-carrot)
 🥪        | [The Picnic Protocol](#the-picnic-protocol)
 ✉️        | [Message Format](#message-format)
@@ -25,7 +25,7 @@ Carrot is an easy-to-use, real-time framework for building applications with mul
 
 tbd
 
-## To Do
+## To-Do
 
 tbd
 
