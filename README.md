@@ -11,7 +11,7 @@ Carrot is an easy-to-use, real-time framework for building applications with mul
 
 ## 🗂 Table of Contents
 1. [Features](#features)
-2. [Todo](#🖋️ Todo)
+2. [Todo](#🖋️-Todo)
 3. Building an Application with Carrot
 4. Message Format
 5. The Picnic Protocol
