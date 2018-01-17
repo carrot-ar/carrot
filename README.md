@@ -10,15 +10,15 @@
 Carrot is an easy-to-use, real-time framework for building applications with multi-device AR capabilities. It works using WebSockets, Golang, client libraries written for iOS, and a unique location tracking system based on iBeacons that we aptly named The Picnic Protocol. Using Carrot, multi-device AR apps can be created with high accuracy location tracking accuracy to provide rich and lifelike experiences. To see for yourself, check out Scribbles, a multiplayer drawing application made with Carrot. You can see a demo video [here](https://www.youtube.com/watch?v=6EVtb0pJPgk) and the code [here](https://github.com/carrot-ar/scribbles).
 
 ## 🗂 Table of Contents
-1. [☑️ Features](#features)
-2. [🖋️ Todo](#Todo)
-3. [🛠 Building an Application with Carrot](#Building-an-application-with-Carrot)
-4. [✉️ Message Format](#Message-Format)
-5. [🥕 The Picnic Protocol](#The-Picnic-Protocol)
-6. [🎙 Sending Messages To Carrot](#Sending-Messages-To-Carrot)
-7. [📨 Receiving Messages from Carrot](#Receiving-Messages-From-Carrot)
-8. [📺 Broadcasting Responses](#Broadcasting-Responses)
-8. [🌎 Session Management](#Session-Management)
+[☑️ Features](#features)</br>
+[🖋️ Todo](#Todo)</br>
+[🛠 Building an Application with Carrot](#Building-an-application-with-Carrot)</br>
+[✉️ Message Format](#Message-Format)</br>
+[🥕 The Picnic Protocol](#The-Picnic-Protocol)</br>
+[🎙 Sending Messages To Carrot](#Sending-Messages-To-Carrot)</br>
+[📨 Receiving Messages from Carrot](#Receiving-Messages-From-Carrot)</br>
+[📺 Broadcasting Responses](#Broadcasting-Responses)</br>
+[🌎 Session Management](#Session-Management)</br>
 
 ## Features
 
