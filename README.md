@@ -7,9 +7,9 @@
 <a href=""><img src="https://codecov.io/gh/carrot-ar/carrot/branch/master/graph/badge.svg" alt="code coverage"></a>
 </p>
 
-Carrot is an easy-to-use, real-time framework for building multi-user applications in Augmented Reality. It works using WebSockets, Golang, client libraries written for iOS, and a unique location tracking system based on iBeacons that we aptly named The Picnic Protocol. Using Carrot, AR apps can be created with sub-meter location tracking accuracy to provide rich and lifelike experiences. To see for yourself, check out Scribbles, a multiplayer drawing application made with Carrot. You can see the demo video [here](https://www.youtube.com/watch?v=6EVtb0pJPgk) and the code [here](https://github.com/carrot-ar/scribbles).
+Carrot is an easy-to-use, real-time framework for building multi-device Augmented Reality applications. It works using WebSockets, Golang, client libraries written for iOS, and a unique location tracking system based on iBeacons that we aptly named The Picnic Protocol. Using Carrot, multi-device AR apps can be created with high accuracy location tracking accuracy to provide rich and lifelike experiences. To see for yourself, check out Scribbles, a multiplayer drawing application made with Carrot. You can see a demo video [here](https://www.youtube.com/watch?v=6EVtb0pJPgk) and the code [here](https://github.com/carrot-ar/scribbles).
 
-## Table of Contents
+## 🗂 Table of Contents
 1. Features
 2. Todo
 3. Building an Application
@@ -19,7 +19,7 @@ Carrot is an easy-to-use, real-time framework for building multi-user applicatio
 7. Receiving Messages from Carrot
 8. Session Management
 
-## Building an application with Carrot
+## 🛠 Building an application with Carrot
 
 Building applications on Carrot is incredibly simple. Check out this simple echo application that echos text input from one device into the AR space of all connected devices: 
 
@@ -66,7 +66,7 @@ Controller methods receieve requests and broadcast responses to clients. Request
 
 To make the framework interact with platform-specific code, developers will need to implement the Carrot client framework. Currently, only iOS support exists. To see how to do so, visit the carrot-ios repository [https://github.com/carrot-ar/carrot-ios](https://github.com/carrot-ar/carrot-ios)
 
-## Message Format
+## ✉️ Message Format
 Carrot has two message types: request and responses. These are represented by the []byte type.
 
 Requests are created and sent by the client framework to the server framework. Conversely, responses are created and sent by a developer defined controller back to the client framework. The end of a request's path marks the beginning of the corresponding response's path. 
@@ -88,7 +88,7 @@ The structure of messages are identical, so the two types of messages represent 
 		}
 	}
 
-## Sending Messages to Carrot
+## 🎙 Sending Messages to Carrot
 
 Carrot expects to recieve requests from clients.
 
@@ -132,7 +132,7 @@ If this request is sent to the server over the WebSocket connection established,
 
 Once the request reached its intended controller method, it has reached the end of its life cycle.
 
-## Receiving Messages from Carrot
+## 📨 Receiving Messages from Carrot
 
 Clients can expect to receive responses from Carrot. Assuming the request is not explicitly modified in the developer-defined controller, then the response should be exactly the same as the request. 
 
@@ -217,7 +217,7 @@ func (c *EchoController) EchoExtendable(req *carrot.Request, br *carrot.Broadcas
 
 The resulting message is ready to be broadcasted to clients and can no longer be modified.
 
-## Broadcasting Responses
+## 📺 Broadcasting Responses
 
 The broadcast module, available in all controller implementations, has a few options for narrowing down which clients to send a message to. Since all clients have a session associated with them, there is a 1-to-1 relationship between sessions and clients. Thus, every client has a `SessionToken` which is accessible within the client and within the session store internal to Carrot. 
 
@@ -247,12 +247,11 @@ func (c *ExampleController) SendHelloToAll(r *carrot.Request, b *carrot.Broadcas
 
 Once the response reaches its intended recipient(s), it has reached the end of its life cycle.
 
-## Sessions
+## 🌎 Sessions
 
 Maintaining the state of clients are done using sessions inside of Carrot. Due to the shared, concurrent access of sessions throughout the lifecycle of a request, they are stored isnide of Golang's `sync.Map`. However, an interface is provided such that future extensibility could be easily integrated into Carrot to allow session storage within in-memory data stores like Redis. 
 
-Within Carrot, the session store is maintained using a singleton pattern and within any point of carrot the current state of sessions is accessible by calling the `NewDefaultSessionManager()`, which returns a pointer to the `SessionStore` interface. F See the GoDoc for the `SessionStore` interface and `DefaultSessionStore` struct for more details.
+Within Carrot, the session store is maintained using a singleton pattern and within any point of carrot the current state of sessions is accessible by calling the `NewDefaultSessionManager()`, which returns a pointer to the `SessionStore` interface. See the GoDoc for the `SessionStore` interface and `DefaultSessionStore` struct for more details.
 
 ### Resuming a Session
 To be implemented
-
