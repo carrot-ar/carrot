@@ -9,22 +9,23 @@
 
 Carrot is an easy-to-use, real-time framework for building applications with multi-device AR capabilities. It works using WebSockets, Golang, client libraries written for iOS, and a unique location tracking system based on iBeacons that we aptly named The Picnic Protocol. Using Carrot, multi-device AR apps can be created with high accuracy location tracking to provide rich and lifelike experiences. To see for yourself, check out Scribbles, a multiplayer drawing application made with Carrot. You can see a demo video [here](https://www.youtube.com/watch?v=6EVtb0pJPgk) and the code [here](https://github.com/carrot-ar/scribbles).
 
-## 🗂 Table of Contents
-[☑️ Features](#features)</br>
-[🖋️ Todo](#todo)</br>
-[🛠 Building an Application with Carrot](#building-an-application-with-carrot)</br>
-[✉️ Message Format](#message-format)</br>
-[🥕 The Picnic Protocol](#the-picnic-protocol)</br>
-[🎙 Sending Messages To Carrot](#sending-messages-to-carrot)</br>
-[📨 Receiving Messages from Carrot](#receiving-messages-from-carrot)</br>
-[📺 Broadcasting Responses](#broadcasting-responses)</br>
-[🌎 Session Management](#session-management)</br>
+|         | 🗂 Table of Contents |
+----------|----------------------
+✨        | [Features](#features)
+📋	  | [To Do](#to-do)
+🛠	  | [Building an Application with Carrot](#building-an-application-with-carrot)
+🥪        | [The Picnic Protocol](#the-picnic-protocol)
+✉️        | [Message Format](#message-format)
+🎙        | [Sending Messages To Carrot](#sending-messages-to-carrot)
+📨        | [Receiving Messages from Carrot](#receiving-messages-from-carrot)
+📺        | [Broadcasting Responses](#broadcasting-responses)
+🌎        | [Sessions](#sessions)
 
 ## Features
 
 tbd
 
-## Todo
+## To Do
 
 tbd
 
@@ -75,7 +76,12 @@ Controller methods receieve requests and broadcast responses to clients. Request
 
 To make the framework interact with platform-specific code, developers will need to implement the Carrot client framework. Currently, only iOS support exists. To see how to do so, visit the carrot-ios repository [https://github.com/carrot-ar/carrot-ios](https://github.com/carrot-ar/carrot-ios)
 
+## The Picnic Protocol
+
+tbd
+
 ## Message Format
+
 Carrot has two message types: request and responses. These are represented by the []byte type.
 
 Requests are created and sent by the client framework to the server framework. Conversely, responses are created and sent by a developer defined controller back to the client framework. The end of a request's path marks the beginning of the corresponding response's path. 
@@ -96,10 +102,6 @@ The structure of messages are identical, so the two types of messages represent 
 			}
 		}
 	}
-
-## The Picnic Protocol
-
-tbd
 
 ## Sending Messages to Carrot
 
@@ -235,11 +237,13 @@ The resulting message is ready to be broadcasted to clients and can no longer be
 The broadcast module, available in all controller implementations, has a few options for narrowing down which clients to send a message to. Since all clients have a session associated with them, there is a 1-to-1 relationship between sessions and clients. Thus, every client has a `SessionToken` which is accessible within the client and within the session store internal to Carrot. 
 
 #### Broadcasting to all clients
+
 ``` go
 carrot.Broadcast(/* carrot response  */)
 ```
 
 #### Broadcasting to a subset of clients
+
 ``` go
 carrot.Broadcast(/* carrot response */, sessionToken1, sessiontoken2)
 ```
