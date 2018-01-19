@@ -15,6 +15,7 @@ type OutMessage struct {
 	sessions []string
 }
 
+// OutboundMessage initializes a new instance of the OutMessage struct.
 func OutboundMessage(message []byte, sessions []string) OutMessage {
 	return OutMessage{
 		message:  message,
@@ -32,6 +33,7 @@ type Broadcaster struct {
 	statsd    *statsd.Client
 }
 
+// NewBroadcaster initializes a new instance of the Broadcaster struct.
 func NewBroadcaster(pool *Clients) Broadcaster {
 	logger := log.WithField("module", "broadcaster")
 	c, err := statsd.New("127.0.0.1:8125")
@@ -48,6 +50,7 @@ func NewBroadcaster(pool *Clients) Broadcaster {
 	}
 }
 
+// checkBufferRedZone returns whether the broadcast channel buffer is nearly full.
 func (br *Broadcaster) checkBufferRedZone() bool {
 	// check for buffer warning
 	if len(br.broadcast) > int(math.Floor(broadcastChannelSize*broadcastChannelWarningTrigger)) {
@@ -59,6 +62,7 @@ func (br *Broadcaster) checkBufferRedZone() bool {
 	return false
 }
 
+// checkBufferFull returns whether the broadcast channel buffer is actually full.
 func (br *Broadcaster) checkBufferFull() bool {
 	// check for buffer full
 	if len(br.broadcast) == broadcastChannelSize {
@@ -69,6 +73,7 @@ func (br *Broadcaster) checkBufferFull() bool {
 	return false
 }
 
+//Run sends buffered responses to devices, deletes expired device connections, and logs information.
 func (br *Broadcaster) Run() {
 	for {
 		br.statsd.Gauge("carrot.broadcaster.outbound.buffer_size", float64(len(br.broadcast)), nil, 100)

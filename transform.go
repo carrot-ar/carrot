@@ -17,6 +17,7 @@ func (t *CarrotTransformController) convertCoordSystem(e_l *offset) *offset {
 }
 */
 
+// Transform gathers and stores device locations via movement vectors in order to perform later calculations.
 func (c *CarrotTransformController) Transform(req *Request, broadcast *Broadcast) {
 	if c.sessions == nil {
 		c.sessions = NewDefaultSessionManager()
@@ -45,10 +46,12 @@ func (c *CarrotTransformController) Transform(req *Request, broadcast *Broadcast
 	}
 }
 
+// storeT_L records the local device's movement from its origin.
 func (c *CarrotTransformController) storeT_L(req *Request, session *Session) {
 	session.T_L = req.Offset
 }
 
+// requestT_P asks the primary device for its movement vector from its origin.
 func (c *CarrotTransformController) requestT_P(req *Request) ([]byte, error) {
 	res, err := getT_PFromPrimaryDeviceRes(string(req.SessionToken))
 	if err != nil {
@@ -57,6 +60,7 @@ func (c *CarrotTransformController) requestT_P(req *Request) ([]byte, error) {
 	return res, err
 }
 
+// storeT_P records the primary transform for the requesting local (secondary) device.
 func (c *CarrotTransformController) storeT_P(req *Request, primaryToken SessionToken) {
 	c.sessions.Range(func(t, session interface{}) bool {
 		s := session.(*Session)

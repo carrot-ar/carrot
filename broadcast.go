@@ -14,6 +14,7 @@ type Broadcast struct {
 	logger      *log.Entry
 }
 
+// NewBroadcast initializes a new instance of the Broadcast struct.
 func NewBroadcast(broadcaster Broadcaster) *Broadcast {
 	return &Broadcast{
 		broadcaster: broadcaster,
@@ -39,6 +40,7 @@ func NewBroadcast(broadcaster Broadcaster) *Broadcast {
  }
 */
 
+// Broadcast allows controllers to send responses to all or a subset of listening devices.
 func (b *Broadcast) Broadcast(message []byte, sessions ...string) {
 	b.logger.Debug("sending message")
 

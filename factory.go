@@ -4,7 +4,7 @@ import (
 	"reflect"
 )
 
-// returns a new controller of controllerType
+// NewController initializes a new controller instance of controllerType.
 func NewController(c interface{}, isStream bool) (*AppController, error) {
 
 	newController := reflect.New(reflect.TypeOf(c))

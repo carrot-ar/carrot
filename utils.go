@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// InSlice returns whether a string exists in a collection of items.
 func InSlice(str string, items []string) bool {
 	for _, item := range items {
 		if item == str {
@@ -19,7 +20,7 @@ func InSlice(str string, items []string) bool {
 	return false
 }
 
-// generate UUID fulfilling RFC 4122
+// generateUUID generates a UUID fulfilling RFC 4122 used for assigning tokens to devices.
 func generateUUID() (string, error) {
 	uuid := make([]byte, 16)
 	n, err := io.ReadFull(rand.Reader, uuid)
@@ -35,7 +36,7 @@ func generateUUID() (string, error) {
 	return strings.ToUpper(fmt.Sprintf("%x-%x-%x-%x-%x", uuid[0:4], uuid[4:6], uuid[6:8], uuid[8:10], uuid[10:])), nil
 }
 
-// a - b
+// offsetSub performs offset subtraction in the form of a - b.
 func offsetSub(a *offset, b *offset) *offset {
 	return &offset{
 		X: a.X - b.X,
@@ -44,6 +45,7 @@ func offsetSub(a *offset, b *offset) *offset {
 	}
 }
 
+// getE_P performs calculations to determine the event placement in a recipient's response.
 func getE_P(currentSession *Session, offset *offset) (*offset, error) {
 	var err error
 	if currentSession.T_L == nil || currentSession.T_P == nil {
@@ -57,7 +59,7 @@ func getE_P(currentSession *Session, offset *offset) (*offset, error) {
 
 	log.Infof("t_l: x: %v y: %v z: %v", currentT_L.X, currentT_L.Y, currentT_L.Z)
 
-	// offset is the e_l
+	// parameter offset is the e_l
 	// o_p = t_l - t_p`
 	// e_p = e_l - o_p
 	o_p := offsetSub(currentT_L, primaryT_P)

@@ -19,9 +19,7 @@ func (c *AppController) Persist(p bool) {
 	c.persist = p
 }
 
-/*
-	Reflect on the controller and find the correct function to call, then call it
-*/
+// Invoke reflects on the controller to find the correct function to call and then calls it.
 func (c *AppController) Invoke(route *Route, req *Request) error {
 	req.AddMetric(MethodReflectionStart)
 

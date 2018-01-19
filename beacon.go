@@ -22,6 +22,8 @@ between the server and primary and secondary devices.
 
 */
 
+// createInitialDeviceInfo creates initial message to be sent to a newly connected device.
+// It establishes a device's primary or secondary role in order to send and recieve further information.
 func createInitialDeviceInfo(uuid string, token string) ([]byte, error) {
 	params := ResponseParams{"identifier": "com.Carrot.Beacon", "uuid": uuid}
 	payload, err := newPayloadNoTransform(nil, params)
@@ -45,6 +47,8 @@ func createInitialDeviceInfo(uuid string, token string) ([]byte, error) {
 
 */
 
+// getT_PFromPrimaryDeviceRes requests information to determine a secondary device's
+// position relative to the primary device.
 func getT_PFromPrimaryDeviceRes(token string) ([]byte, error) {
 	payload, err := newPayloadNoTransform(nil, nil)
 	res, err := NewResponse(token, "carrot_transform", payload)
