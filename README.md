@@ -22,8 +22,16 @@ Carrot is an easy-to-use, real-time framework for building applications with mul
 | 🌎 | [Sessions](#sessions)
 
 ## Features
-
-tbd
+- Rapid development of multi-device AR applications with little Go or server knowledge
+- WebSocket connection and state management
+- High accuracy AR location tracking with the [Picnic Protocol](https://github.com/carrot-ar/carrot-ios#-the-picnic-protocol)
+- Sessions and session management
+- Middleware 
+- Extensible controllers
+- Custom endpoints 
+- Performance optimizations
+- High throughput (30k messages/second tested on 4 CPU test machine)
+- ~100 microsecond average to service one request 
 
 ## To-Do
 
