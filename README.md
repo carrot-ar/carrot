@@ -34,8 +34,11 @@ Carrot is an easy-to-use, real-time framework for building applications with mul
 - ~100 microsecond average to service one request 
 
 ## To-Do
+- Support for external session management using Redis, memcached, etc
+- Bug fixes for picnic protocol implementation 
+- Object Relational Mapping library to have a true Model-Controller design
+- [Universal Scene Description](https://github.com/PixarAnimationStudios/USD) support 
 
-tbd
 
 ## Building an application with Carrot
 
