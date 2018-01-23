@@ -10,9 +10,10 @@ type response interface {
 	AddParams()
 }
 
-//for use of controller-level control
+// for use of controller-level control
 type ResponseParams map[string]interface{}
 
+// NewOffset instantiates a struct to hold coordinate data used later to create JSON objects.
 func NewOffset(x float64, y float64, z float64) (*offset, error) {
 	return &offset{
 		X: x,
@@ -21,6 +22,7 @@ func NewOffset(x float64, y float64, z float64) (*offset, error) {
 	}, nil
 }
 
+// NewPayload instantiates a struct to hold offset and params data used later to create JSON objects.
 func NewPayload(sessionToken string, offset *offset, params map[string]interface{}) (payload, error) {
 	sessions := NewDefaultSessionManager()
 	primaryToken, err := sessions.GetPrimaryDeviceToken()
@@ -30,7 +32,7 @@ func NewPayload(sessionToken string, offset *offset, params map[string]interface
 
 	// if the requester is a primary device,
 	// don't do any transform math
-	//likewise, if the incoming offset is empty, don't perform a transform
+	// likewise, if the incoming offset is empty, don't perform a transform
 	if sessionToken == string(primaryToken) || offset == nil {
 		return newPayloadNoTransform(offset, params)
 	}
@@ -53,6 +55,8 @@ func NewPayload(sessionToken string, offset *offset, params map[string]interface
 	}, nil
 }
 
+// newPayloadNoTransform instantiates a struct to hold payload data without modifying
+// the offset content used later to create JSON objects.
 func newPayloadNoTransform(offset *offset, params map[string]interface{}) (payload, error) {
 	return payload{
 		Offset: offset,
@@ -60,6 +64,7 @@ func newPayloadNoTransform(offset *offset, params map[string]interface{}) (paylo
 	}, nil
 }
 
+// NewResponse instantiates a struct that will be directly converted to a JSON object to be broadcasted to devices.
 func NewResponse(sessionToken string, endpoint string, payload payload) (*messageData, error) {
 	return &messageData{
 		SessionToken: sessionToken,
@@ -68,7 +73,7 @@ func NewResponse(sessionToken string, endpoint string, payload payload) (*messag
 	}, nil
 }
 
-//only adds new params, does not override existing ones
+// AddParam adds a new parameter to the params field of the payload but does not override existing ones.
 func (md *messageData) AddParam(key string, value interface{}) {
 	if md.Payload.Params == nil {
 		md.Payload.Params = make(map[string]interface{})
@@ -80,18 +85,21 @@ func (md *messageData) AddParam(key string, value interface{}) {
 	}
 }
 
+// AddParams adds new parameters to the params field of the payload but does not override existing ones.
 func (md *messageData) AddParams(rp ResponseParams) {
 	for key, value := range rp {
 		md.AddParam(key, value)
 	}
 }
 
+// Build converts response struct into JSON object that will be broadcasted to devices.
 func (md *messageData) Build() ([]byte, error) {
 	res, err := json.Marshal(md)
 	return res, err
 }
 
-//offers brevity but does not support extra input from controllers (skips adding params)
+// CreateDefaultResponse generates a JSON object (ready to broadcast response) from a request in one step.
+// This function offers brevity but does not support extra input from controllers (skips adding params).
 func CreateDefaultResponse(req *Request) ([]byte, error) {
 	payload, err := NewPayload(string(req.SessionToken), req.Offset, req.Params)
 	r, err := NewResponse(string(req.SessionToken), req.endpoint, payload)

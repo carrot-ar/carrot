@@ -10,6 +10,7 @@ type CachedControllersList struct {
 	lru               *PriorityQueue
 }
 
+// NewCachedControllersList initializes a new instance of the CachedControllersList struct.
 func NewCachedControllersList() *CachedControllersList {
 	return &CachedControllersList{
 		cachedControllers: make(map[string]*AppController),
@@ -17,6 +18,7 @@ func NewCachedControllersList() *CachedControllersList {
 	}
 }
 
+// Exists checks whether a controller of the given type is already being cached.
 func (ccl *CachedControllersList) Exists(key string) bool {
 	_, ok := ccl.cachedControllers[key]
 	if ok {
@@ -25,6 +27,7 @@ func (ccl *CachedControllersList) Exists(key string) bool {
 	return false
 }
 
+// Get returns a reference to the controller whose type matches the key.
 func (ccl *CachedControllersList) Get(key string) (*AppController, error) {
 	var err error
 	cc, ok := ccl.cachedControllers[key]
@@ -37,6 +40,7 @@ func (ccl *CachedControllersList) Get(key string) (*AppController, error) {
 	return cc, err
 }
 
+// Add maintains the existence of a new controller so that it does not have to be created again upon request reference.
 func (ccl *CachedControllersList) Add(key string, ac *AppController) {
 	//add to controller map
 	ccl.cachedControllers[key] = ac
@@ -44,6 +48,7 @@ func (ccl *CachedControllersList) Add(key string, ac *AppController) {
 	ccl.lru.Insert(key, getPriority())
 }
 
+// DeleteOldest frees the memory of the oldest controller maintained by the cache.
 func (ccl *CachedControllersList) DeleteOldest() error {
 	//find oldest controller in LRU to identify token and delete LRU record
 	key, err := ccl.lru.Pop()
@@ -55,6 +60,7 @@ func (ccl *CachedControllersList) DeleteOldest() error {
 	return nil
 }
 
+// IsEmpty determines whether the cache is currently maintaining any controllers.
 func (ccl *CachedControllersList) IsEmpty() bool {
 	if len(ccl.cachedControllers) == 0 {
 		return true
@@ -62,10 +68,12 @@ func (ccl *CachedControllersList) IsEmpty() bool {
 	return false
 }
 
+// Length returns the size of the cache: the number of maintained controllers.
 func (ccl *CachedControllersList) Length() int {
 	return len(ccl.cachedControllers)
 }
 
+// getPriority returns the current Unix time in order to record controller age for later deletion.
 func getPriority() float64 {
 	return float64(time.Now().Unix())
 }

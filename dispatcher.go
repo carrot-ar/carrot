@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	doCacheControllers               bool = true
+	doCacheControllers               bool = true // determines whether controllers should be cached for streaming purposes
 	maxNumCachedControllers               = 4096
 	maxNumDispatcherIncomingRequests      = 16384
 )
@@ -20,6 +20,7 @@ type Dispatcher struct {
 	logger            *log.Entry
 }
 
+// NewDispatcher initializes a new instance of the Dispatcher struct.
 func NewDispatcher() *Dispatcher {
 	return &Dispatcher{
 		cachedControllers: NewCachedControllersList(),
@@ -28,6 +29,7 @@ func NewDispatcher() *Dispatcher {
 	}
 }
 
+// dispatchRequest sends requests to their specified controllers.
 func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) error {
 	req.AddMetric(DispatchRequestStart)
 	if doCacheControllers { //used to be "if route.persist"
@@ -57,6 +59,7 @@ func (dp *Dispatcher) dispatchRequest(route *Route, req *Request) error {
 	return nil
 }
 
+// Run establishes request routes, dispatches requests, and logs information.
 func (dp *Dispatcher) Run() {
 	for {
 		select {
@@ -98,6 +101,7 @@ func (dp *Dispatcher) Run() {
 	}
 }
 
+// getCacheKey returns a key for a controller type since only one instance of each controller type is cached.
 func getCacheKey(token SessionToken, controller ControllerType) string {
 	c1 := reflect.TypeOf(controller)
 	c2 := strings.SplitAfter(c1.String(), ".")
