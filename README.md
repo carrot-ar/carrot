@@ -9,10 +9,13 @@
 
 Carrot is an easy-to-use, real-time framework for building applications with multi-device AR capabilities. It works using WebSockets, Golang, client libraries written for iOS, and a unique location tracking system based on iBeacons that we aptly named The Picnic Protocol. Using Carrot, multi-device AR apps can be created with high accuracy location tracking to provide rich and lifelike experiences. To see for yourself, check out Scribbles, a multiplayer drawing application made with Carrot. You can see a demo video [here](https://www.youtube.com/watch?v=6EVtb0pJPgk) and the code [here](https://github.com/carrot-ar/scribbles).
 
+To see documentation for the iOS Client library visit the [README for carrot-ios](https://github.com/carrot-ar/carrot-ios/blob/master/README.md)
+
 |    | 🗂 Table of Contents |
 |:--:|----------------------
 | ✨ | [Features](#features)
 | 📋 | [To-Do](#to-do)
+| ⚙️ | [Design](#design)
 | 🛠 | [Building an Application with Carrot](#building-an-application-with-carrot)
 | 🥗 | [The Picnic Protocol](#the-picnic-protocol)
 | ✉️ | [Message Format](#message-format)
@@ -38,6 +41,13 @@ Carrot is an easy-to-use, real-time framework for building applications with mul
 - Bug fixes for picnic protocol implementation 
 - Object Relational Mapping library to have a true Model-Controller design
 - [Universal Scene Description](https://github.com/PixarAnimationStudios/USD) support 
+
+## Design
+
+Bellow is a high level design of the Carrot framework. More detailed diagrams will be provided when time permits.
+
+
+<img src="https://i.imgur.com/sHkF7Hl.png" alt="carrot flow">
 
 
 ## Building an application with Carrot
