@@ -99,7 +99,33 @@ To make the framework interact with platform-specific code, developers will need
 
 ## The Picnic Protocol
 
-tbd
+The Picnic Protocol is a set of rules and standards that provide a way for devices to communicate local AR events as well as understand foreign ones. More specifically, however, it relies on both decentralized and centralized network topologies in order to solve the problem of understanding events that happen in foreign coordinate spaces.
+The protocol's "handshake" begins by designating the first device to join the session as the primary device. The primary device has two responsibilities:
+
+ It must provide other devices a way to know that they are immediately next to it in physical space, which we'll refer to as the "immediate ping". On iOS, this is achieved by broadcasting iBeacon signals from the primary device.
+
+It must let the server know what it's current position in physical space is whenever the server asks for it, which the server does by sending a message with a reserved endpoint. At the moment of the immediate ping, the server asks the primary device for its position in physical space. We'll refer to this as TP, or the primary device's transform.
+
+The rest of the devices in a session are referred to as secondary devices. Secondary devices must be able to listen for the immediate ping from the primary device and let the server know that they received this immediate ping by sending it their own position in physical space at that moment in time. We refer to this as TL, or the local transform. 
+The state of the environment between a secondary device and the primary device at the moment of the immediate ping is illustrated below.
+
+![figure 1](https://i.imgur.com/yTr9OEg.png)
+*The first step of the invention’s handshake, shown from the perspective of the secondary device. TL is the vector reflecting where the secondary device travelled to receive the immediate ping from the primary device. TP reflects where the primary device travelled to send the immediate ping to the secondary device.*
+
+After receiving the immediate ping, a secondary device is considered to be authenticated and ready to interact with other devices in the session. The invention uses the TL and TP relationship between every secondary device and the primary device in order to calculate the primary device’s origin in the secondary device’s coordinate space. This equation, explained in the image below, acts as the bridge between a secondary device and any other authenticated device in the network, whether that be the primary device or another secondary device.
+
+This is the core of protocol. Clients are responsible for being able to send and receive the immediate ping and the server is responsible for maintaining the TL and TP relationship for every authenticated device in the network, as well as converting the locations in messages themselves before broadcasting them to clients.
+
+![figure 2](https://i.imgur.com/IEsfau0.png)
+*The calculation of OP, which is the vector resulting from the difference of TL and TP. Visually speaking, OP can be calculated by “walking along” TL and then walking in the opposite direction of TP. Being able to derive OP via this relationship allows the server to convert a coordinate that originated in the coordinate system of a secondary device to one that is now relative to the origin of the primary device. This equation can be applied a second time over in order to do secondary device to secondary device conversions.*
+
+The final step in picnic’s coordinate conversion work is to take the coordinates of a local event, referred to as EL, and convert it to the primary device’s coordinate space. This results in a new vector, EP, which the server populates the outgoing message with before broadcasting it to the primary device. The calculation of EP is illustrated below.
+
+The protocol is a platform-agnostic way of performing coordinate conversion. It was designed specifically for multi-device augmented reality on mobile devices though, and is well tailored for that use case. The only thing it requires devices to have, however,  is the ability to connect to a network. Although Bluetooth and iBeacon technologies were chosen as the way to do inter-device communication in the iOS framework, one can imagine this happening over something like a P2P network instead, for example.
+
+![figure 3](https://i.imgur.com/uRsqDEH.png)
+*The calculation of EP, which is EL converted to be relative to the primary device’s origin. The server mutates the message sent by the secondary device who rendered the event at EL, effectively replacing EL with EP. This allows the primary device to take the incoming message and render it as is, without having to even consider where*
+
 
 ## Message Format
 
