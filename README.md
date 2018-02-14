@@ -99,7 +99,7 @@ To make the framework interact with platform-specific code, developers will need
 
 ## The Picnic Protocol
 
-The Picnic Protocol is a set of rules and standards that provide a way for devices to communicate local AR events as well as understand foreign ones. More specifically, however, it relies on both decentralized and centralized network topologies in order to solve the problem of understanding events that happen in foreign coordinate spaces.
+The Picnic Protocol (patent pending) is a set of rules and standards that provide a way for devices to communicate local AR events as well as understand foreign ones. More specifically, however, it relies on both decentralized and centralized network topologies in order to solve the problem of understanding events that happen in foreign coordinate spaces.
 The protocol's "handshake" begins by designating the first device to join the session as the primary device. The primary device has two responsibilities:
 
 - It must provide other devices a way to know that they are immediately next to it in physical space, which we'll refer to as the "immediate ping". On iOS, this is achieved by broadcasting iBeacon signals from the primary device.
