@@ -124,7 +124,7 @@ The final step in picnic’s coordinate conversion work is to take the coordinat
 The protocol is a platform-agnostic way of performing coordinate conversion. It was designed specifically for multi-device augmented reality on mobile devices though, and is well tailored for that use case. The only thing it requires devices to have, however,  is the ability to connect to a network. Although Bluetooth and iBeacon technologies were chosen as the way to do inter-device communication in the iOS framework, one can imagine this happening over something like a P2P network instead, for example.
 
 ![figure 3](https://i.imgur.com/uRsqDEH.png)
-*The calculation of EP, which is EL converted to be relative to the primary device’s origin. The server mutates the message sent by the secondary device who rendered the event at EL, effectively replacing EL with EP. This allows the primary device to take the incoming message and render it as is, without having to even consider where*
+*The calculation of EP, which is EL converted to be relative to the primary device’s origin. The server mutates the message sent by the secondary device who rendered the event at EL, effectively replacing EL with EP. This allows the primary device to take the incoming message and render it as is, without having to even consider where the coordinate originated from. It allows the primary device to treat all incoming messages as if they originated locally.*
 
 
 ## Message Format
