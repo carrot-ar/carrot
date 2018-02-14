@@ -102,9 +102,9 @@ To make the framework interact with platform-specific code, developers will need
 The Picnic Protocol is a set of rules and standards that provide a way for devices to communicate local AR events as well as understand foreign ones. More specifically, however, it relies on both decentralized and centralized network topologies in order to solve the problem of understanding events that happen in foreign coordinate spaces.
 The protocol's "handshake" begins by designating the first device to join the session as the primary device. The primary device has two responsibilities:
 
- It must provide other devices a way to know that they are immediately next to it in physical space, which we'll refer to as the "immediate ping". On iOS, this is achieved by broadcasting iBeacon signals from the primary device.
+- It must provide other devices a way to know that they are immediately next to it in physical space, which we'll refer to as the "immediate ping". On iOS, this is achieved by broadcasting iBeacon signals from the primary device.
 
-It must let the server know what it's current position in physical space is whenever the server asks for it, which the server does by sending a message with a reserved endpoint. At the moment of the immediate ping, the server asks the primary device for its position in physical space. We'll refer to this as TP, or the primary device's transform.
+- It must let the server know what it's current position in physical space is whenever the server asks for it, which the server does by sending a message with a reserved endpoint. At the moment of the immediate ping, the server asks the primary device for its position in physical space. We'll refer to this as TP, or the primary device's transform.
 
 The rest of the devices in a session are referred to as secondary devices. Secondary devices must be able to listen for the immediate ping from the primary device and let the server know that they received this immediate ping by sending it their own position in physical space at that moment in time. We refer to this as TL, or the local transform. 
 The state of the environment between a secondary device and the primary device at the moment of the immediate ping is illustrated below.
